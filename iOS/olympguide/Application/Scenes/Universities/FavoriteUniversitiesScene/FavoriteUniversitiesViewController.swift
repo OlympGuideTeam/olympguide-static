@@ -79,7 +79,7 @@ class FavoriteUniversitiesViewController: UIViewController {
 //            )
 //            return modifiedUniversity
 //        }.filter { $0.like }
-//        
+//
 //        tableView.reloadData()
 //        tableView.backgroundView = getEmptyLabel()
 //    }
@@ -147,12 +147,9 @@ extension FavoriteUniversitiesViewController : UITableViewDataSource {
         let universityViewModel = universities[indexPath.row]
         cell.configure(with: universityViewModel)
         
-        cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
-            guard let self = self else { return }
-            
+        cell.favoriteButtonTapped = { sender, isFavorite in            
             if !isFavorite {
                 FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
-                self.universities[indexPath.row].like = false
             }
         }
         
@@ -216,7 +213,7 @@ extension FavoriteUniversitiesViewController {
                             name: university.name,
                             logoURL: university.logo,
                             region: university.region,
-                            like: university.like ?? false
+                            like: true
                         )
                         
                         let insertIndex = self.universities.firstIndex {$0.universityID > university.universityID} ?? self.universities.count
@@ -230,7 +227,6 @@ extension FavoriteUniversitiesViewController {
                     }
                 case .removed(let universityID):
                     if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        if !self.universities[index].like { break }
                         self.universities.remove(at: index)
                         self.interactor?.dislikeUniversity(at: index)
                         self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
@@ -252,4 +248,5 @@ extension FavoriteUniversitiesViewController {
         )
     }
 }
+
 
