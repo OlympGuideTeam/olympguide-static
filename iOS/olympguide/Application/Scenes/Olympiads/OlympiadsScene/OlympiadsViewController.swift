@@ -186,8 +186,7 @@ extension OlympiadsViewController: UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let olympiadModel = interactor?.olympiads[indexPath.row] else { return }
-        router?.routeToDetails(for: olympiadModel)
+        router?.routeToOlympiad(with: indexPath.row)
     }
 }
 
