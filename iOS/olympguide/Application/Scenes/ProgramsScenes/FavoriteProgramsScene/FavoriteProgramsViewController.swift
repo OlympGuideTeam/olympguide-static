@@ -38,7 +38,7 @@ final class FavoriteProgramsViewController: UIViewController {
 //            )
 //            return modifiedProgram
 //        }.filter { $0.like }
-//        
+//
 //        tableView.reloadData()
 //        tableView.backgroundView = getEmptyLabel()
 //    }
@@ -178,7 +178,7 @@ extension FavoriteProgramsViewController {
                             budgetPlaces: program.budgetPlaces,
                             paidPlaces: program.paidPlaces,
                             cost: program.cost,
-                            like: program.like,
+                            like: true,
                             requiredSubjects: program.requiredSubjects,
                             optionalSubjects: program.optionalSubjects
                         )
@@ -215,3 +215,4 @@ extension FavoriteProgramsViewController {
         )
     }
 }
+
