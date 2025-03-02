@@ -7,8 +7,8 @@
 
 import Foundation
 final class ProgramInteractor  {
-    var presenter: (ProgramPresentationLogic & BenefitsPresentationLogic)?
-    var worker: (ProgramWorkerLogic & BenefitsWorkerLogic)?
+    var presenter: (ProgramPresentationLogic & BenefitsByOlympiadsPresentationLogic)?
+    var worker: (ProgramWorkerLogic & BenefitsByOlympiadsWorkerLogic)?
     var olympiads: [OlympiadWithBenefitsModel] = []
 }
 
@@ -35,8 +35,8 @@ extension ProgramInteractor : ProgramBusinessLogic {
 }
 
 // MARK: - BenefitsBusinessLogic
-extension ProgramInteractor: BenefitsBusinessLogic {
-    func loadBenefits(with request: Benefits.Load.Request) {
+extension ProgramInteractor: BenefitsByOlympiadsBusinessLogic {
+    func loadBenefits(with request: BenefitsByOlympiads.Load.Request) {
         worker?.fetchBenefits(
             for: request.programID,
             with: request.params
@@ -44,10 +44,10 @@ extension ProgramInteractor: BenefitsBusinessLogic {
             switch result {
             case .success(let olympiads):
                 self?.olympiads = olympiads ?? []
-                let response = Benefits.Load.Response(olympiads: olympiads)
+                let response = BenefitsByOlympiads.Load.Response(olympiads: olympiads ?? [])
                 self?.presenter?.presentLoadBenefits(with: response)
             case .failure(let error):
-                let response = Benefits.Load.Response(error: error)
+                let response = BenefitsByOlympiads.Load.Response(error: error)
                 self?.presenter?.presentLoadBenefits(with: response)
             }
         }
