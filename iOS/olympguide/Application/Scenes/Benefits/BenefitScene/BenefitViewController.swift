@@ -8,10 +8,10 @@
 import UIKit
 
 final class BenefitViewController: UIViewController {
-    let viewModel: Benefits.Load.ViewModel.BenefitViewModel
+    let viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel
     let informationStackView: UIStackView = UIStackView()
     
-    init(with viewModel: Benefits.Load.ViewModel.BenefitViewModel) {
+    init(with viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
