@@ -6,41 +6,77 @@
 //
 
 import Foundation
+
+// MARK: - By olympiads
 // MARK: - Business Logic
-protocol BenefitsBusinessLogic {
-    func loadBenefits(with request: Benefits.Load.Request)
+protocol BenefitsByOlympiadsBusinessLogic {
+    func loadBenefits(with request: BenefitsByOlympiads.Load.Request)
 }
 
 // MARK: - Data Store
 // Храним данные, которые могут потребоваться при переходе на другой экран
-protocol BenefitsDataStore {
+protocol BenefitsByOlympiadsDataStore {
     
 }
 
 // MARK: - Presentation Logic
-protocol BenefitsPresentationLogic {
-    func presentLoadBenefits(with response: Benefits.Load.Response)
+protocol BenefitsByOlympiadsPresentationLogic {
+    func presentLoadBenefits(with response: BenefitsByOlympiads.Load.Response)
 }
 
 // MARK: - Display Logic
-protocol BenefitsDisplayLogic: AnyObject {
-    func displayLoadBenefitsResult(with viewModel: Benefits.Load.ViewModel)
+protocol BenefitsByOlympiadsDisplayLogic: AnyObject {
+    func displayLoadBenefitsResult(with viewModel: BenefitsByOlympiads.Load.ViewModel)
 }
 
 // MARK: - Routing Logic
-protocol BenefitsRoutingLogic {
+protocol BenefitsByOlympiadsRoutingLogic {
     func routeTo()
 }
 
 // MARK: - Data Passing
-protocol BenefitsDataPassing {
-    var dataStore: BenefitsDataStore? { get }
+protocol BenefitsByOlympiadsDataPassing {
+    var dataStore: BenefitsByOlympiadsDataStore? { get }
 }
 
-protocol BenefitsWorkerLogic {
+protocol BenefitsByOlympiadsWorkerLogic {
     func fetchBenefits(
         for progrmaId: Int,
         with params: [Param],
         completion: @escaping (Result<[OlympiadWithBenefitsModel]?, Error>) -> Void
     )
 }
+
+// MARK: - By programs
+protocol BenefitsByProgramsBusinessLogic {
+    func loadBenefits(with request: BenefitsByPrograms.Load.Request)
+}
+
+protocol BenefitsByProgramsDataStore {
+    
+}
+
+protocol BenefitsByProgramsPresentationLogic {
+    func presentLoadBenefits(with response: BenefitsByPrograms.Load.Response)
+}
+
+protocol BenefitsByProgramsDisplayLogic: AnyObject {
+    func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel)
+}
+
+protocol BenefitsByProgramsRoutingLogic {
+    func routeTo()
+}
+
+protocol BenefitsByProgramsDataPassing {
+    var dataStore: BenefitsByProgramsDataStore? { get }
+}
+
+protocol BenefitsByProgramsWorkerLogic {
+    func fetchBenefits(
+        for olympiadId: Int,
+        with params: [Param],
+        completion: @escaping (Result<[ProgramWithBenefitsModel]?, Error>) -> Void
+    )
+}
+
