@@ -174,9 +174,7 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
         if universities.count != 0 {
             let universityViewModel = universities[indexPath.row]
             cell.configure(with: universityViewModel)
-            cell.favoriteButtonTapped = {
-                [weak self] sender,
-                isFavorite in
+            cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
                 guard let self = self else { return }
                 if isFavorite {
                     self.universities[indexPath.row].like = true

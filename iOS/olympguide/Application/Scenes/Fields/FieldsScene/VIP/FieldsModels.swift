@@ -31,6 +31,7 @@ enum Fields {
                 var isExpanded: Bool = false
                 
                 let fields: [FieldViewModel]
+                var visibleRowCount: Int = 0
             }
             
             let groupsOfFields: [GroupOfFieldsViewModel]

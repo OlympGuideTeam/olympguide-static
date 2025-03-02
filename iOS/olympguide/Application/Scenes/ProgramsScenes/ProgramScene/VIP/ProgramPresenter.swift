@@ -8,7 +8,7 @@
 import UIKit
 
 final class ProgramPresenter {
-    weak var viewController: (BenefitsDisplayLogic & ProgramDisplayLogic & UIViewController)?
+    weak var viewController: (BenefitsByOlympiadsDisplayLogic & ProgramDisplayLogic & UIViewController)?
 }
 
 extension ProgramPresenter : ProgramPresentationLogic {
@@ -29,8 +29,8 @@ extension ProgramPresenter : ProgramPresentationLogic {
     }
 }
 
-extension ProgramPresenter : BenefitsPresentationLogic {
-    func presentLoadBenefits(with response: Benefits.Load.Response) {
+extension ProgramPresenter : BenefitsByOlympiadsPresentationLogic {
+    func presentLoadBenefits(with response: BenefitsByOlympiads.Load.Response) {
         if let error = response.error {
             viewController?.showAlert(with: error.localizedDescription)
             return
@@ -40,7 +40,7 @@ extension ProgramPresenter : BenefitsPresentationLogic {
         
         let benefits = olympiads.flatMap { model in
             model.benefits.map { benefit in
-                Benefits.Load.ViewModel.BenefitViewModel(
+                BenefitsByOlympiads.Load.ViewModel.BenefitViewModel(
                     olympiadName: model.olympiad.name,
                     olympiadLevel: model.olympiad.level,
                     olympiadProfile: model.olympiad.profile,
@@ -53,7 +53,7 @@ extension ProgramPresenter : BenefitsPresentationLogic {
             }
         }
         
-        let viewModel = Benefits.Load.ViewModel(benefits: benefits)
+        let viewModel = BenefitsByOlympiads.Load.ViewModel(benefits: benefits)
         viewController?.displayLoadBenefitsResult(with: viewModel)
     }
 }

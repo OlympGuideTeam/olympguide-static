@@ -22,10 +22,15 @@ protocol OlympiadsDisplayLogic: AnyObject {
 }
 
 protocol OlympiadsRoutingLogic {
-    func routeToDetails(for university: OlympiadModel)
     func routeToSearch()
+    func routeToOlympiad(with index: Int)
 }
 
 protocol OlympiadsDataStore {
     var olympiads: [OlympiadModel] { get set }
 }
+
+protocol OlympiadsDataPassing {
+    var dataStore: OlympiadsDataStore? { get }
+}
+

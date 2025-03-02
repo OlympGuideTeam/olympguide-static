@@ -7,18 +7,19 @@
 
 import UIKit
 
-final class OlympiadsRouter: OlympiadsRoutingLogic {
+final class OlympiadsRouter: OlympiadsRoutingLogic, OlympiadsDataPassing {
     weak var viewController: UIViewController?
-
-    func routeToDetails(for university: OlympiadModel) {
-        let detailsViewController = UIViewController() // Допустим, у вас есть экран деталей
-//        detailsViewController.university = university
-        viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
-    }
+    var dataStore: OlympiadsDataStore?
     
     func routeToSearch() {
         let searchVC = SearchViewController(searchType: .olympiads)
         searchVC.modalPresentationStyle = .overFullScreen
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
+    }
+    
+    func routeToOlympiad(with index: Int) {
+        guard let olympiad = dataStore?.olympiads[index] else { return }
+        let olympiadVC = OlympiadAssembly.build(with: olympiad)
+        viewController?.navigationController?.pushViewController(olympiadVC, animated: true)
     }
 }

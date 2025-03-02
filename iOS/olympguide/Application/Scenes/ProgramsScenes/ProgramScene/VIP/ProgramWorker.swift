@@ -66,7 +66,7 @@ final class ProgramWorker : ProgramWorkerLogic {
     }
 }
 
-extension ProgramWorker : BenefitsWorkerLogic {
+extension ProgramWorker : BenefitsByOlympiadsWorkerLogic {
     func fetchBenefits(
         for progrmaId: Int,
         with params: [Param],

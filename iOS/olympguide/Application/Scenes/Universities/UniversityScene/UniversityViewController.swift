@@ -219,7 +219,7 @@ extension UniversityViewController {
     
     private func configureProgramsLabel() {
         let text = "Программы"
-        let font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)!
+        let font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)
         programsLabel.text = text
         programsLabel.font = font
         
@@ -625,5 +625,3 @@ extension UniversityViewController {
             .store(in: &cancellables)
     }
 }
-
-
