@@ -150,7 +150,7 @@ class OlympiadTableViewCell: UITableViewCell {
         favoriteButton.isHidden = AuthManager.shared.isAuthenticated ? false : true
     }
     
-    func configure(with viewModel: Benefits.Load.ViewModel.BenefitViewModel) {
+    func configure(with viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel) {
         nameLabel.text = viewModel.olympiadName
         let level = "\(String(repeating: "I", count: viewModel.olympiadLevel)) уровень"
         levelAndProfileLabel.text = "\(level) | \(viewModel.olympiadProfile)"
