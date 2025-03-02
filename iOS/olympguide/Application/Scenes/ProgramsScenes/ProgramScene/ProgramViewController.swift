@@ -33,8 +33,8 @@ fileprivate enum Constants {
 }
 
 final class ProgramViewController : UIViewController, WithBookMarkButton {
-    var interactor: (ProgramBusinessLogic & BenefitsBusinessLogic)?
-    var router: (ProgramRoutingLogic & BenefitsRoutingLogic)?
+    var interactor: (ProgramBusinessLogic & BenefitsByOlympiadsBusinessLogic)?
+    var router: (ProgramRoutingLogic & BenefitsByOlympiadsRoutingLogic)?
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -48,7 +48,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     let codeLabel: UILabel = UILabel()
     let programNameLabel = UILabel()
     let program: GroupOfProgramsModel.ProgramModel
-    var benefits: [Benefits.Load.ViewModel.BenefitViewModel] = []
+    var benefits: [BenefitsByOlympiads.Load.ViewModel.BenefitViewModel] = []
     var link: String? = nil
     
     private let informationContainer: UIView = UIView()
@@ -120,7 +120,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             self.logoImageView.image = image
         }
         
-        let benefitRequest = Benefits.Load.Request(programID: program.programID)
+        let benefitRequest = BenefitsByOlympiads.Load.Request(programID: program.programID)
         interactor?.loadBenefits(with: benefitRequest)
         
         if webSiteButton.titleLabel?.text == nil {
@@ -179,6 +179,7 @@ extension ProgramViewController {
         configurePaidLabel()
         configureCostLabel()
         configureSubjectsStack()
+        configureBenefitsLabel()
         
         configureRefreshControl()
         configureTableView()
@@ -234,7 +235,7 @@ extension ProgramViewController {
         codeLabel.text = program.field
         
         informationContainer.addSubview(codeLabel)
-        codeLabel.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
+        codeLabel.pinTop(to: logoImageView.bottomAnchor, 30)
 //        codeLabel.pinTop(to: universityNameLabel.bottomAnchor, 30, .grOE)
         codeLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
     }
@@ -298,7 +299,6 @@ extension ProgramViewController {
         
         subjectsStack.pinTop(to: costLabel.bottomAnchor, 11)
         subjectsStack.pinLeft(to: informationContainer.leadingAnchor, 20)
-        subjectsStack.pinBottom(to: informationContainer.bottomAnchor)
     }
     
     func formatNumber(_ number: Int) -> String {
@@ -306,6 +306,21 @@ extension ProgramViewController {
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = " "
         return "\(formatter.string(from: NSNumber(value: number)) ?? "\(number)") ₽/год"
+    }
+    
+    private func configureBenefitsLabel() {
+        let benefitsLabel = UILabel()
+        benefitsLabel.text = "Льготы"
+        benefitsLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)
+        
+        informationContainer.addSubview(benefitsLabel)
+        benefitsLabel.pinTop(to: subjectsStack.bottomAnchor, 20)
+        benefitsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
+        benefitsLabel.pinBottom(to: informationContainer.bottomAnchor)
+        
+        //        let textSize = text.size(withAttributes: [.font: font])
+        //
+        //        programsLabel.setHeight(textSize.height)
     }
     
     func configureRefreshControl() {
@@ -345,10 +360,22 @@ extension ProgramViewController {
         tableView.tableHeaderView = informationContainer
     }
     
+    func getEmptyLabel() -> UILabel? {
+        guard benefits.isEmpty else { return nil }
+        
+        let emptyLabel = UILabel(frame: self.tableView.bounds)
+        emptyLabel.text = "Подходящих льгот не найдено"
+        emptyLabel.textAlignment = .center
+        emptyLabel.textColor = .black
+        emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+        
+        return emptyLabel
+    }
+    
     @objc private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let programID = self?.program.programID else { return }
-            let request = Benefits.Load.Request(programID: programID)
+            let request = BenefitsByOlympiads.Load.Request(programID: programID)
             
             self?.interactor?.loadBenefits(with: request)
             self?.refreshControl.endRefreshing()
@@ -432,12 +459,13 @@ extension ProgramViewController : UITableViewDelegate {
 }
 
 // MARK: - BenefitsDisplayLogic
-extension ProgramViewController : BenefitsDisplayLogic {
-    func displayLoadBenefitsResult(with viewModel: Benefits.Load.ViewModel) {
+extension ProgramViewController : BenefitsByOlympiadsDisplayLogic {
+    func displayLoadBenefitsResult(with viewModel: BenefitsByOlympiads.Load.ViewModel) {
         benefits = viewModel.benefits
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-            self.refreshControl.endRefreshing()
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+            self?.refreshControl.endRefreshing()
+//            self?.tableView.backgroundView = self?.getEmptyLabel()
         }
     }
 }
@@ -492,4 +520,5 @@ extension ProgramViewController {
         navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
 }
+
 
