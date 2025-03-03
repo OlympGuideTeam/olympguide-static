@@ -12,8 +12,7 @@ final class OlympiadsRouter: OlympiadsRoutingLogic, OlympiadsDataPassing {
     var dataStore: OlympiadsDataStore?
     
     func routeToSearch() {
-        let searchVC = SearchViewController(searchType: .olympiads)
-        searchVC.modalPresentationStyle = .overFullScreen
+        let searchVC = SearchAssembly<OlympiadSearchStrategy>.build()
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
     

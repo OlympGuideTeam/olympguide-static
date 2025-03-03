@@ -17,8 +17,7 @@ final class UniversitiesRouter: UniversitiesRoutingLogic {
     }
     
     func routeToSearch() {
-        let searchVC = SearchViewController(searchType: .universities)
-//        searchVC.modalPresentationStyle = .overFullScreen
+        let searchVC = SearchAssembly<UniversitySearchStrategy>.build()
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
