@@ -40,9 +40,9 @@ class ProfileButtonTableViewCell: UITableViewCell {
         actionButton.setHeight(54)
     }
     
-    func configure(title: String, borderColor: UIColor, textColor: UIColor) {
+    func configure(title: String, borderColor: UIColor?, textColor: UIColor) {
         actionButton.setTitle(title, for: .normal)
-        actionButton.layer.borderColor = borderColor.cgColor
+        actionButton.layer.borderColor = borderColor?.cgColor
         actionButton.setTitleColor(textColor, for: .normal)
         
         actionButton.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)

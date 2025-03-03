@@ -16,7 +16,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     // MARK: - UI
     private let emailTextField: CustomInputDataField = CustomInputDataField(with: "email")
     private let nextButton: UIButton = UIButton(type: .system)
-    private var nextButtonBottomConstraint: NSLayoutConstraint!
+    private var nextButtonBottomConstraint: NSLayoutConstraint?
     private var currentEmail: String = ""
     
     // MARK: - LifeCycle
@@ -71,7 +71,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
         ])
         
         nextButtonBottomConstraint = nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -43)
-        nextButtonBottomConstraint.isActive = true
+        nextButtonBottomConstraint?.isActive = true
         
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
     }
@@ -126,7 +126,7 @@ extension EnterEmailViewController {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
            let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
             let keyboardHeight = keyboardFrame.height
-            nextButtonBottomConstraint.constant = -keyboardHeight - 10
+            nextButtonBottomConstraint?.constant = -keyboardHeight - 10
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()
@@ -137,7 +137,7 @@ extension EnterEmailViewController {
     @objc
     private func keyboardWillHide(notification: Notification) {
         if let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
-            nextButtonBottomConstraint.constant = -43
+            nextButtonBottomConstraint?.constant = -43
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()

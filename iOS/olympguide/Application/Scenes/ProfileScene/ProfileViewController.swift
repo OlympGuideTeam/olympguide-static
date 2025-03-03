@@ -129,12 +129,12 @@ extension ProfileViewController : UITableViewDataSource {
         if !AuthManager.shared.isAuthenticated {
             if indexPath.row == 0 {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Зарегистрироваться", borderColor: UIColor(hex: "#FF2D55")!, textColor: .black)
+                cell.configure(title: "Зарегистрироваться", borderColor: UIColor(hex: "#FF2D55"), textColor: .black)
                 cell.actionButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
                 return cell
             } else if indexPath.row == 1 {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Войти", borderColor: UIColor(hex: "#32ADE6")!, textColor: .black)
+                cell.configure(title: "Войти", borderColor: UIColor(hex: "#32ADE6"), textColor: .black)
                 cell.actionButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
                 return cell
             } else {
@@ -168,7 +168,7 @@ extension ProfileViewController : UITableViewDataSource {
             }
             else {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55")!, textColor: .black)
+                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55"), textColor: .black)
                 cell.actionButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
                 return cell
             }

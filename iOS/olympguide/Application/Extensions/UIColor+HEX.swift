@@ -60,7 +60,8 @@ extension UIColor {
     static func randomHEXColor() -> String {
         var hex = "#"
         for _ in 0..<6 {
-            hex.append(hexLetters.allCases.randomElement()!.rawValue)
+            guard let letter = hexLetters.allCases.randomElement() else { continue }
+            hex.append(letter.rawValue)
         }
         return hex
     }
