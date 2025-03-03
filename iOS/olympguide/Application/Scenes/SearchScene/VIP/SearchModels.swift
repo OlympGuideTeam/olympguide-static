@@ -13,7 +13,7 @@ enum SearchType {
     case olympiads
     case fields
     
-    func title() -> String {
+    var title: String {
         switch self {
         case .universities: return "Поиск по ВУЗам"
         case .olympiads: return "Поиск по олимпиадам"
@@ -23,43 +23,17 @@ enum SearchType {
 }
 
 enum Search {
-    
-    // MARK: - Загрузка сцены
-    enum Load {
-        struct Request {
-            let searchType: SearchType
-        }
-        struct Response {
-            let title: String
-        }
-        struct ViewModel {
-            let navBarTitle: String
-        }
-    }
-    
-    // MARK: - Изменение текста поиска
     enum TextDidChange {
         struct Request {
             let query: String
         }
-        struct Response {
-            let results: [String]
+        
+        struct Response<ResponseModel> {
+            let items: [ResponseModel]
         }
-        struct ViewModel {
-            let items: [String]
-        }
-    }
-    
-    // MARK: - Выбор элемента из списка
-    enum SelectItem {
-        struct Request {
-            let index: Int
-        }
-        struct Response {
-            let selectedItem: String
-        }
-        struct ViewModel {
-            let selectedItemTitle: String
+        
+        struct ViewModel<ViewModel> {
+            let items: [ViewModel]
         }
     }
 }
