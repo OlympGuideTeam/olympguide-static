@@ -8,12 +8,16 @@
 
 import UIKit
 
-final class SearchRouter: SearchRoutingLogic, SearchDataPassing {
-    
+final class SearchRouter<Strategy: SearchStrategy>: SearchRoutingLogic, SearchDataPassing {
     weak var viewController: UIViewController?
-    var dataStore: SearchDataStore?
+    var dataStore: SearchInteractor<Strategy>?
     
-    func routeToSomeNextScene(selected: String) {
-        viewController?.navigationController?.popViewController(animated: true)
+    func routeToDetails(to index: Int) {
+        guard
+            let model = dataStore?.currentItems[index] as? Strategy.ModelType
+        else { return }
+        
+        let detailVC = Strategy.build(with: model)
+        viewController?.navigationController?.pushViewController(detailVC, animated: true)
     }
 }
