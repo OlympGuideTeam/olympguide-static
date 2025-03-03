@@ -57,9 +57,7 @@ class UIInformationButton: UIButton, Shimmerable {
     
     override func setTitle(_ title: String?, for state: UIControl.State) {
         var config = self.configuration ?? UIButton.Configuration.plain()
-        guard let customFont = UIFont(name: "MontserratAlternates-Medium", size: 15) else {
-            fatalError("Font not found")
-        }
+        let customFont = FontManager.shared.font(for: .commonInformation)
         config.attributedTitle = AttributedString(title ?? "", attributes: AttributeContainer([.font: customFont]))
         self.configuration = config
         

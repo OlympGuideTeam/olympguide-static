@@ -27,8 +27,8 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let nameLabelFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
-        static let regionLabelFont = UIFont(name: "MontserratAlternates-Regular", size: 13)!
+        static let nameLabelFont = FontManager.shared.font(for: .commonInformation)
+        static let regionLabelFont = FontManager.shared.font(for: .region)
     }
 }
 
@@ -231,7 +231,7 @@ extension ProgramViewController {
     }
     
     private func configureCodeLabel() {
-        codeLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        codeLabel.font = FontManager.shared.font(for: .additionalInformation)
         codeLabel.text = program.field
         
         informationContainer.addSubview(codeLabel)
@@ -241,7 +241,7 @@ extension ProgramViewController {
     }
     
     private func configureProgramNameLabel() {
-        programNameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        programNameLabel.font = FontManager.shared.font(for: .commonInformation)
         programNameLabel.numberOfLines = 0
         programNameLabel.lineBreakMode = .byWordWrapping
         programNameLabel.text = program.name
@@ -312,7 +312,7 @@ extension ProgramViewController {
     private func configureBenefitsLabel() {
         let benefitsLabel = UILabel()
         benefitsLabel.text = "Льготы"
-        benefitsLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)
+        benefitsLabel.font = FontManager.shared.font(for: .tableTitle)
         
         informationContainer.addSubview(benefitsLabel)
         benefitsLabel.pinTop(to: subjectsStack.bottomAnchor, 20)
@@ -368,7 +368,7 @@ extension ProgramViewController {
         emptyLabel.text = "Подходящих льгот не найдено"
         emptyLabel.textAlignment = .center
         emptyLabel.textColor = .black
-        emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+        emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
         
         return emptyLabel
     }

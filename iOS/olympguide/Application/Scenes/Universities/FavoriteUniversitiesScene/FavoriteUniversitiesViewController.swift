@@ -17,10 +17,6 @@ fileprivate enum Constants {
         static let titleLabelTextColor = UIColor.black
     }
     
-    enum Fonts {
-        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28)!
-    }
-    
     enum Dimensions {
         static let titleLabelTopMargin: CGFloat = 25
         static let titleLabelLeftMargin: CGFloat = 20
@@ -192,7 +188,7 @@ extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
         emptyLabel.text = "Избранных ВУЗов пока нет"
         emptyLabel.textAlignment = .center
         emptyLabel.textColor = .black
-        emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+        emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
         
         return emptyLabel
     }

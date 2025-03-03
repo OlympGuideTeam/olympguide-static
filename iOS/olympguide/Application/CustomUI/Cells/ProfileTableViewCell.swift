@@ -20,9 +20,9 @@ class ProfileTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        label.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        label.font = FontManager.shared.font(for: .commonInformation)
         
-        detailLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)!
+        detailLabel.font = FontManager.shared.font(for: .additionalInformation)
         detailLabel.textColor = .gray
         
         chevronImageView.tintColor = .black

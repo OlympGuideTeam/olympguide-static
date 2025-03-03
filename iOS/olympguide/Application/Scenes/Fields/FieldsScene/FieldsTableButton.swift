@@ -19,7 +19,6 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let titleFont = UIFont(name: "MontserratAlternates-Regular", size: 14)!
     }
     
     enum Dimensions {
@@ -111,7 +110,7 @@ class FieldsTableButton: UIButton {
             for char in code {
                 let label = UILabel()
                 label.text = String(char)
-                label.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+                label.font = FontManager.shared.font(for: .commonInformation)
                 label.textColor = .black
                 label.textAlignment = .center
                 if char == "." {
@@ -129,7 +128,7 @@ class FieldsTableButton: UIButton {
             information.addArrangedSubview(spaceLabel1)
             let dashLabel = UILabel()
             dashLabel.text = "-"
-            dashLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+            dashLabel.font = FontManager.shared.font(for: .commonInformation)
             dashLabel.textColor = .black
             dashLabel.textAlignment = .center
             dashLabel.setWidth(11)
@@ -139,7 +138,7 @@ class FieldsTableButton: UIButton {
 
         let nameLabel = UILabel()
         nameLabel.text = capitalizeFirstLetter(input: name)
-        nameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        nameLabel.font = FontManager.shared.font(for: .commonInformation)
         nameLabel.textColor = .black
         nameLabel.numberOfLines = 0
         nameLabel.textAlignment = .left

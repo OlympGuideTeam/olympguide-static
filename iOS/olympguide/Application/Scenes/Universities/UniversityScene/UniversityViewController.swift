@@ -28,8 +28,8 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let nameLabelFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
-        static let regionLabelFont = UIFont(name: "MontserratAlternates-Regular", size: 13)!
+        static let nameLabelFont = FontManager.shared.font(for: .commonInformation) 
+        static let regionLabelFont = FontManager.shared.font(for: .region)
     }
 }
 
@@ -219,7 +219,7 @@ extension UniversityViewController {
     
     private func configureProgramsLabel() {
         let text = "Программы"
-        let font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)
+        let font = FontManager.shared.font(for: .tableTitle)
         programsLabel.text = text
         programsLabel.font = font
         
@@ -237,7 +237,7 @@ extension UniversityViewController {
         segmentedControl.insertSegment(withTitle: "По факультетам", at: 1, animated: false)
         segmentedControl.selectedSegmentIndex = 0
         
-        let customFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        let customFont = FontManager.shared.font(for: .commonInformation)
         let customAttributes: [NSAttributedString.Key: Any] = [.font: customFont]
         
         segmentedControl.setTitleTextAttributes(customAttributes, for: .normal)

@@ -25,8 +25,8 @@ fileprivate enum CellConstants {
     }
     
     enum Fonts {
-        static let nameLabelFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
-        static let regionLabelFont = UIFont(name: "MontserratAlternates-Regular", size: 13)!
+        static let nameLabelFont = FontManager.shared.font(for: .commonInformation)
+        static let regionLabelFont = FontManager.shared.font(for: .region)
     }
     
     enum Dimensions {

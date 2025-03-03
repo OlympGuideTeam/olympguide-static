@@ -86,7 +86,7 @@ final class FavoriteProgramsViewController: UIViewController {
         emptyLabel.text = "Избранных программ пока нет"
         emptyLabel.textAlignment = .center
         emptyLabel.textColor = .black
-        emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+        emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
         self.tableView.backgroundView = emptyLabel
         
         return emptyLabel

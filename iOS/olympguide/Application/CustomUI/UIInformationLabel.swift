@@ -27,8 +27,16 @@ final class UIInformationLabel: UILabel {
         
         let attributedString = NSMutableAttributedString(string: fullText)
         
-        let regularFont = UIFont(name: "MontserratAlternates-Regular", size: 14) ?? UIFont.systemFont(ofSize: 14)
-        let boldFont = UIFont(name: "MontserratAlternates-Bold", size: 14) ?? UIFont.boldSystemFont(ofSize: 14)
+        let regularFont = FontManager.shared.font(
+            for: .additionalInformation,
+            size: 14.0
+        )
+        
+        let boldFont = FontManager.shared.font(
+            for: .additionalInformation,
+            weight: .bold,
+            size: 14.0
+        )
         
         let textColor = UIColor.black.withAlphaComponent(0.53)
         attributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: fullText.count))

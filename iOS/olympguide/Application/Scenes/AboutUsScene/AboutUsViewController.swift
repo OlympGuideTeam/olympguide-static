@@ -47,7 +47,7 @@ final class AboutUsViewController : UIViewController {
     
     private func configureAboutUsLabel() {
         let aboutUsLabel: UILabel = UILabel()
-        aboutUsLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        aboutUsLabel.font = FontManager.shared.font(for: .commonInformation)
         aboutUsLabel.textColor = .black
         aboutUsLabel.numberOfLines = 0
         aboutUsLabel.lineBreakMode = .byWordWrapping
@@ -61,7 +61,7 @@ final class AboutUsViewController : UIViewController {
         let contactButton: UIButton = UIButton()
         contactButton.setTitle("@easyeeeye", for: .normal)
         contactButton.setTitleColor(.black, for: .normal)
-        contactButton.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        contactButton.titleLabel?.font = FontManager.shared.font(for: .bigButton)
         
         contactButton.addTarget(self, action: #selector(openWebPage), for: .touchUpInside)
         

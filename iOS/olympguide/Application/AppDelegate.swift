@@ -15,49 +15,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         let deviceIdentifier = getDeviceIdentifier()
-        
-        if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 20) {
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: customFont,
-                .foregroundColor: UIColor.black
-            ]
-            UINavigationBar.appearance().titleTextAttributes = attributes
-        }
-        
-        if let customFont = UIFont(name: "MontserratAlternates-Bold", size: 28) {
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: customFont,
-                .foregroundColor: UIColor.black
-            ]
-            UINavigationBar.appearance().largeTitleTextAttributes = attributes
-        }
-        
         if isMiniScreen(identifier: deviceIdentifier) {
-            if let customFont = UIFont(name: "MontserratAlternates-Bold", size: 24) {
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: customFont,
-                    .foregroundColor: UIColor.black
-                ]
-                UINavigationBar.appearance().largeTitleTextAttributes = attributes
-            }
-            
-            if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 18) {
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: customFont,
-                    .foregroundColor: UIColor.black
-                ]
-                UINavigationBar.appearance().titleTextAttributes = attributes
-            }
+            let scaleFactor: CGFloat = 0.85
+            FontManager.shared.globalFontScale = scaleFactor
         }
         
-        if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 17) {
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: customFont,
-                .foregroundColor: UIColor.systemBlue 
-            ]
-            UIBarButtonItem.appearance().setTitleTextAttributes(attributes, for: .normal)
-            UIBarButtonItem.appearance().setTitleTextAttributes(attributes, for: .highlighted)
-        }
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: FontManager.shared.font(for: .titleLbel),
+            .foregroundColor: UIColor.black
+        ]
+        UINavigationBar.appearance().titleTextAttributes = titleAttributes
+        
+        
+        let largeTitleAttributes: [NSAttributedString.Key: Any] = [
+            .font: FontManager.shared.font(for: .largeTitleLabel),
+            .foregroundColor: UIColor.black
+        ]
+        UINavigationBar.appearance().largeTitleTextAttributes = largeTitleAttributes
+        
+        
+        
+        let backButtonAttributes: [NSAttributedString.Key: Any] = [
+            .font: FontManager.shared.font(for: .backButton),
+            .foregroundColor: UIColor.systemBlue
+        ]
+        UIBarButtonItem.appearance().setTitleTextAttributes(backButtonAttributes, for: .normal)
+        UIBarButtonItem.appearance().setTitleTextAttributes(backButtonAttributes, for: .highlighted)
+        
         
         return true
     }

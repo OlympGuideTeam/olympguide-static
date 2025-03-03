@@ -25,8 +25,8 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let nameLabelFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
-        static let levelAndProfileLabelFont = UIFont(name: "MontserratAlternates-Regular", size: 15)!
+        static let nameLabelFont = FontManager.shared.font(for: .commonInformation)
+        static let levelAndProfileLabelFont = FontManager.shared.font(for: .additionalInformation)
     }
     
     enum Dimensions {

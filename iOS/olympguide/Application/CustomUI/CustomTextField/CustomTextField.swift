@@ -12,8 +12,8 @@ import UIKit
 fileprivate enum Constants {
     
     enum Fonts {
-        static let titleFont = UIFont(name: "MontserratAlternates-Regular", size: 15)!
-        static let textFieldFont = UIFont(name: "MontserratAlternates-Regular", size: 14)!
+        static let titleFont = FontManager.shared.font(for: .commonInformation)
+        static let textFieldFont = FontManager.shared.font(for: .textField)
     }
     
     enum Colors {

@@ -13,7 +13,7 @@ class ProfileButtonTableViewCell: UITableViewCell {
     
     let actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        button.titleLabel?.font = FontManager.shared.font(for: .commonInformation)
         button.layer.cornerRadius = 13
         button.layer.borderWidth = 2
         button.titleLabel?.tintColor = .black

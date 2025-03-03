@@ -18,7 +18,8 @@ class DisconnectViewController: UIViewController {
         label.text = "Проблемы со связью"
         label.textAlignment = .center
         label.textColor = .black
-        label.font = UIFont(name: "MontserratAlternates-Medium", size: 20)
+        
+        label.font = FontManager.shared.font(weight: .medium, size: 20.0)
         return label
     }()
 
@@ -33,7 +34,7 @@ class DisconnectViewController: UIViewController {
         let label = UILabel()
         label.text = "Проверьте подключение к интернету"
         label.textAlignment = .center
-        label.font = UIFont(name: "MontserratAlternates-Regular", size: 14)
+        label.font = FontManager.shared.font(for: .additionalInformation)
         label.numberOfLines = 0
         label.textColor = UIColor(hex: "#999999")
         return label
