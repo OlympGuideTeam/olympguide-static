@@ -182,6 +182,10 @@ class UniversityTableViewCell: UITableViewCell {
         logoImageView.isHidden = false
     }
     
+    func hideSeparator(_ hide: Bool) {
+        separatorLine.isHidden = hide
+    }
+    
     // MARK: - Objc funcs
     @objc private func favoriteButtonTapped(_ sender: UIButton) {
         let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
