@@ -116,7 +116,7 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         
         tableView.register(
             UniversityTableViewCell.self,
-            forCellReuseIdentifier: "UniversityTableViewCell"
+            forCellReuseIdentifier: UniversityTableViewCell.identifier
         )
         tableView.dataSource = self
         tableView.delegate = self
@@ -137,7 +137,10 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         
         headerContainer.layoutIfNeeded()
         
-        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
         
         headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
