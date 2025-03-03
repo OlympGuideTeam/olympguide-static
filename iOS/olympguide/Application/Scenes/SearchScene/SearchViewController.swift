@@ -7,110 +7,119 @@
 
 import UIKit
 
-// MARK: - Constants
-fileprivate enum Constants {
-    enum Dimensions {
-        static let searchBarHeight: CGFloat = 48
-        static let searchBarHorizontalMargin: CGFloat = 20
-        static let tableViewTopMargin: CGFloat = 10
-    }
-}
-
-final class SearchViewController: UIViewController, NonTabBarVC {
+final class SearchViewController<Strategy: SearchStrategy>: UIViewController, NonTabBarVC, UITableViewDataSource, UITableViewDelegate {
     
     // MARK: - VIP
-    var interactor: SearchBusinessLogic?
-    var router: (SearchRoutingLogic & SearchDataPassing)?
+    var interactor: (SearchBusinessLogic)?
+    var router: (SearchRoutingLogic)?
     
     // MARK: - Variables
     private let customSearchBar: CustomTextField
     private let tableView = UITableView()
-    private var itemsToShow: [String] = []
+    
+    private var rawModels: [Strategy.ViewModelType] = []
+    var strategy: Strategy?
     
     // MARK: - Lifecycle
-    init(searchType: SearchType) {
-        customSearchBar = CustomTextField(with: searchType.title())
+    init(
+        searchType: SearchType
+    ) {
+        self.customSearchBar = CustomTextField(with: searchType.title)
         super.init(nibName: nil, bundle: nil)
-        setup()
-        router?.dataStore?.searchType = searchType
     }
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError("init(coder:) not implemented")
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = "Поиск"
         navigationItem.largeTitleDisplayMode = .never
-        setupUI()
-        loadScene()
+        
+        configureUI()
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+        super.viewDidAppear(animated)
         customSearchBar.didTapSearchBar()
     }
     
     // MARK: - Methods
-    private func setup() {
-        let viewController = self
-        let interactor = SearchInteractor()
-        let presenter = SearchPresenter()
-        let router = SearchRouter()
-        
-        viewController.interactor = interactor
-        viewController.router = router
-        interactor.presenter = presenter
-        presenter.viewController = viewController
-        router.viewController = viewController
-        router.dataStore = interactor
-    }
-    
-    private func setupUI() {
+    private func configureUI() {
         view.backgroundColor = .white
         
+        configureNavigationController()
+        configureSearchBar()
+        configureTableView()
+    }
+    
+    private func configureNavigationController() {
+        navigationItem.largeTitleDisplayMode = .never
+        let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
+    }
+    
+    private func configureSearchBar() {
         customSearchBar.delegate = self
         view.addSubview(customSearchBar)
         
-        //        customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
-        //        customSearchBar.setWidth(UIScreen.main.bounds.width - 2 * Constants.Dimensions.searchBarHorizontalMargin)
         customSearchBar.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
-        customSearchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.searchBarHorizontalMargin)
+        customSearchBar.pinLeft(to: view.leadingAnchor, 20)
+    }
+    
+    private func configureTableView() {
+        tableView.separatorStyle = .none
         
         tableView.dataSource = self
         tableView.delegate = self
         view.addSubview(tableView)
-        tableView.pinTop(to: customSearchBar.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
+        
+        strategy?.registerCells(in: tableView)
+        
+        tableView.pinTop(to: customSearchBar.bottomAnchor, 10)
         tableView.pinLeft(to: view.leadingAnchor)
         tableView.pinRight(to: view.trailingAnchor)
         tableView.pinBottom(to: view.bottomAnchor)
     }
     
-    private func loadScene() {
-        if let searchType = router?.dataStore?.searchType {
-            let request = Search.Load.Request(searchType: searchType)
-            interactor?.loadScene(request: request)
-        } else {
-            let request = Search.Load.Request(searchType: .fields)
-            interactor?.loadScene(request: request)
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return rawModels.count
+    }
+    
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            guard let strategy = self.strategy else {
+                let cell = UITableViewCell(
+                    style: .default,
+                    reuseIdentifier: "cell"
+                )
+                return cell
+            }
+            
+            let viewModel = rawModels[indexPath.row]
+            return strategy.configureCell(
+                tableView: tableView,
+                indexPath: indexPath,
+                viewMmodel: viewModel,
+                isSeparatorHidden: indexPath.row == rawModels.count - 1
+            )
         }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToDetails(to: indexPath.row)
     }
 }
 
+// MARK: - SearchDisplayLogic
 extension SearchViewController: SearchDisplayLogic {
-    // MARK: - SearchDisplayLogic
-    func displayLoadScene(viewModel: Search.Load.ViewModel) {
-        title = "Поиск"
-    }
-    
-    func displayTextDidChange(viewModel: Search.TextDidChange.ViewModel) {
-        itemsToShow = viewModel.items
+    func displayTextDidChange<ViewModel>(viewModel: Search.TextDidChange.ViewModel<ViewModel>) {
+        guard let items = viewModel.items as? [Strategy.ViewModelType] else {
+            return
+        }
+        rawModels = items
         tableView.reloadData()
-    }
-    
-    func displaySelectItem(viewModel: Search.SelectItem.ViewModel) {
-        router?.routeToSomeNextScene(selected: viewModel.selectedItemTitle)
     }
 }
 
@@ -122,21 +131,3 @@ extension SearchViewController: CustomTextFieldDelegate {
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
-extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemsToShow.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.textLabel?.text = itemsToShow[indexPath.row]
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let request = Search.SelectItem.Request(index: indexPath.row)
-        interactor?.selectItem(request: request)
-    }
-}
