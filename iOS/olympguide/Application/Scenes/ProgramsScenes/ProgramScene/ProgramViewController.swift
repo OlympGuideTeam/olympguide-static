@@ -250,6 +250,7 @@ extension ProgramViewController {
         programNameLabel.pinTop(to: codeLabel.bottomAnchor, 5)
         programNameLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
         programNameLabel.pinRight(to: informationContainer.trailingAnchor, 20)
+        programNameLabel.calculateHeight(with: view.frame.width - 40)
     }
     
     private func configureWebButton() {

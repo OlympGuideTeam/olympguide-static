@@ -17,8 +17,7 @@ final class FieldsRouter: FieldsRoutingLogic {
     }
     
     func routeToSearch() {
-        let searchVC = SearchViewController(searchType: .fields)
-        searchVC.modalPresentationStyle = .overFullScreen
+        let searchVC = SearchAssembly<FieldSearchStrategy>.build()
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
