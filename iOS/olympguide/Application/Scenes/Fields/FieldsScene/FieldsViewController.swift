@@ -179,16 +179,24 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         return fields.count
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         return fields[section].isExpanded ? fields[section].fields.count : 0
     }
     
-    func tableView(_ tableView: UITableView,
-                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(
             withIdentifier: FieldTableViewCell.identifier,
             for: indexPath
-        ) as! FieldTableViewCell
+        ) as? FieldTableViewCell
+        else {
+            return UITableViewCell()
+        }
         
         let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
         cell.configure(with: fieldViewModel)
