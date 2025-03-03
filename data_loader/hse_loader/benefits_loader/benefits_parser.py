@@ -9,7 +9,7 @@ from logging_config.setup_logging import setup_logging
 from hse_loader.benefits_loader.Benefit import Benefit
 from hse_loader.benefits_loader.load_files import download_file, delete_file, get_links
 from clients.post_client import upload_benefit
-
+import time
 setup_logging()
 logger = logging.getLogger(__name__)
 
@@ -223,7 +223,7 @@ def load_benefits():
     exist_olympiads = get_olympiads()
     exist_programs = get_programs(1)
     count_of_benefits = 0
-    all_benefits = []
+    # all_benefits = []
     for link in file_list:
         pdf_path = link.path
 
@@ -274,7 +274,8 @@ def load_benefits():
         benefits = process_data_rows(data, exist_olympiads, exist_subjects, pdf_path, program_id)
 
         for benefit in benefits:
-            all_benefits.append(benefit)
+            upload_benefit(benefit)
+            # all_benefits.append(benefit)
 
         logger.info(f"Из файла {pdf_path} сформировано {len(benefits)} бенефитов.")
         count_of_benefits += len(benefits)
@@ -283,8 +284,8 @@ def load_benefits():
         logger.info(f"Удалён файл: {pdf_path}")
     logger.info(f"Завершение процесса загрузки бенефитов, было загружено {count_of_benefits} бенефитов.")
 
-    for benefit in all_benefits:
-        upload_benefit(benefit)
+    # for benefit in all_benefits:
+    #     upload_benefit(benefit)
         # print(benefit)
     # i = 0
     # repairing = 0
