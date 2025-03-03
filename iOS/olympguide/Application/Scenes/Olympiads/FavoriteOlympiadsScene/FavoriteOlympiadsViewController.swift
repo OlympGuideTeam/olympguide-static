@@ -107,45 +107,19 @@ final class FavoriteOlympiadsViewController : UIViewController {
     }
 }
 
-//// MARK: - UITableViewDataSource
-//extension FavoriteOlympiadsViewController : UITableViewDataSource {
-//    
-//    func tableView(
-//        _ tableView: UITableView,
-//        numberOfRowsInSection section: Int
-//    ) -> Int {
-//        return (olympiads.count != 0) ? olympiads.count : 10
-//    }
-//    
-//    func tableView(
-//        _ tableView: UITableView,
-//        cellForRowAt indexPath: IndexPath
-//    ) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(
-//            withIdentifier: OlympiadTableViewCell.identifier,
-//            for: indexPath
-//        ) as! OlympiadTableViewCell
-//        
-//        if olympiads.count != 0 {
-//            let olympiadViewModel = olympiads[indexPath.row]
-//            cell.configure(with: olympiadViewModel)
-//        } else {
-//            cell.configureShimmer()
-//        }
-//        return cell
-//    }
-//}
-
 extension FavoriteOlympiadsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return olympiads.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
+        guard let cell = tableView.dequeueReusableCell(
             withIdentifier: OlympiadTableViewCell.identifier,
             for: indexPath
-        ) as! OlympiadTableViewCell
+        ) as? OlympiadTableViewCell
+        else {
+            return UITableViewCell()
+        }
         
         let olympiadViewModel = olympiads[indexPath.row]
         cell.configure(with: olympiadViewModel)

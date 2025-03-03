@@ -18,7 +18,7 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     let passwordTextField: HighlightableField = CustomPasswordField(with: "пароль")
     
     private let nextButton: UIButton = UIButton(type: .system)
-    private var nextButtonBottomConstraint: NSLayoutConstraint!
+    private var nextButtonBottomConstraint: NSLayoutConstraint?
     private var email: String = ""
     private var password: String = ""
     
@@ -86,7 +86,7 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
         ])
         
         nextButtonBottomConstraint = nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -43)
-        nextButtonBottomConstraint.isActive = true
+        nextButtonBottomConstraint?.isActive = true
         
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
     }
@@ -148,7 +148,7 @@ extension SignInViewController {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
            let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
             let keyboardHeight = keyboardFrame.height
-            nextButtonBottomConstraint.constant = -keyboardHeight - 10
+            nextButtonBottomConstraint?.constant = -keyboardHeight - 10
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()
@@ -159,7 +159,7 @@ extension SignInViewController {
     @objc
     private func keyboardWillHide(notification: Notification) {
         if let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
-            nextButtonBottomConstraint.constant = -43
+            nextButtonBottomConstraint?.constant = -43
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()

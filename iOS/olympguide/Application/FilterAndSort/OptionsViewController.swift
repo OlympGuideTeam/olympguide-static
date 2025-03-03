@@ -102,7 +102,6 @@ final class OptionsViewController: UIViewController {
     
     private let dimmingView = UIView()
     private let containerView = UIView()
-    private var panGesture: UIPanGestureRecognizer!
     private var finalY: CGFloat = 0
     private var endPoint: String = ""
     
@@ -128,7 +127,7 @@ final class OptionsViewController: UIViewController {
         $0.clipsToBounds = true
         return $0
     }(UIView())
-    private var containerHeightConstraint: NSLayoutConstraint!
+    private var containerHeightConstraint: NSLayoutConstraint?
     
     private let selectedScrollView: SelectedScrollView = SelectedScrollView(selectedOptions: [])
     
@@ -193,7 +192,7 @@ final class OptionsViewController: UIViewController {
     
     // MARK: - Gesture Configuration
     private func configureGesture() {
-        panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
         containerView.addGestureRecognizer(panGesture)
     }
     
@@ -301,7 +300,7 @@ final class OptionsViewController: UIViewController {
     private func configureSelectedScrollContainer() {
         containerView.addSubview(selectedScrollContainer)
         containerHeightConstraint = selectedScrollContainer.heightAnchor.constraint(equalToConstant: 0)
-        containerHeightConstraint.isActive = true
+        containerHeightConstraint?.isActive = true
         
         selectedScrollContainer.pinTop(to: searchBar.bottomAnchor)
         selectedScrollContainer.pinLeft(to: containerView.leadingAnchor)
@@ -585,15 +584,23 @@ extension OptionsViewController: OptionsDisplayLogic {
 
 extension OptionsViewController : SelectedBarDelegate {
     func toggleCustomTextField() {
+        guard let containerHeightConstraint = self.containerHeightConstraint else { return }
         if containerHeightConstraint.constant == 0 {
-            UIView.animate(withDuration: 0.3) {
-                self.containerHeightConstraint.constant = self.selectedScrollView.bounds.height + 12
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                guard let self = self,
+                      let containerHeightConstraint = self.containerHeightConstraint
+                else { return }
+                containerHeightConstraint.constant = self.selectedScrollView.bounds.height + 12
+                //                self.containerHeightConstraint.constant = self.selectedScrollView.bounds.height + 12
                 self.selectedScrollView.alpha = 1
                 self.view.layoutIfNeeded()
             }
         } else {
-            UIView.animate(withDuration: 0.3) {
-                self.containerHeightConstraint.constant = 0
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                guard let self = self,
+                      let containerHeightConstraint = self.containerHeightConstraint
+                else { return }
+                containerHeightConstraint.constant = 0
                 self.selectedScrollView.alpha = 0
                 self.view.layoutIfNeeded()
             }

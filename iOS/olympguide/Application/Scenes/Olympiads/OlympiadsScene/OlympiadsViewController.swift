@@ -162,10 +162,13 @@ extension OlympiadsViewController: UITableViewDataSource {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
+        guard let cell = tableView.dequeueReusableCell(
             withIdentifier: OlympiadTableViewCell.identifier,
             for: indexPath
-        ) as! OlympiadTableViewCell
+        ) as? OlympiadTableViewCell
+        else {
+            return UITableViewCell()
+        }
         
         if olympiads.count != 0 {
             let olympiadViewModel = olympiads[indexPath.row]
