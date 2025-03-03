@@ -46,7 +46,7 @@ class CustomPasswordField: CustomTextField, HighlightableField {
     
     func configureVisiblePasswordField() {
         self.addSubview(visiblePassword)
-        visiblePassword.font =  UIFont(name: "MontserratAlternates-Regular", size: 14)!
+        visiblePassword.font =  FontManager.shared.font(for: .textField)
         visiblePassword.textColor = .black
         visiblePassword.pinTop(to: textField.topAnchor)
         visiblePassword.pinLeft(to: textField.leadingAnchor)

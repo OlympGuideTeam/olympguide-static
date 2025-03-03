@@ -79,7 +79,7 @@ final class VerifyEmailViewController: UIViewController, NonTabBarVC {
         descriptionLabel.textAlignment = .left
         descriptionLabel.text = "Введите четырёхзначный код, присланный на \(userEmail)"
         descriptionLabel.numberOfLines = 0
-        descriptionLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 12) ?? .systemFont(ofSize: 12)
+        descriptionLabel.font = FontManager.shared.font(for: .additionalInformation)
         
         view.addSubview(descriptionLabel)
         descriptionLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 13)
@@ -103,16 +103,12 @@ final class VerifyEmailViewController: UIViewController, NonTabBarVC {
         view.addSubview(timerLabel)
         
         timerLabel.setTitle(formatTimeMessage(remainingTime), for: .normal)
-        timerLabel.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 10) ?? .systemFont(ofSize: 10)
+        timerLabel.titleLabel?.font = FontManager.shared.font(for: .additionalInformation)
         timerLabel.titleLabel?.numberOfLines = 0
         timerLabel.titleLabel?.textAlignment = .center
-//        timerLabel.titleLabel?.text = formatTimeMessage(remainingTime)
+
         timerLabel.backgroundColor = .clear
         timerLabel.setTitleColor(.black, for: .normal)
-//        timerLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 10) ?? .systemFont(ofSize: 10)
-//        timerLabel.textAlignment = .center
-//        timerLabel.text = formatTimeMessage(remainingTime)
-//        timerLabel.numberOfLines = 0
         
         timerLabel.pinCenterX(to: view)
         timerLabel.pinTop(to: verifyCodeField.bottomAnchor, 42)

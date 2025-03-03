@@ -99,7 +99,7 @@ final class SubjectLabel: UILabel {
         
         self.text = text
         self.textAlignment = .center
-        self.font = UIFont(name: "MontserratAlternates-Regular", size: 14)
+        self.font = FontManager.shared.font(for: .subjectStack)
         self.textColor = UIColor.black.withAlphaComponent(0.53)
         self.layer.borderColor = UIColor.black.withAlphaComponent(0.53).cgColor
         self.layer.borderWidth = 1

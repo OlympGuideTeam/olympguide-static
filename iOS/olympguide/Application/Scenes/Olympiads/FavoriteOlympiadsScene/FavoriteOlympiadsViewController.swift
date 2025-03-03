@@ -17,7 +17,6 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28)
     }
     
     enum Dimensions {
@@ -177,7 +176,7 @@ extension FavoriteOlympiadsViewController : OlympiadsDisplayLogic {
                 emptyLabel.text = "Избранных олимпиад пока нет"
                 emptyLabel.textAlignment = .center
                 emptyLabel.textColor = .black
-                emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+                emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
                 self.tableView.backgroundView = emptyLabel
             } else {
                 self.tableView.backgroundView = nil

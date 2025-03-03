@@ -14,7 +14,7 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let titleFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        static let titleFont = FontManager.shared.font(for: .commonInformation)
     }
     
     enum Dimensions {

@@ -59,7 +59,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureOlympiadTitleLabel() {
         let olympiadTitleLabel: UILabel = UILabel()
-        olympiadTitleLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)
+        olympiadTitleLabel.font = FontManager.shared.font(for: .tableTitle)
         olympiadTitleLabel.textColor = .black
         olympiadTitleLabel.text = "Олимпиада"
         olympiadTitleLabel.textAlignment = .center
@@ -71,7 +71,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureOlympiadNameLabel() {
         let nameLabel: UILabel = UILabel()
-        nameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        nameLabel.font = FontManager.shared.font(for: .commonInformation)
         nameLabel.numberOfLines = 0
         nameLabel.lineBreakMode = .byWordWrapping
         
@@ -97,7 +97,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureLevelLabel() -> UILabel {
         let levelLabel: UILabel = UILabel()
-        levelLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        levelLabel.font = FontManager.shared.font(for: .additionalInformation)
         levelLabel.textColor = UIColor(hex: "#787878")
         levelLabel.text = "Уровень: \(String(repeating: "I", count: viewModel.olympiadLevel))"
         
@@ -106,7 +106,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureProfileLabel() -> UILabel {
         let profileLabel: UILabel = UILabel()
-        profileLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        profileLabel.font = FontManager.shared.font(for: .additionalInformation)
         profileLabel.textColor = UIColor(hex: "#787878")
         profileLabel.numberOfLines = 0
         profileLabel.lineBreakMode = .byWordWrapping
@@ -117,7 +117,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureClassLebel() -> UILabel {
         let classLabel: UILabel = UILabel()
-        classLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        classLabel.font = FontManager.shared.font(for: .additionalInformation)
         classLabel.textColor = UIColor(hex: "#787878")
         classLabel.text = "Класс: \(viewModel.minClass)"
         
@@ -140,7 +140,7 @@ final class BenefitViewController: UIViewController {
         
         for subject in fullScoreSubjects {
             let subjectLabel: UILabel = UILabel()
-            subjectLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+            subjectLabel.font = FontManager.shared.font(for: .additionalInformation)
             subjectLabel.textColor = UIColor(hex: "#787878")
             subjectLabel.numberOfLines = 0
             subjectLabel.lineBreakMode = .byWordWrapping
@@ -151,7 +151,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureBenefitLabel() -> UILabel {
         let benefitLabel: UILabel = UILabel()
-        benefitLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        benefitLabel.font = FontManager.shared.font(for: .additionalInformation)
         benefitLabel.textColor = .black
         benefitLabel.numberOfLines = 0
         benefitLabel.lineBreakMode = .byWordWrapping
@@ -179,7 +179,7 @@ final class BenefitViewController: UIViewController {
         
         for subject in confirmationSubjects {
             let subjectLabel: UILabel = UILabel()
-            subjectLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+            subjectLabel.font = FontManager.shared.font(for: .additionalInformation)
             subjectLabel.textColor = UIColor(hex: "#787878")
             subjectLabel.numberOfLines = 0
             subjectLabel.lineBreakMode = .byWordWrapping
@@ -192,7 +192,7 @@ final class BenefitViewController: UIViewController {
     
     private func configureConfirmationLabel(score: Int) -> UILabel {
         let confirmationLabel: UILabel = UILabel()
-        confirmationLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        confirmationLabel.font = FontManager.shared.font(for: .commonInformation)
         confirmationLabel.textColor = .black
         confirmationLabel.numberOfLines = 0
         confirmationLabel.lineBreakMode = .byWordWrapping

@@ -78,7 +78,7 @@ extension OlympiadViewController {
     
     private func configureOlympiadNameLabel() {
         let olympiadNameLabel: UILabel = UILabel()
-        olympiadNameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        olympiadNameLabel.font = FontManager.shared.font(for: .additionalInformation)
         olympiadNameLabel.numberOfLines = 0
         olympiadNameLabel.lineBreakMode = .byWordWrapping
         olympiadNameLabel.text = olympiad.name
@@ -90,7 +90,7 @@ extension OlympiadViewController {
     
     private func configureLevelLabel() -> UILabel {
         let levelLabel: UILabel = UILabel()
-        levelLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        levelLabel.font = FontManager.shared.font(for: .additionalInformation)
         levelLabel.textColor = UIColor(hex: "#787878")
         levelLabel.text = "Уровень: \(String(repeating: "I", count: olympiad.level))"
         
@@ -99,7 +99,7 @@ extension OlympiadViewController {
     
     private func configureProfileLabel() -> UILabel {
         let profileLabel: UILabel = UILabel()
-        profileLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        profileLabel.font = FontManager.shared.font(for: .additionalInformation)
         profileLabel.textColor = UIColor(hex: "#787878")
         profileLabel.numberOfLines = 0
         profileLabel.lineBreakMode = .byWordWrapping
@@ -112,7 +112,7 @@ extension OlympiadViewController {
     private func configureProgramsLabel() {
         let programsLabel = UILabel()
         
-        programsLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)
+        programsLabel.font = FontManager.shared.font(for: .tableTitle)
         programsLabel.textColor = .black
         programsLabel.text = "Программы"
         informationStackView.addArrangedSubview(programsLabel)

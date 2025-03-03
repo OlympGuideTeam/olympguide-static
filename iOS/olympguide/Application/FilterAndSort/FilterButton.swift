@@ -24,8 +24,8 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let defaultTitleFont = UIFont(name: "MontserratAlternates-Regular", size: 14)!
-        static let selectedTitleFont = UIFont(name: "MontserratAlternates-SemiBold", size: 14)!
+        static let defaultTitleFont = FontManager.shared.font(for: .scrollButton)
+        static let selectedTitleFont = FontManager.shared.font(for: .selectedScrollButton)
     }
     
     enum Dimensions {

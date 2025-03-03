@@ -55,7 +55,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     }
     
     private func configureNextButton() {
-        nextButton.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        nextButton.titleLabel?.font = FontManager.shared.font(for: .bigButton)
         nextButton.layer.cornerRadius = 13
         nextButton.titleLabel?.tintColor = .black
         nextButton.backgroundColor = UIColor(hex: "#E0E8FE")

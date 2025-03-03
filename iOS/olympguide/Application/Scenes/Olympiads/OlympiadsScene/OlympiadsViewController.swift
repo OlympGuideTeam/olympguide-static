@@ -18,9 +18,6 @@ fileprivate enum Constants {
         static let titleLabelTextColor = UIColor.black
     }
     
-    enum Fonts {
-        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28)
-    }
     
     enum Dimensions {
         static let tableViewTopMargin: CGFloat = 13

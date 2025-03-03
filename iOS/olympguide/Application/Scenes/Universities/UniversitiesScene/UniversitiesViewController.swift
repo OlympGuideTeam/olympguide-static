@@ -17,10 +17,6 @@ fileprivate enum Constants {
         static let titleLabelTextColor = UIColor.black
     }
     
-    enum Fonts {
-        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28)!
-    }
-    
     enum Dimensions {
         static let titleLabelTopMargin: CGFloat = 25
         static let titleLabelLeftMargin: CGFloat = 20
