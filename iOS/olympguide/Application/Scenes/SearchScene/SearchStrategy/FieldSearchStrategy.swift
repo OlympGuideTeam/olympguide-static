@@ -1,0 +1,69 @@
+//
+//  FieldSearchStrategy.swift
+//  olympguide
+//
+//  Created by Tom Tim on 03.03.2025.
+//
+
+import UIKit
+
+final class FieldSearchStrategy: SearchStrategy {
+    typealias ModelType = GroupOfFieldsModel.FieldModel
+    typealias ViewModelType = Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel
+    typealias ResponseType = GroupOfFieldsModel
+    
+    func endpoint() -> String {
+        "/fields"
+    }
+    
+    func queryItems(for query: String) -> [URLQueryItem] {
+        var queryItems: [URLQueryItem] = []
+        queryItems.append(URLQueryItem(name: "search", value: query.trim()))
+        return queryItems
+    }
+    
+    func registerCells(in tableView: UITableView) {
+        tableView.register(
+            SecondFieldTableViewCell.self,
+            forCellReuseIdentifier: SecondFieldTableViewCell.identifier
+        )
+    }
+    
+    func configureCell(
+        tableView: UITableView,
+        indexPath: IndexPath,
+        viewMmodel: Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel,
+        isSeparatorHidden: Bool = false
+    ) -> UITableViewCell {
+        let identifier = SecondFieldTableViewCell.identifier
+        guard
+            let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as? SecondFieldTableViewCell
+        else {
+            fatalError("Could not dequeue cell with identifier: \(identifier)")
+        }
+        
+        cell.configure(with: viewMmodel)
+        return cell
+    }
+    
+    func titleForItem(_ model: GroupOfFieldsModel.FieldModel) -> String {
+        model.name
+    }
+    
+    static func modelToViewModel(
+        _ model: GroupOfFieldsModel.FieldModel
+    ) -> Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel {
+        Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel(
+            name: model.name,
+            code: model.code
+        )
+    }
+    
+    static func build(with model: GroupOfFieldsModel.FieldModel) -> UIViewController {
+        UIViewController()
+    }
+    
+    func responseTypeToModel(_ response: [GroupOfFieldsModel]) -> [GroupOfFieldsModel.FieldModel] {
+        response.flatMap { $0.fields }
+    }
+}
