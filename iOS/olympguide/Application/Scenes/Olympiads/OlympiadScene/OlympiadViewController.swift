@@ -62,6 +62,7 @@ extension OlympiadViewController {
         let backItem = UIBarButtonItem(title: "Олимпиада", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
+    
     private func configureOlympiadInformation() {
         let olympiadInformationStack = UIStackView()
         
