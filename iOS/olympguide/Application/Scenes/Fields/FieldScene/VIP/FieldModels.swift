@@ -1,0 +1,25 @@
+//
+//  Models.swift
+//  olympguide
+//
+//  Created by Tom Tim on 04.03.2025.
+//
+
+enum Field {
+    enum LoadPrograms {
+        struct Request {
+            let fieldID: Int
+            var params: [Param] = []
+        }
+        
+        struct Response {
+            var programs: [ProgramModel]? = nil
+            var error: Error? = nil
+        }
+        
+        struct ViewModel {
+//            let programs
+        }
+    }
+}
+
