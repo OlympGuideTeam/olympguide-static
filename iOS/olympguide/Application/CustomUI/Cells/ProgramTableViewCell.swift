@@ -101,24 +101,6 @@ final class ProgramTableViewCell: UITableViewCell {
         favoriteButton.setHeight(CellConstants.Dimensions.favoriteButtonSize)
     }
     
-//    private func configureLogoImageView() {
-//        contentView.addSubview(logoImageView)
-//        
-//        logoImageView.setWidth(80)
-//        logoImageView.setHeight(80)
-//        
-//        logoImageView.pinTop(to: informationStack.bottomAnchor, 11)
-//        logoImageView.pinRight(to: contentView.trailingAnchor, 20)
-//    }
-//    
-//    private func configureUniversityShortNameLabel() {
-//        universityShortNameLabel.font = FontManager.shared.font(weight: .bold, size: 15.0)
-//        contentView.addSubview(universityShortNameLabel)
-//        universityShortNameLabel.pinTop(to: logoImageView.bottomAnchor, 11)
-//        universityShortNameLabel.pinCenterX(to: logoImageView.centerXAnchor)
-//    }
-    
-    
     private func configureBudgetLabel() {
         budgtetLabel.setText(regular: "Бюджетных мест  ")
         
