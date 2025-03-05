@@ -36,7 +36,7 @@ extension ProgramInteractor : ProgramBusinessLogic {
 
 // MARK: - BenefitsBusinessLogic
 extension ProgramInteractor: BenefitsByOlympiadsBusinessLogic {
-    func loadBenefits(with request: BenefitsByOlympiads.Load.Request) {
+    func loadOlympiads(with request: BenefitsByOlympiads.Load.Request) {
         worker?.fetchBenefits(
             for: request.programID,
             with: request.params
@@ -45,10 +45,10 @@ extension ProgramInteractor: BenefitsByOlympiadsBusinessLogic {
             case .success(let olympiads):
                 self?.olympiads = olympiads ?? []
                 let response = BenefitsByOlympiads.Load.Response(olympiads: olympiads ?? [])
-                self?.presenter?.presentLoadBenefits(with: response)
+                self?.presenter?.presentLoadOlympiads(with: response)
             case .failure(let error):
                 let response = BenefitsByOlympiads.Load.Response(error: error)
-                self?.presenter?.presentLoadBenefits(with: response)
+                self?.presenter?.presentLoadOlympiads(with: response)
             }
         }
     }

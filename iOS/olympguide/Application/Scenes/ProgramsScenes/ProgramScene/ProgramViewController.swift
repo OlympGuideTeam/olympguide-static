@@ -121,7 +121,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         }
         
         let benefitRequest = BenefitsByOlympiads.Load.Request(programID: program.programID)
-        interactor?.loadBenefits(with: benefitRequest)
+        interactor?.loadOlympiads(with: benefitRequest)
         
         if webSiteButton.titleLabel?.text == nil {
             let programRequest = Program.Load.Request(programID: program.programID)
@@ -378,7 +378,7 @@ extension ProgramViewController {
             guard let programID = self?.program.programID else { return }
             let request = BenefitsByOlympiads.Load.Request(programID: programID)
             
-            self?.interactor?.loadBenefits(with: request)
+            self?.interactor?.loadOlympiads(with: request)
             self?.refreshControl.endRefreshing()
         }
     }
@@ -464,7 +464,7 @@ extension ProgramViewController : UITableViewDelegate {
 
 // MARK: - BenefitsDisplayLogic
 extension ProgramViewController : BenefitsByOlympiadsDisplayLogic {
-    func displayLoadBenefitsResult(with viewModel: BenefitsByOlympiads.Load.ViewModel) {
+    func displayLoadOlympiadsResult(with viewModel: BenefitsByOlympiads.Load.ViewModel) {
         benefits = viewModel.benefits
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()
