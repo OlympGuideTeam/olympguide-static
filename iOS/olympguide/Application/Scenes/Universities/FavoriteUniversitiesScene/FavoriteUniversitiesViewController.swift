@@ -46,7 +46,7 @@ class FavoriteUniversitiesViewController: UIViewController {
     private let titleLabel: UILabel = UILabel()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private var universities: [Universities.Load.ViewModel.UniversityViewModel] = []
+    private var universities: [UniversityViewModel] = []
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
@@ -204,7 +204,7 @@ extension FavoriteUniversitiesViewController {
                 switch event {
                 case .added(let university):
                     if !self.universities.contains(where: { $0.universityID == university.universityID }) {
-                        let viewModel = Universities.Load.ViewModel.UniversityViewModel(
+                        let viewModel = UniversityViewModel(
                             universityID: university.universityID,
                             name: university.name,
                             logoURL: university.logo,

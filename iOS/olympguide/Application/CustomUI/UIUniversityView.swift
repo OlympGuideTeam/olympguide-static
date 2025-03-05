@@ -1,0 +1,95 @@
+//
+//  UIUniversityView.swift
+//  olympguide
+//
+//  Created by Tom Tim on 04.03.2025.
+//
+
+import UIKit
+
+final class UIUniversityView: UIView {
+    private let logoImageView = UIImageViewWithShimmer(frame: .zero)
+    private let nameLabel = UILabel()
+    private let regionLabel = UILabel()
+    let favoriteButton: UIButton = {
+        let button = UIButton()
+        button.tintColor = .black
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        button.setImage(UIImage(systemName: "bookmark"), for: .normal)
+        return button
+    }()
+    
+    init() {
+        super.init(frame: .zero)
+        configureLayout()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func configureLayout() {
+        addSubview(logoImageView)
+        addSubview(nameLabel)
+        addSubview(regionLabel)
+        addSubview(favoriteButton)
+
+        
+        
+        // Configure logoImageView
+        logoImageView.contentMode = .scaleAspectFit
+        
+        // Configure nameLabel
+        nameLabel.font =  FontManager.shared.font(for: .commonInformation)
+        nameLabel.numberOfLines = 0
+        nameLabel.lineBreakMode = .byWordWrapping
+        
+        // Configure regionLabel
+        regionLabel.font = FontManager.shared.font(for: .region)
+        regionLabel.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
+                
+        logoImageView.pinLeft(to: self.leadingAnchor)
+        logoImageView.pinTop(to: self.topAnchor)
+        logoImageView.setWidth(80)
+        logoImageView.setHeight(80)
+        
+        regionLabel.pinTop(to: self.topAnchor)
+        regionLabel.pinLeft(to: logoImageView.trailingAnchor, 15)
+        regionLabel.pinRight(to: self.trailingAnchor)
+        
+        nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
+        nameLabel.pinLeft(to: logoImageView.trailingAnchor, 15)
+        nameLabel.pinRight(to: self.trailingAnchor, 37)
+        
+        favoriteButton.pinTop(to: regionLabel.bottomAnchor, 5)
+        favoriteButton.pinRight(to: self.trailingAnchor)
+        favoriteButton.setWidth(22)
+        favoriteButton.setHeight(22)
+        
+        self.pinBottom(to: nameLabel.bottomAnchor, 0, .grOE)
+        self.pinBottom(to: logoImageView.bottomAnchor, 0, .grOE)
+    }
+    
+    func configure(
+        with viewModel: UniversityViewModel,
+        _ left: CGFloat = 15.0,
+        _ right: CGFloat = 15.0
+    ) {
+        let isFavorite = viewModel.like
+        let newImageName = isFavorite ? "bookmark.fill" : "bookmark"
+        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        nameLabel.text = viewModel.name
+        regionLabel.text = viewModel.region
+        logoImageView.startShimmer()
+        ImageLoader.shared.loadImage(from: viewModel.logoURL) { [weak self] image in
+            guard let self = self, let image = image else { return }
+            self.logoImageView.stopShimmer()
+            self.logoImageView.image = image
+        }
+        nameLabel.calculateHeight(with: UIScreen.main.bounds.width - left - right - 80 - 37 - 15)
+        favoriteButton.tag = viewModel.universityID
+    }
+}

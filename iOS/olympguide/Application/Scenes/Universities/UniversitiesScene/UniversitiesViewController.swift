@@ -55,7 +55,7 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         return view
     }()
     
-    private var universities: [Universities.Load.ViewModel.UniversityViewModel] = []
+    private var universities: [UniversityViewModel] = []
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle

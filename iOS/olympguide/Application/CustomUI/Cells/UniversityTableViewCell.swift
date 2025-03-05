@@ -47,19 +47,7 @@ class UniversityTableViewCell: UITableViewCell {
     // MARK: - Variables
     static let identifier = Constants.Identifier.cellIdentifier
     
-    let logoImageView = UIImageViewWithShimmer(frame: .zero)
-    private let nameLabel = UILabel()
-    private let regionLabel = UILabel()
-    
-    private let favoriteButton: UIButton = {
-        let button = UIButton()
-        button.tintColor = .black
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        button.setImage(UIImage(systemName: Constants.Images.bookmark), for: .normal)
-        return button
-    }()
+    private let universityView: UIUniversityView = UIUniversityView()
     
     private let shimmerLayer: UIShimmerView = UIShimmerView()
     
@@ -82,48 +70,18 @@ class UniversityTableViewCell: UITableViewCell {
     
     // MARK: - Private funcs
     private func setupUI() {
-        contentView.addSubview(logoImageView)
-        contentView.addSubview(nameLabel)
-        contentView.addSubview(regionLabel)
-        contentView.addSubview(favoriteButton)
+        contentView.addSubview(universityView)
         contentView.addSubview(separatorLine)
         contentView.addSubview(shimmerLayer)
         
         
-        // Configure logoImageView
-        logoImageView.contentMode = .scaleAspectFit
+        universityView.favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
         
-        // Configure nameLabel
-        nameLabel.font = Constants.Fonts.nameLabelFont
-        nameLabel.numberOfLines = 0
-        nameLabel.lineBreakMode = .byWordWrapping
+        universityView.pinTop(to: contentView.topAnchor, 30)
+        universityView.pinLeft(to: contentView.leadingAnchor, 15)
+        universityView.pinRight(to: contentView.trailingAnchor, 15)
         
-        // Configure regionLabel
-        regionLabel.font = Constants.Fonts.regionLabelFont
-        regionLabel.textColor = Constants.Colors.regionTextColor
-        
-        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
-        
-        logoImageView.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.logoLeftMargin)
-        logoImageView.pinTop(to: contentView.topAnchor, Constants.Dimensions.logoTopMargin)
-        logoImageView.setWidth(Constants.Dimensions.logoSize)
-        logoImageView.setHeight(Constants.Dimensions.logoSize)
-        
-        regionLabel.pinTop(to: contentView.topAnchor, Constants.Dimensions.logoTopMargin)
-        regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        regionLabel.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        
-        nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
-        nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
-        
-        favoriteButton.pinTop(to: regionLabel.bottomAnchor, 5)
-        favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        favoriteButton.setWidth(Constants.Dimensions.favoriteButtonSize)
-        favoriteButton.setHeight(Constants.Dimensions.favoriteButtonSize)
-        
-        separatorLine.pinTop(to: logoImageView.bottomAnchor, 20, .grOE)
-        separatorLine.pinTop(to: nameLabel.bottomAnchor, 20, .grOE)
+        separatorLine.pinTop(to: universityView.bottomAnchor, 20)
         separatorLine.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
@@ -138,24 +96,12 @@ class UniversityTableViewCell: UITableViewCell {
     }
     
     // MARK: - Methods
-    func configure(with viewModel: Universities.Load.ViewModel.UniversityViewModel) {
-        nameLabel.text = viewModel.name
-        regionLabel.text = viewModel.region
-        let isFavorite = viewModel.like
-        let newImageName = isFavorite ? Constants.Images.bookmarkFill : Constants.Images.bookmark
-        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
-        
-        logoImageView.startShimmer()
-        ImageLoader.shared.loadImage(from: viewModel.logoURL) { [weak self] image in
-            guard let self = self, let image = image else { return }
-            self.logoImageView.stopShimmer()
-            self.logoImageView.image = image
-        }
+    func configure(with viewModel: UniversityViewModel) {
+        universityView.configure(with: viewModel)
         shimmerLayer.isHidden = true
         shimmerLayer.stopAnimating()
         shimmerLayer.removeAllConstraints()
         isUserInteractionEnabled = true
-        favoriteButton.tag = viewModel.universityID
         showAll()
     }
     
@@ -168,18 +114,12 @@ class UniversityTableViewCell: UITableViewCell {
     
     private func hideAll() {
         separatorLine.isHidden = true
-        favoriteButton.isHidden = true
-        nameLabel.isHidden = true
-        regionLabel.isHidden = true
-        logoImageView.isHidden = true
+        universityView.isHidden = true
     }
     
     private func showAll() {
         separatorLine.isHidden = false
-        favoriteButton.isHidden = false
-        nameLabel.isHidden = false
-        regionLabel.isHidden = false
-        logoImageView.isHidden = false
+        universityView.isHidden = false
     }
     
     func hideSeparator(_ hide: Bool) {
@@ -188,9 +128,9 @@ class UniversityTableViewCell: UITableViewCell {
     
     // MARK: - Objc funcs
     @objc private func favoriteButtonTapped(_ sender: UIButton) {
-        let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
+        let isFavorite = universityView.favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
         let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
-        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        universityView.favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
         favoriteButtonTapped?(sender, !isFavorite)
     }
 }

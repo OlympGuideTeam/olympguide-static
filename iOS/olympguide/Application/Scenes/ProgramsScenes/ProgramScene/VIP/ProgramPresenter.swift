@@ -30,7 +30,7 @@ extension ProgramPresenter : ProgramPresentationLogic {
 }
 
 extension ProgramPresenter : BenefitsByOlympiadsPresentationLogic {
-    func presentLoadBenefits(with response: BenefitsByOlympiads.Load.Response) {
+    func presentLoadOlympiads(with response: BenefitsByOlympiads.Load.Response) {
         if let error = response.error {
             viewController?.showAlert(with: error.localizedDescription)
             return
@@ -54,6 +54,6 @@ extension ProgramPresenter : BenefitsByOlympiadsPresentationLogic {
         }
         
         let viewModel = BenefitsByOlympiads.Load.ViewModel(benefits: benefits)
-        viewController?.displayLoadBenefitsResult(with: viewModel)
+        viewController?.displayLoadOlympiadsResult(with: viewModel)
     }
 }

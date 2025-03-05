@@ -362,9 +362,9 @@ extension UniversityViewController : UniversityDisplayLogic {
 extension UniversityViewController : ProgramsDisplayLogic {
     func displayLoadProgramsResult(with viewModel: Programs.Load.ViewModel) {
         groupOfProgramsViewModel = viewModel.groupsOfPrograms
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-            self.refreshControl.endRefreshing()
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+            self?.refreshControl.endRefreshing()
         }
     }
 }

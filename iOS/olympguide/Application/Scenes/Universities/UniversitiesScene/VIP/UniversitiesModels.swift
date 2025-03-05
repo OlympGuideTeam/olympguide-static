@@ -19,14 +19,6 @@ enum Universities {
         }
         
         struct ViewModel {
-            struct UniversityViewModel {
-                let universityID: Int
-                let name: String
-                let logoURL: String
-                let region: String
-                var like: Bool
-            }
-            
             let universities: [UniversityViewModel]
         }
     }
@@ -72,4 +64,12 @@ struct UniversityModel: Codable {
         case shortName = "short_name"
         case name, logo, region, like, email, site, description, phone
     }
+}
+
+struct UniversityViewModel {
+    let universityID: Int
+    let name: String
+    let logoURL: String
+    let region: String
+    var like: Bool
 }

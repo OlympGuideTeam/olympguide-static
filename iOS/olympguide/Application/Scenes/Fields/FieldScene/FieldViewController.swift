@@ -129,27 +129,3 @@ final class FieldViewController: UIViewController {
 //    
 //}
 
-
-import SwiftUI
-
-struct ViewControllerWrapper: UIViewControllerRepresentable {
-    
-    func makeUIViewController(context: Context) -> UINavigationController {
-        let field = GroupOfFieldsModel.FieldModel(
-            fieldId: 1,
-            name: "Программная инженерия и бла бла бла бла чтоб название подлиннее было",
-            code: "09.03.04",
-            degree: "Бакалавриат"
-        )
-        
-        let vc = FieldViewController(for: field)
-        
-        return NavigationBarViewController(rootViewController: vc)
-    }
-    
-    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
-}
-
-#Preview {
-    ViewControllerWrapper()
-}

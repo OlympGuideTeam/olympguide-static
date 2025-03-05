@@ -36,37 +36,6 @@ enum BenefitsByOlympiads {
     }
 }
 
-enum BenefitsByPrograms {
-    enum Load {
-        struct Request {
-            let olympiadID: Int
-            var params: [Param] = []
-        }
-        
-        struct Response {
-            var error: Error? = nil
-            var benefits: [ProgramWithBenefitsModel]? = nil
-        }
-        
-        struct ViewModel {
-            struct BenefitViewModel {
-                let programID: Int
-                let programName: String
-                let field: String
-                let universityName: String
-                let mibClass: Int
-                let minDiplomaLevel: Int
-                let isBVI: Bool
-                
-                let confirmationSubjects: [Benefit.ConfirmationSubject]?
-                let fullScoreSubjects: [String]?
-            }
-            
-            let benefits: [BenefitViewModel]
-        }
-    }
-}
-
 struct Benefit : Codable {
     struct ConfirmationSubject : Codable {
         let subject: String
@@ -102,22 +71,5 @@ struct OlympiadWithBenefitsModel : Codable {
     }
     
     let olympiad: Olympiad
-    let benefits: [Benefit]
-}
-
-struct ProgramWithBenefitsModel : Codable {
-    struct Program: Codable {
-        let programID: Int
-        let name: String
-        let field: String
-        let university: String
-        
-        enum CodingKeys: String, CodingKey {
-            case programID = "program_id"
-            case name, field, university
-        }
-    }
-    
-    let program: Program
     let benefits: [Benefit]
 }
