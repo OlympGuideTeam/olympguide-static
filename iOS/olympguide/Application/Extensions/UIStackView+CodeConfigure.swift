@@ -8,7 +8,11 @@
 import UIKit
 
 extension UIStackView {
-    func configure(with code: String, and name: String, weight: CGFloat = UIScreen.main.bounds.width - 129) {
+    func configure(
+        with code: String,
+        and name: String,
+        width: CGFloat = UIScreen.main.bounds.width - 129
+    ) {
         self.axis = .horizontal
         self.alignment = .top
         self.spacing = 0
@@ -51,6 +55,6 @@ extension UIStackView {
         nameLabel.textAlignment = .left
         nameLabel.lineBreakMode = .byWordWrapping
         self.addArrangedSubview(nameLabel)
-        nameLabel.calculateHeight(with: weight)
+        nameLabel.calculateHeight(with: width)
     }
 }
