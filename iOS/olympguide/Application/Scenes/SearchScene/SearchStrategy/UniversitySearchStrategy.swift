@@ -9,13 +9,13 @@ import UIKit
 
 final class UniversitySearchStrategy: SearchStrategy {
     typealias ModelType = UniversityModel
-    typealias ViewModelType = Universities.Load.ViewModel.UniversityViewModel
+    typealias ViewModelType = UniversityViewModel
     typealias ResponseType = UniversityModel
     
     func configureCell(
         tableView: UITableView,
         indexPath: IndexPath,
-        viewMmodel: Universities.Load.ViewModel.UniversityViewModel,
+        viewMmodel: UniversityViewModel,
         isSeparatorHidden: Bool = false
     ) -> UITableViewCell {
         let identifier = UniversityTableViewCell.identifier
@@ -40,8 +40,8 @@ final class UniversitySearchStrategy: SearchStrategy {
     
     static func modelToViewModel(
         _ model: UniversityModel
-    ) -> Universities.Load.ViewModel.UniversityViewModel {
-        Universities.Load.ViewModel.UniversityViewModel(
+    ) -> UniversityViewModel {
+        UniversityViewModel(
             universityID: model.universityID,
             name: model.name,
             logoURL: model.logo,
