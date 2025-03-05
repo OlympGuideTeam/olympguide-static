@@ -126,7 +126,11 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButt
             FieldTableViewCell.self,
             forCellReuseIdentifier: FieldTableViewCell.identifier
         )
-        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
+        
+        tableView.register(
+            UITableViewHeaderFooterView.self,
+            forHeaderFooterViewReuseIdentifier: "ReusableHeader"
+        )
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -202,8 +206,10 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     
-    func tableView(_ tableView: UITableView,
-                   didSelectRowAt indexPath: IndexPath) {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
             return
@@ -211,13 +217,16 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         router?.routeToDetails(for: fieldModel)
     }
     
-    func tableView(_ tableView: UITableView,
-                   viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(
+        _ tableView: UITableView,
+        viewForHeaderInSection section: Int
+    ) -> UIView? {
         let headerButton = FieldsTableButton(
             name: fields[section].name,
             code: fields[section].code,
             isExpanded: fields[section].isExpanded
         )
+        
         headerButton.tag = section
         headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
         
