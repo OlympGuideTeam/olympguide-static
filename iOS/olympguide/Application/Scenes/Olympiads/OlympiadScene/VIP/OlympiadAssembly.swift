@@ -9,6 +9,19 @@ import UIKit
 
 final class OlympiadAssembly {
     static func build(with olympiad: OlympiadModel) -> UIViewController {
-        OlympiadViewController(with: olympiad)
+        let viewController = OlympiadViewController(with: olympiad)
+        let presenter = OlympiadPresenter()
+        let interactor = OlympiadInteractor()
+        let worker = OlympiadWorker()
+        let router = OlympiadRouter()
+        
+        viewController.inteactor = interactor
+        viewController.router = router
+        interactor.presenter = presenter
+        interactor.worker = worker
+        presenter.viewController = viewController
+//        router.dataStore = interactor
+        
+        return viewController
     }
 }
