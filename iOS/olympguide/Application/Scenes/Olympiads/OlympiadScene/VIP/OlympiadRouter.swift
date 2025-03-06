@@ -8,7 +8,7 @@
 import UIKit
 
 final class OlympiadRouter: OlympiadRoutingLogic, OlympiadDataPassing {
-    var viewController: UIViewController?
+    weak var viewController: UIViewController?
     var dataStore: OlympiadDataStore?
     
     func routeToProgram(indexPath: IndexPath) {
