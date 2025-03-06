@@ -7,28 +7,25 @@
 
 import UIKit
 
-struct BenefitInfo {
-    let title: String
-    let description: String
-}
-
 final class BenefitStackView: UIStackView {
-    var benefitInfo: BenefitInfo?
+    weak var parentCell: UIProgramWithBenefitsCell?
+    var createPreviewVC: ((_: IndexPath, _ : Int) -> UIViewController?)?
+    var indexPath: IndexPath?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        commonInit()
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(openDetailsVC)
+        )
+        addGestureRecognizer(tapGesture)
+        let interaction = UIContextMenuInteraction(delegate: self)
+        self.addInteraction(interaction)
     }
     
     @available(*, unavailable)
     required init(coder: NSCoder) {
         super.init(coder: coder)
-        commonInit()
-    }
-    
-    private func commonInit() {
-        let interaction = UIContextMenuInteraction(delegate: self)
-        self.addInteraction(interaction)
     }
 }
 
@@ -38,21 +35,14 @@ extension BenefitStackView: UIContextMenuInteractionDelegate {
         _ interaction: UIContextMenuInteraction,
         configurationForMenuAtLocation location: CGPoint
     ) -> UIContextMenuConfiguration? {
-        
-      
-        let identifier = NSString(string: "BenefitStackViewPreview")
-        
+        guard let indexPath = self.indexPath else { return nil }
         return UIContextMenuConfiguration(
-            identifier: identifier,
             previewProvider: { [weak self] in
                 guard
-                    let self = self,
-                      let info = self.benefitInfo
+                    let self = self
                 else { return nil }
                 
-                let previewVC = BenefitByProgramViewController(with: info)
-                
-                previewVC.preferredContentSize = CGSize(width: 0, height: 300)
+                let previewVC = createPreviewVC?(indexPath, tag)
                 
                 return previewVC
             },
@@ -67,31 +57,25 @@ extension BenefitStackView: UIContextMenuInteractionDelegate {
         willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration,
         animator: UIContextMenuInteractionCommitAnimating
     ) {
-//        animator.addCompletion { [weak self] in
-//            guard let self = self,
-//                  let info = self.benefitInfo else { return }
-//            
-//            // Создаем полноценный VC. Можно тот же, что и в previewProvider,
-//            // а можно новый экземпляр (обычно так и делают).
-//            let detailVC = BenefitByProgramViewController(with: info)
-//            
-//            // Находим ближайший UIViewController в иерархии (чтобы пушить/презентовать)
-//            guard let parentVC = self.findViewController() else { return }
-//            detailVC.modalPresentationStyle = .pageSheet
-//            if let sheet = detailVC.sheetPresentationController {
-//                sheet.detents = [.medium(), .large()]
-//                sheet.selectedDetentIdentifier = .medium
-//            }
-//            
-//            parentVC.present(detailVC, animated: true)
-//        }
+        animator.addCompletion { [weak self] in
+            guard
+                let self = self,
+                let indexPath = self.indexPath,
+                let detailVC = createPreviewVC?(indexPath, tag),
+                let parentVC = self.findViewController()
+            else { return }
+            
+            parentVC.present(detailVC, animated: true)
+        }
     }
     
-    func openPage() {
-        guard let info = self.benefitInfo else { return }
-        let detailVC = BenefitByProgramViewController(with: info)
+    @objc func openDetailsVC() {
+        guard
+            let indexPath = self.indexPath,
+            let detailVC = createPreviewVC?(indexPath, tag),
+            let parentVC = self.findViewController()
+        else { return }
         
-        guard let parentVC = self.findViewController() else { return }
         detailVC.modalPresentationStyle = .pageSheet
         if let sheet = detailVC.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
@@ -100,17 +84,20 @@ extension BenefitStackView: UIContextMenuInteractionDelegate {
         
         parentVC.present(detailVC, animated: true)
     }
-}
-
-final class BenefitByProgramViewController: UIViewController {
-    init(with info: BenefitInfo) {
-        super.init(nibName: nil, bundle: nil)
-        title = info.description
-        view.backgroundColor = .white
+    
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        parentCell?.shouldIgnoreHighlight = true
+        super.touchesBegan(touches, with: event)
     }
     
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        parentCell?.shouldIgnoreHighlight = false
+        super.touchesEnded(touches, with: event)
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        parentCell?.shouldIgnoreHighlight = false
+        super.touchesCancelled(touches, with: event)
     }
 }
