@@ -21,6 +21,7 @@ final class FieldAssembly {
         interactor.worker = worker
         presenter.viewController = viewController
         router.dataStore = interactor
+        router.viewController = viewController
         
         return viewController
     }

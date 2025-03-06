@@ -198,6 +198,7 @@ extension FieldViewController : UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToProgram(indexPath: indexPath)
     }
     
     func tableView(
