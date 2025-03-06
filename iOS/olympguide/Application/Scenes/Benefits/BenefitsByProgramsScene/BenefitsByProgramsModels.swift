@@ -22,47 +22,9 @@ enum BenefitsByPrograms {
             var section: Int? = nil
         }
         
-        struct ViewModel {
-            struct BenefitViewModel {
-                struct Program {
-                    let programID: Int
-                    let programName: String
-                    let field: String
-                    let university: String
-                }
-                
-                struct BenefitInformationViewModel {
-                    let minClass: Int
-                    let minDiplomaLevel: Int
-                    let isBVI: Bool
-                    
-                    let confirmationSubjects: [BenefitModel.ConfirmationSubject]?
-                    let fullScoreSubjects: [String]?
-                }
-                
-                let program: Program
-                let benefitInformation: [BenefitInformationViewModel]
-            }
-            
-            let benefits: [BenefitViewModel]
+        struct ViewModel {            
+            let benefits: [ProgramWithBenefitsViewModel]
             let section: Int
         }
     }
-}
-
-struct ProgramWithBenefitsModel : Codable {
-    struct Program: Codable {
-        let programID: Int
-        let name: String
-        let field: String
-        let university: String
-        
-        enum CodingKeys: String, CodingKey {
-            case programID = "program_id"
-            case name, field, university
-        }
-    }
-    
-    let program: Program
-    let benefits: [BenefitModel]
 }

@@ -50,7 +50,7 @@ extension OlympiadPresenter : BenefitsByProgramsPresentationLogic {
         }
         
         let programsViewModel = programs.map { model in
-            let program = BenefitsByPrograms.Load.ViewModel.BenefitViewModel.Program(
+            let program = ProgramWithBenefitsViewModel.Program(
                 programID: model.program.programID,
                 programName: model.program.name,
                 field: model.program.field,
@@ -58,7 +58,7 @@ extension OlympiadPresenter : BenefitsByProgramsPresentationLogic {
             )
             
             let benefitInformation = model.benefits.map { benefit in
-                BenefitsByPrograms.Load.ViewModel.BenefitViewModel.BenefitInformationViewModel(
+                ProgramWithBenefitsViewModel.BenefitInformationViewModel(
                     minClass: benefit.minClass,
                     minDiplomaLevel: benefit.minDiplomaLevel,
                     isBVI: benefit.isBVI,
@@ -67,7 +67,7 @@ extension OlympiadPresenter : BenefitsByProgramsPresentationLogic {
                 )
             }
             
-            return BenefitsByPrograms.Load.ViewModel.BenefitViewModel(
+            return ProgramWithBenefitsViewModel(
                 program: program,
                 benefitInformation: benefitInformation
             )

@@ -47,8 +47,8 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     let university: UniversityModel
     let codeLabel: UILabel = UILabel()
     let programNameLabel = UILabel()
-    var program: GroupOfProgramsModel.ProgramModel?
-    var benefits: [BenefitsByOlympiads.Load.ViewModel.BenefitViewModel] = []
+    var program: ShortProgramModel?
+    var benefits: [OlympiadWithBenefitViewModel] = []
     var link: String? = nil
     
     private let informationContainer: UIView = UIView()
@@ -81,7 +81,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         self.startIsFavorite = program.like
         self.programId = program.programID
         self.university = program.university
-        self.program = GroupOfProgramsModel.ProgramModel(
+        self.program = ShortProgramModel(
             programID: program.programID,
             name: program.name,
             field: program.field,
@@ -105,7 +105,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     }
     
     init(
-        for program: GroupOfProgramsModel.ProgramModel,
+        for program: ShortProgramModel,
         by university: UniversityModel
     ) {
         self.isFavorite = program.like

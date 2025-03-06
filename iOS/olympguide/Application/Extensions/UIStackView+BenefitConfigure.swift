@@ -9,7 +9,7 @@ import UIKit
 
 extension UIStackView {
     func configure(
-        with benefit: BenefitsByPrograms.Load.ViewModel.BenefitViewModel.BenefitInformationViewModel
+        with benefit: ProgramWithBenefitsViewModel.BenefitInformationViewModel
     ) {
         self.arrangedSubviews.forEach { $0.removeFromSuperview() }
         

@@ -9,7 +9,7 @@ import UIKit
 
 final class FieldSearchStrategy: SearchStrategy {
     typealias ModelType = GroupOfFieldsModel.FieldModel
-    typealias ViewModelType = Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel
+    typealias ViewModelType = GroupOfFieldsViewModel.FieldViewModel
     typealias ResponseType = GroupOfFieldsModel
     
     func endpoint() -> String {
@@ -32,7 +32,7 @@ final class FieldSearchStrategy: SearchStrategy {
     func configureCell(
         tableView: UITableView,
         indexPath: IndexPath,
-        viewMmodel: Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel,
+        viewMmodel: GroupOfFieldsViewModel.FieldViewModel,
         isSeparatorHidden: Bool = false
     ) -> UITableViewCell {
         let identifier = SecondFieldTableViewCell.identifier
@@ -52,8 +52,8 @@ final class FieldSearchStrategy: SearchStrategy {
     
     static func modelToViewModel(
         _ model: GroupOfFieldsModel.FieldModel
-    ) -> Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel {
-        Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel(
+    ) -> GroupOfFieldsViewModel.FieldViewModel {
+        GroupOfFieldsViewModel.FieldViewModel(
             name: model.name,
             code: model.code
         )

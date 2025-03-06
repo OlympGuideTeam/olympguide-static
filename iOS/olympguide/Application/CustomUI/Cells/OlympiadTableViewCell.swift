@@ -138,7 +138,7 @@ class OlympiadTableViewCell: UITableViewCell {
     }
     
     // MARK: - Methods
-    func configure(with viewModel: Olympiads.Load.ViewModel.OlympiadViewModel) {
+    func configure(with viewModel: OlympiadViewModel) {
         nameLabel.text = viewModel.name
         levelAndProfileLabel.text = "\(viewModel.level) уровень | \(viewModel.profile)"
         benefitLabel.text = nil
@@ -150,7 +150,7 @@ class OlympiadTableViewCell: UITableViewCell {
         favoriteButton.isHidden = AuthManager.shared.isAuthenticated ? false : true
     }
     
-    func configure(with viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel) {
+    func configure(with viewModel: OlympiadWithBenefitViewModel) {
         nameLabel.text = viewModel.olympiadName
         let level = "\(String(repeating: "I", count: viewModel.olympiadLevel)) уровень"
         levelAndProfileLabel.text = "\(level) | \(viewModel.olympiadProfile)"
