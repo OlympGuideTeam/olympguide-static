@@ -27,7 +27,7 @@ enum BenefitsByOlympiads {
                 let minDiplomaLevel: Int
                 let isBVI: Bool
                 
-                let confirmationSubjects: [Benefit.ConfirmationSubject]?
+                let confirmationSubjects: [BenefitModel.ConfirmationSubject]?
                 let fullScoreSubjects: [String]?
             }
             
@@ -36,7 +36,7 @@ enum BenefitsByOlympiads {
     }
 }
 
-struct Benefit : Codable {
+struct BenefitModel : Codable {
     struct ConfirmationSubject : Codable {
         let subject: String
         let score: Int
@@ -71,5 +71,5 @@ struct OlympiadWithBenefitsModel : Codable {
     }
     
     let olympiad: Olympiad
-    let benefits: [Benefit]
+    let benefits: [BenefitModel]
 }
