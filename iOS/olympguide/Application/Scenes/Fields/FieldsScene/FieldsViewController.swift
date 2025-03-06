@@ -29,7 +29,7 @@ fileprivate enum Constants {
     
     enum Strings {
         static let fieldsTitle = "Направления"
-        static let backButtonTitle = "Направления"
+        static let backButtonTitle = "   "
     }
     
     enum Images {
