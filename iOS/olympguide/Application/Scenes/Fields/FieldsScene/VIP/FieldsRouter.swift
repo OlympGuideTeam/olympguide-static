@@ -11,7 +11,7 @@ final class FieldsRouter: FieldsRoutingLogic {
     weak var viewController: UIViewController?
 
     func routeToDetails(for field: GroupOfFieldsModel.FieldModel) {
-        let detailsViewController = FieldViewController(for: field) 
+        let detailsViewController = FieldAssembly.build(for: field) 
         viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
     }
     
