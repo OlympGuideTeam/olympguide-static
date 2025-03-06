@@ -42,9 +42,9 @@ final class UIUniversityHeader: UITableViewHeaderFooterView {
     }
     
     private func configureLayouts() {
+        tintColor = .white
         configureBackgroundView()
         configureUniversityView()
-        
     }
     
     private func configureUniversityView() {

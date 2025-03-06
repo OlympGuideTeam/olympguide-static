@@ -13,6 +13,7 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
     let nameStack: UIStackView = UIStackView()
     let separatorView: UIView = UIView()
     var benefitIsTapped: ((_: IndexPath) -> Void)?
+    var shouldIgnoreHighlight = false
     
     override init(
         style: UITableViewCell.CellStyle,
@@ -25,6 +26,14 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        if shouldIgnoreHighlight {
+            super.setHighlighted(false, animated: animated)
+        } else {
+            super.setHighlighted(highlighted, animated: animated)
+        }
     }
     
     private func configureLayouts() {
@@ -47,29 +56,20 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
         separatorView.pinRight(to: contentView.trailingAnchor, 20)
         separatorView.pinBottom(to: contentView.bottomAnchor)
         separatorView.setHeight(1)
-        separatorView.backgroundColor = .systemGray5
+        separatorView.backgroundColor = UIColor(hex: "#D9D9D9")
     }
     
-    func configure(with viewModel: BenefitsByPrograms.Load.ViewModel.BenefitViewModel) {
+    func configure(with viewModel: BenefitsByPrograms.Load.ViewModel.BenefitViewModel, indexPath: IndexPath) {
         nameStack.configure(with: viewModel.program.field, and: viewModel.program.programName)
         benefitsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        for benefit in viewModel.benefitInformation {
+        for (index, benefit) in viewModel.benefitInformation.enumerated() {
             let bs = BenefitStackView()
-            bs.benefitInfo = BenefitInfo(title: "ek", description: "frfr")
-            let tapGesture = UITapGestureRecognizer(
-                target: self,
-                action: #selector(benefitTapped)
-            )
-            bs.addGestureRecognizer(tapGesture)
             bs.configure(with: benefit)
-            
+            bs.parentCell = self
+            bs.tag = index
+            bs.indexPath = indexPath
             benefitsStack.addArrangedSubview(bs)
         }
-    }
-    
-    @objc func benefitTapped(_ sender: UITapGestureRecognizer) {
-        guard let view = sender.view as? BenefitStackView else { return }
-        view.openPage()
     }
 }

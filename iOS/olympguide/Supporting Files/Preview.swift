@@ -44,6 +44,27 @@ struct FieldViewControllerWrapper: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
+struct BenefitViewControllerWrapper : UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let benefit = BenefitsByOlympiads.Load.ViewModel.BenefitViewModel (
+            olympiadName: "Турнир имени М.В. Ломоносова",
+            olympiadLevel: 3,
+            olympiadProfile: "литература",
+            minClass: 11,
+            minDiplomaLevel: 3,
+            isBVI: false,
+            confirmationSubjects: [BenefitModel.ConfirmationSubject(subject: "Литература", score: 75)],
+            fullScoreSubjects: ["Литература"]
+        )
+        
+        let vc = BenefitViewController(with: benefit)
+        vc.navigationItem.largeTitleDisplayMode = .never
+        return NavigationBarViewController(rootViewController: vc)
+    }
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+}
+
 #Preview {
     FieldViewControllerWrapper()
 }

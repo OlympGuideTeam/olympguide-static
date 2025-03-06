@@ -86,8 +86,8 @@ extension OlympiadViewController {
     
     private func configureOlympiadNameLabel() {
         let olympiadNameLabel: UILabel = UILabel()
-        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
-//        olympiadNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
+//        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
+        olympiadNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
         olympiadNameLabel.numberOfLines = 0
         olympiadNameLabel.lineBreakMode = .byWordWrapping
         olympiadNameLabel.text = olympiad.name
@@ -142,15 +142,13 @@ extension OlympiadViewController {
             UIUniversityHeader.self,
             forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
         )
-//
-//        tableView.dataSource = self
-//        tableView.delegate = self
+        
         tableView.dataSource = self
         tableView.delegate = self
         
         tableView.backgroundColor = .white
         tableView.separatorStyle = .none
-//        tableView.refreshControl = refreshControl
+        //        tableView.refreshControl = refreshControl
         tableView.showsVerticalScrollIndicator = false
         
         informationStackView.setNeedsLayout()
@@ -195,13 +193,23 @@ extension OlympiadViewController : UITableViewDataSource {
             return UITableViewCell()
         }
         
-        cell.configure(with: programs[indexPath.section][indexPath.row])
+        cell.configure(with: programs[indexPath.section][indexPath.row], indexPath: indexPath)
+        for view in cell.benefitsStack.arrangedSubviews {
+            guard let subview = view as? BenefitStackView else { continue }
+            subview.createPreviewVC = { [weak self] indexPath, index in
+                guard let self = self else { return nil }
+                let program = self.programs[indexPath.section][indexPath.row]
+                let previewVC = BenefitViewController(with: program, index: index)
+                return previewVC
+            }
+        }
         
-//        cell.textLabel?.text = programs[indexPath.section][indexPath.row].program.programName
         return cell
     }
 }
 
+
+// MARK: - UITableViewDelegate
 extension OlympiadViewController : UITableViewDelegate {
     func tableView(
         _ tableView: UITableView,
@@ -243,9 +251,10 @@ extension OlympiadViewController : UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToProgram(indexPath: indexPath)
     }
     
-    }
+}
 
 
 extension OlympiadViewController : OlympiadDisplayLogic {
@@ -270,12 +279,12 @@ extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
     private func reloadSectionWithoutAnimation(_ section: Int) {
         var currentOffset = tableView.contentOffset
         let headerRectBefore = tableView.rectForHeader(inSection: section)
-
+        
         UIView.performWithoutAnimation {
             tableView.reloadSections(IndexSet(integer: section), with: .none)
             tableView.layoutIfNeeded()
         }
-
+        
         let headerRectAfter = tableView.rectForHeader(inSection: section)
         let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
         currentOffset.y += deltaY

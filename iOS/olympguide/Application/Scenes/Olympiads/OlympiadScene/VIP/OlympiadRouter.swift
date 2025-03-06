@@ -8,10 +8,23 @@
 import UIKit
 
 final class OlympiadRouter: OlympiadRoutingLogic, OlympiadDataPassing {
-    var dataStore: DataStore?
+    var viewController: UIViewController?
+    var dataStore: OlympiadDataStore?
     
-    func routeToProgram() {
+    func routeToProgram(indexPath: IndexPath) {
+        guard
+            let program = dataStore?.programs?[indexPath.section][indexPath.row].program,
+            let universityModel = dataStore?.universities?[indexPath.section]
+        else { return }
+
+        let programVC = ProgramAssembly.build(
+            for: program.programID,
+            name: program.name,
+            code: program.field,
+            university: universityModel
+        )
         
+        viewController?.navigationController?.pushViewController(programVC, animated: true)
     }
 }
 
