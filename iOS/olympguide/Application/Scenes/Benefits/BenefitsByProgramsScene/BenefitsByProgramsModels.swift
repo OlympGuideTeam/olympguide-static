@@ -28,6 +28,7 @@ enum BenefitsByPrograms {
                     let programID: Int
                     let programName: String
                     let field: String
+                    let university: String
                 }
                 
                 struct BenefitInformationViewModel {
@@ -35,7 +36,7 @@ enum BenefitsByPrograms {
                     let minDiplomaLevel: Int
                     let isBVI: Bool
                     
-                    let confirmationSubjects: [Benefit.ConfirmationSubject]?
+                    let confirmationSubjects: [BenefitModel.ConfirmationSubject]?
                     let fullScoreSubjects: [String]?
                 }
                 
@@ -63,5 +64,5 @@ struct ProgramWithBenefitsModel : Codable {
     }
     
     let program: Program
-    let benefits: [Benefit]
+    let benefits: [BenefitModel]
 }
