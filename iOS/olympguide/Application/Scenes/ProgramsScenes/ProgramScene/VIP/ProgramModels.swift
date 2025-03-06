@@ -33,7 +33,7 @@ enum Program {
         }
         
         struct ViewModel {
-            let program: ShortProgramModel
+            let program: ProgramShortModel
         }
     }
 }

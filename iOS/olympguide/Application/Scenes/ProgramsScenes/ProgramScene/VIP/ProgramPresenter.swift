@@ -24,7 +24,7 @@ extension ProgramPresenter : ProgramPresentationLogic {
         
         guard let program = response.program else { return }
         
-        let programModel = ShortProgramModel(
+        let programModel = ProgramShortModel(
             programID: program.programID,
             name: program.name,
             field: program.field,

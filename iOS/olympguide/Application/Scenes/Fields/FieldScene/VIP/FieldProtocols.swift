@@ -5,6 +5,8 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
+import Foundation
+
 // MARK: - Business Logic
 protocol FieldBusinessLogic {
     func loadPrograms(with request: Field.LoadPrograms.Request)
@@ -12,7 +14,7 @@ protocol FieldBusinessLogic {
 
 // MARK: - Data Store
 protocol FieldDataStore {
-    
+    var programs: [ProgramsByUniversityModel]? { get }
 }
 
 // MARK: - Presentation Logic
@@ -27,7 +29,7 @@ protocol FieldDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol FieldRoutingLogic {
-    func routeToProgram()
+    func routeToProgram(indexPath: IndexPath)
 }
 
 // MARK: - Data Passing
