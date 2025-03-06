@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 06.03.2025.
 //
 
-struct ShortProgramModel : Codable {
+struct ProgramShortModel : Codable {
     let programID: Int
     let name: String
     let field: String
@@ -24,5 +24,19 @@ struct ShortProgramModel : Codable {
         case name, field, cost, like, link
         case requiredSubjects = "required_subjects"
         case optionalSubjects = "optional_subjects"
+    }
+    
+    func toViewModel() -> ProgramViewModel {
+        ProgramViewModel(
+            programID: programID,
+            name: name,
+            code: field,
+            budgetPlaces: budgetPlaces,
+            paidPlaces: paidPlaces,
+            cost: cost,
+            like: like,
+            requiredSubjects: requiredSubjects,
+            optionalSubjects: optionalSubjects
+        )
     }
 }
