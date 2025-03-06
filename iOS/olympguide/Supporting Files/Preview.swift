@@ -45,5 +45,5 @@ struct FieldViewControllerWrapper: UIViewControllerRepresentable {
 }
 
 #Preview {
-    OlympiadViewControllerWrapper()
+    FieldViewControllerWrapper()
 }
