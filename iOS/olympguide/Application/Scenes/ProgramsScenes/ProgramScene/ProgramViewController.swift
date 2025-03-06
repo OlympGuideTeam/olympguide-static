@@ -38,16 +38,16 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     
     private var cancellables = Set<AnyCancellable>()
     
+    let programId: Int
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
-    var startIsFavorite: Bool
-    var isFavorite: Bool
+    var startIsFavorite: Bool?
+    var isFavorite: Bool?
     let universityNameLabel: UILabel = UILabel()
     let regionLabel: UILabel = UILabel()
-    let logo: String
     let university: UniversityModel
     let codeLabel: UILabel = UILabel()
     let programNameLabel = UILabel()
-    let program: GroupOfProgramsModel.ProgramModel
+    var program: GroupOfProgramsModel.ProgramModel?
     var benefits: [BenefitsByOlympiads.Load.ViewModel.BenefitViewModel] = []
     var link: String? = nil
     
@@ -61,13 +61,25 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     private let tableView = UITableView(frame: .zero, style: .plain)
     
+    init(
+        for programID: Int,
+        name: String,
+        code: String,
+        university: UniversityModel
+    ) {
+        self.university = university
+        self.programId = programID
+        self.programNameLabel.text = name
+        self.codeLabel.text = code
+        super.init(nibName: nil, bundle: nil)
+    }
+    
     init (
         for program: ProgramModel
     ) {
-        self.logo = program.university.logo
         self.isFavorite = program.like
         self.startIsFavorite = program.like
-        
+        self.programId = program.programID
         self.university = program.university
         self.program = GroupOfProgramsModel.ProgramModel(
             programID: program.programID,
@@ -78,7 +90,8 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             cost: program.cost,
             requiredSubjects: program.requiredSubjects,
             optionalSubjects: program.optionalSubjects,
-            like: program.like
+            like: program.like,
+            link: program.link ?? ""
         )
         
         if var link = program.link {
@@ -95,12 +108,11 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         for program: GroupOfProgramsModel.ProgramModel,
         by university: UniversityModel
     ) {
-        self.logo = university.logo
         self.isFavorite = program.like
         self.startIsFavorite = program.like
         self.university = university
         self.program = program
-        
+        self.programId = program.programID
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -114,34 +126,56 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         configureUI()
         setupBindings()
         
-        ImageLoader.shared.loadImage(from: logo) { [weak self] (image: UIImage?) in
+        ImageLoader.shared.loadImage(from: university.logo) { [weak self] (image: UIImage?) in
             guard let self = self, let image = image else { return }
             self.logoImageView.stopShimmer()
             self.logoImageView.image = image
         }
         
-        let benefitRequest = BenefitsByOlympiads.Load.Request(programID: program.programID)
+        let benefitRequest = BenefitsByOlympiads.Load.Request(programID: programId)
         interactor?.loadOlympiads(with: benefitRequest)
         
         if webSiteButton.titleLabel?.text == nil {
-            let programRequest = Program.Load.Request(programID: program.programID)
+            let programRequest = Program.Load.Request(programID: programId)
             interactor?.loadProgram(with: programRequest)
         }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        configureFavoriteButton()
+        
+    }
+    
+    private func configureFavoriteButton() {
+        guard
+            let navigationController = navigationController as? NavigationBarViewController
+        else { return }
+        
+        guard
+            let isFavorite = self.isFavorite
+        else {
+            navigationController.bookMarkButton.setImage(UIImage(systemName: "bookmark"), for: .normal)
+            navigationController.bookMarkButton.isEnabled = false
+            return
+        }
+
         let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
         navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
         navigationController.bookMarkButtonPressed = {[weak self] sender in
-            self?.isFavorite.toggle()
-            let newImageName = self?.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
+            guard
+                let self = self,
+                var isFavorite = self.isFavorite,
+                let program = self.program
+            else { return }
+            isFavorite.toggle()
+            // TODO: -
+//            self?.isFavorite.toggle()
+            let newImageName = self.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
             sender.setImage(UIImage(systemName: newImageName), for: .normal)
             
-            guard let self = self else { return }
             
-            if self.isFavorite {
+            if isFavorite {
                 let model = ProgramModel(
                     programID: program.programID,
                     name: program.name,
@@ -228,23 +262,29 @@ extension ProgramViewController {
         universityNameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         universityNameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         universityNameLabel.pinRight(to: informationContainer.trailingAnchor, Constants.Dimensions.interItemSpacing)
+        universityNameLabel.calculateHeight(with: view.frame.width - 15 - 15 - 80 - 15)
     }
     
     private func configureCodeLabel() {
         codeLabel.font = FontManager.shared.font(for: .additionalInformation)
-        codeLabel.text = program.field
+        if codeLabel.text?.isEmpty ?? true {
+            codeLabel.text = program?.field ?? ""
+        }
         
         informationContainer.addSubview(codeLabel)
         codeLabel.pinTop(to: logoImageView.bottomAnchor, 30)
 //        codeLabel.pinTop(to: universityNameLabel.bottomAnchor, 30, .grOE)
         codeLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
+        codeLabel.calculateHeight(with: view.frame.width - 40)
     }
     
     private func configureProgramNameLabel() {
         programNameLabel.font = FontManager.shared.font(for: .commonInformation)
         programNameLabel.numberOfLines = 0
         programNameLabel.lineBreakMode = .byWordWrapping
-        programNameLabel.text = program.name
+        if programNameLabel.text?.isEmpty ?? true {
+            programNameLabel.text = program?.name ?? ""
+        }
         
         informationContainer.addSubview(programNameLabel)
         programNameLabel.pinTop(to: codeLabel.bottomAnchor, 5)
@@ -264,7 +304,10 @@ extension ProgramViewController {
     }
     
     private func configureBudgetLabel() {
-        budgtetLabel.setText(regular: "Бюджетных мест  ", bold: String(program.budgetPlaces))
+        budgtetLabel.setText(regular: "Бюджетных мест  ")
+        if let budgetPlaced = program?.budgetPlaces {
+            budgtetLabel.setBoldText(String(budgetPlaced))
+        }
         
         informationContainer.addSubview(budgtetLabel)
         
@@ -273,7 +316,10 @@ extension ProgramViewController {
     }
     
     private func configurePaidLabel() {
-        paidLabel.setText(regular: "Платных мест  ", bold: String(program.paidPlaces))
+        paidLabel.setText(regular: "Платных мест  ")
+        if let paidPlaces = program?.paidPlaces {
+            paidLabel.setBoldText(String(paidPlaces))
+        }
         
         informationContainer.addSubview(paidLabel)
         
@@ -282,7 +328,10 @@ extension ProgramViewController {
     }
     
     private func configureCostLabel() {
-        costLabel.setText(regular: "Стоимость  ", bold: formatNumber(program.cost))
+        costLabel.setText(regular: "Стоимость  ")
+        if let cost = program?.cost {
+            costLabel.setBoldText(formatNumber(cost))
+        }
         
         informationContainer.addSubview(costLabel)
         
@@ -291,11 +340,14 @@ extension ProgramViewController {
     }
     
     private func configureSubjectsStack() {
-        subjectsStack.configure(
-            requiredSubjects: program.requiredSubjects,
-            optionalSubjects: program.optionalSubjects ?? []
-        )
-        
+        if
+            let requiredSubjects = program?.requiredSubjects,
+            let optionalSubjects = program?.optionalSubjects {
+            subjectsStack.configure(
+                requiredSubjects: requiredSubjects,
+                optionalSubjects: optionalSubjects
+            )
+        }
         informationContainer.addSubview(subjectsStack)
         
         subjectsStack.pinTop(to: costLabel.bottomAnchor, 11)
@@ -375,7 +427,7 @@ extension ProgramViewController {
     
     @objc private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let programID = self?.program.programID else { return }
+            guard let programID = self?.programId else { return }
             let request = BenefitsByOlympiads.Load.Request(programID: programID)
             
             self?.interactor?.loadOlympiads(with: request)
@@ -477,11 +529,22 @@ extension ProgramViewController : BenefitsByOlympiadsDisplayLogic {
 // MARK: - ProgramDisplayLogic
 extension ProgramViewController : ProgramDisplayLogic {
     func displayLoadProgram(with viewModel: Program.Load.ViewModel) {
-        let link = viewModel.link
+        let link = viewModel.program.link
             .replacingOccurrences(of: "https://www.", with: "")
             .replacingOccurrences(of: "https://", with: "")
         webSiteButton.setTitle(link, for: .normal)
         self.link = link
+        program = viewModel.program
+        startIsFavorite = viewModel.program.like
+        isFavorite = startIsFavorite
+        budgtetLabel.setBoldText(String(viewModel.program.budgetPlaces))
+        paidLabel.setBoldText(String(viewModel.program.paidPlaces))
+        costLabel.setBoldText(formatNumber(viewModel.program.cost))
+        subjectsStack.configure(
+            requiredSubjects: viewModel.program.requiredSubjects,
+            optionalSubjects: viewModel.program.optionalSubjects ?? []
+        )
+        configureFavoriteButton()
     }
     
     func displayToggleFavoriteResult(viewModel: Program.Favorite.ViewModel) {
@@ -498,19 +561,19 @@ extension ProgramViewController {
                 guard let self = self else { return }
                 switch event {
                 case.added(let program):
-                    if program.programID == self.program.programID {
+                    if program.programID == self.programId {
                         self.isFavorite = true
                     }
                 case .removed(let programID):
-                    if programID == self.program.programID {
+                    if programID == self.programId {
                         self.isFavorite = false
                     }
                 case .error(let programID):
-                    if programID == self.program.programID {
+                    if programID == self.programId {
                         self.isFavorite = self.startIsFavorite
                     }
                 case .access(let programID, let isFavorite):
-                    if programID == self.program.programID {
+                    if programID == self.programId {
                         self.startIsFavorite = isFavorite
                     }
                 }
@@ -519,6 +582,7 @@ extension ProgramViewController {
     }
     
     private func reloadFavoriteButton() {
+        guard let isFavorite = self.isFavorite else { return }
         guard let navigationController = navigationController as? NavigationBarViewController else { return }
         let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
         navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
