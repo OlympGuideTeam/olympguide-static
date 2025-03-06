@@ -13,13 +13,12 @@ enum Field {
         }
         
         struct Response {
-            var programs: [ProgramModel]? = nil
+            var programs: [ProgramsByUniversityModel]? = nil
             var error: Error? = nil
         }
         
         struct ViewModel {
-//            let programs
+            let programs: [ProgramsByUniversityViewModel]
         }
     }
 }
-
