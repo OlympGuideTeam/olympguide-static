@@ -12,7 +12,7 @@ protocol FieldBusinessLogic {
 
 // MARK: - Data Store
 protocol FieldDataStore {
-    
+    var programs: [ProgramsByUniversityModel]? { get }
 }
 
 // MARK: - Presentation Logic
