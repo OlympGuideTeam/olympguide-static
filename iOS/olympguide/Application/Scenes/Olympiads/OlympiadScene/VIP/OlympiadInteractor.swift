@@ -5,11 +5,11 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
-final class OlympiadInteractor {
+final class OlympiadInteractor : OlympiadDataStore {
     var presenter: (OlympiadPresentationLogic & BenefitsByProgramsPresentationLogic)?
     var worker: (OlympiadWorkerLogic & BenefitsByProgramsWorkerLogic)?
     var universities: [UniversityModel]?
-    var programs: [ProgramWithBenefitsModel]?
+    var programs: [[ProgramWithBenefitsModel]]?
 }
 
 extension OlympiadInteractor : OlympiadBusinessLogic {
@@ -20,6 +20,7 @@ extension OlympiadInteractor : OlympiadBusinessLogic {
             switch result {
             case .success(let universities):
                 self?.universities = universities
+                self?.programs = [[ProgramWithBenefitsModel]] (repeating: [], count: universities.count)
                 let response = Olympiad.LoadUniversities.Response(universities: universities)
                 self?.presenter?.presentLoadUniversities(with: response)
             case .failure(let error):
@@ -39,7 +40,7 @@ extension OlympiadInteractor : BenefitsByProgramsBusinessLogic {
         ) { [weak self] result in
             switch result {
             case .success(let programs):
-                self?.programs = programs
+                self?.programs?[request.section] = programs ?? []
                 let response = BenefitsByPrograms.Load.Response(programs: programs, section: request.section)
                 self?.presenter?.presentLoadBenefits(with: response)
             case .failure(let error):
