@@ -17,7 +17,7 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     
     private var universities: [UniversityViewModel] = []
     private var isExpanded: [Bool] = []
-    private var programs: [[BenefitsByPrograms.Load.ViewModel.BenefitViewModel]] = []
+    private var programs: [[ProgramWithBenefitsViewModel]] = []
     
     init(with olympiad: OlympiadModel) {
         self.olympiad = olympiad
@@ -261,7 +261,7 @@ extension OlympiadViewController : OlympiadDisplayLogic {
     func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel) {
         universities = viewModel.universities
         isExpanded = [Bool](repeating: false, count: universities.count)
-        programs = [[BenefitsByPrograms.Load.ViewModel.BenefitViewModel]] (repeating: [], count: universities.count)
+        programs = [[ProgramWithBenefitsViewModel]] (repeating: [], count: universities.count)
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()
         }

@@ -10,7 +10,7 @@ import UIKit
 // MARK: - Олимпиады
 struct OlympiadSearchStrategy: SearchStrategy {
     typealias ModelType = OlympiadModel
-    typealias ViewModelType = Olympiads.Load.ViewModel.OlympiadViewModel
+    typealias ViewModelType = OlympiadViewModel
     typealias ResponseType = OlympiadModel
     
     func endpoint() -> String {
@@ -33,7 +33,7 @@ struct OlympiadSearchStrategy: SearchStrategy {
     func configureCell(
         tableView: UITableView,
         indexPath: IndexPath,
-        viewMmodel: Olympiads.Load.ViewModel.OlympiadViewModel,
+        viewMmodel: OlympiadViewModel,
         isSeparatorHidden: Bool
     ) -> UITableViewCell {
         let identifier = OlympiadTableViewCell.identifier
@@ -52,8 +52,8 @@ struct OlympiadSearchStrategy: SearchStrategy {
         return model.name
     }
     
-    static func modelToViewModel(_ model: OlympiadModel) -> Olympiads.Load.ViewModel.OlympiadViewModel {
-        Olympiads.Load.ViewModel.OlympiadViewModel(
+    static func modelToViewModel(_ model: OlympiadModel) -> OlympiadViewModel {
+        OlympiadViewModel(
             name: model.name,
             profile: model.profile,
             level: String(repeating: "I", count: model.level)

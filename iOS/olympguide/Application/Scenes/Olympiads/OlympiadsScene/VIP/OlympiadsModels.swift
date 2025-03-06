@@ -19,12 +19,6 @@ enum Olympiads {
         }
         
         struct ViewModel {
-            struct OlympiadViewModel {
-                let name: String
-                let profile: String
-                let level: String
-            }
-            
             let olympiads: [OlympiadViewModel]
         }
     }
@@ -34,19 +28,5 @@ enum Olympiads {
         case name
         case popularity
         case level
-    }
-}
-
-
-struct OlympiadModel: Codable {
-    let olympiadID: Int
-    let name: String
-    let level: Int
-    let profile: String
-    let like: Bool
-    
-    enum CodingKeys: String, CodingKey {
-        case olympiadID = "olympiad_id"
-        case name, profile, level, like
     }
 }

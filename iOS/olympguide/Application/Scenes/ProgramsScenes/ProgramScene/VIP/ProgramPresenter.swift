@@ -24,7 +24,7 @@ extension ProgramPresenter : ProgramPresentationLogic {
         
         guard let program = response.program else { return }
         
-        let programModel = GroupOfProgramsModel.ProgramModel(
+        let programModel = ShortProgramModel(
             programID: program.programID,
             name: program.name,
             field: program.field,
@@ -53,7 +53,7 @@ extension ProgramPresenter : BenefitsByOlympiadsPresentationLogic {
         
         let benefits = olympiads.flatMap { model in
             model.benefits.map { benefit in
-                BenefitsByOlympiads.Load.ViewModel.BenefitViewModel(
+                OlympiadWithBenefitViewModel(
                     olympiadName: model.olympiad.name,
                     olympiadLevel: model.olympiad.level,
                     olympiadProfile: model.olympiad.profile,

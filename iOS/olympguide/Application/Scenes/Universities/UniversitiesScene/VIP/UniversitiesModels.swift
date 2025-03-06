@@ -44,32 +44,3 @@ enum Universities {
         case popularity
     }
 }
-
-
-struct UniversityModel: Codable {
-    let email: String?
-    let site: String?
-    let description: String?
-    let phone: String?
-    
-    let universityID: Int
-    let name: String
-    let shortName: String
-    let logo: String
-    let region: String
-    var like: Bool?
-    
-    enum CodingKeys: String, CodingKey {
-        case universityID = "university_id"
-        case shortName = "short_name"
-        case name, logo, region, like, email, site, description, phone
-    }
-}
-
-struct UniversityViewModel {
-    let universityID: Int
-    let name: String
-    let logoURL: String
-    let region: String
-    var like: Bool
-}

@@ -36,7 +36,7 @@ final class BenefitViewController: UIViewController {
     let informationStackView: UIStackView = UIStackView()
     
     init(
-        with viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel
+        with viewModel: OlympiadWithBenefitViewModel
     ) {
         self.olympiad = Olympiad(
             name: viewModel.olympiadName,
@@ -55,7 +55,7 @@ final class BenefitViewController: UIViewController {
     }
 
     init(
-        with viewModel: BenefitsByPrograms.Load.ViewModel.BenefitViewModel, index: Int
+        with viewModel: ProgramWithBenefitsViewModel, index: Int
     ) {
         self.program = Program(
             code: viewModel.program.field,

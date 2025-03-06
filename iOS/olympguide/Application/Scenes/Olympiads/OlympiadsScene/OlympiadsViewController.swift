@@ -52,7 +52,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
         return view
     }()
     
-    private var olympiads: [Olympiads.Load.ViewModel.OlympiadViewModel] = []
+    private var olympiads: [OlympiadViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {

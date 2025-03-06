@@ -13,11 +13,11 @@ final class FieldsPresenter: FieldsPresentationLogic {
     
     func presentFields(response: Fields.Load.Response) {
         let viewModels = response.groupsOfFields.map { groupOfFields in
-            Fields.Load.ViewModel.GroupOfFieldsViewModel(
+            GroupOfFieldsViewModel(
                 name: groupOfFields.name,
                 code: groupOfFields.code,
                 fields: groupOfFields.fields.map { field in
-                    Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel(
+                    GroupOfFieldsViewModel.FieldViewModel(
                         name: field.name,
                         code: field.code
                     )

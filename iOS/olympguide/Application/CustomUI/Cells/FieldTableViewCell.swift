@@ -71,7 +71,7 @@ class FieldTableViewCell: UITableViewCell {
     }
     
     // MARK: - Methods
-    func configure(with viewModel: Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel) {
+    func configure(with viewModel: GroupOfFieldsViewModel.FieldViewModel) {
         information.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         let code = viewModel.code

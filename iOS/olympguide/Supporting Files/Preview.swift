@@ -46,7 +46,7 @@ struct FieldViewControllerWrapper: UIViewControllerRepresentable {
 
 struct BenefitViewControllerWrapper : UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UINavigationController {
-        let benefit = BenefitsByOlympiads.Load.ViewModel.BenefitViewModel (
+        let benefit = OlympiadWithBenefitViewModel (
             olympiadName: "Турнир имени М.В. Ломоносова",
             olympiadLevel: 3,
             olympiadProfile: "литература",

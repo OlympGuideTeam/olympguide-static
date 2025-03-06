@@ -21,11 +21,3 @@ enum Olympiad {
         }
     }
 }
-
-struct Model : Codable {
-    //    let olympiadID: Int
-    //    enum CodingKeys: String, CodingKey {
-    //        case olympiadID = "olympiad_id"
-    //        case name, profile, level, like
-    //    }
-}
