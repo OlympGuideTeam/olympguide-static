@@ -59,7 +59,7 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
         separatorView.backgroundColor = UIColor(hex: "#D9D9D9")
     }
     
-    func configure(with viewModel: BenefitsByPrograms.Load.ViewModel.BenefitViewModel, indexPath: IndexPath) {
+    func configure(with viewModel: ProgramWithBenefitsViewModel, indexPath: IndexPath) {
         nameStack.configure(with: viewModel.program.field, and: viewModel.program.programName)
         benefitsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         

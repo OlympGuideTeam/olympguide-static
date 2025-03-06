@@ -39,7 +39,7 @@ final class FavoriteOlympiadsViewController : UIViewController {
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private var olympiads: [Olympiads.Load.ViewModel.OlympiadViewModel] = []
+    private var olympiads: [OlympiadViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {

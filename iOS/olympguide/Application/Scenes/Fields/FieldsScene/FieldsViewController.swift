@@ -55,7 +55,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButt
         return view
     }()
     
-    private var fields: [Fields.Load.ViewModel.GroupOfFieldsViewModel] = []
+    private var fields: [GroupOfFieldsViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {

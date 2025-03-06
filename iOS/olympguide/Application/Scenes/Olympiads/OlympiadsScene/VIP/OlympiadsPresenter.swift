@@ -14,7 +14,7 @@ final class OlympiadsPresenter: OlympiadsPresentationLogic {
     func presentOlympiads(_ response: Olympiads.Load.Response) {
         
         let viewModels = response.olympiads.map { olympiad in
-            Olympiads.Load.ViewModel.OlympiadViewModel(
+            OlympiadViewModel(
                 name: olympiad.name,
                 profile: olympiad.profile,
                 level: String(repeating: "I", count: olympiad.level)
