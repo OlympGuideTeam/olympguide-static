@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// Тип поиска — определяем, по чему мы ищем
 enum SearchType {
     case universities
     case olympiads
