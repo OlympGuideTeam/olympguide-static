@@ -10,7 +10,7 @@ struct GroupOfProgramsModel : Codable {
     let groupID: Int?
     let name: String
     let code: String?
-    var programs: [ShortProgramModel]
+    var programs: [ProgramShortModel]
     
     enum CodingKeys: String, CodingKey {
         case facultyID = "faculty_id"

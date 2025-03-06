@@ -1,5 +1,5 @@
 //
-//  ShortProgramModel.swift
+//  ProgramShortModel.swift
 //  olympguide
 //
 //  Created by Tom Tim on 06.03.2025.

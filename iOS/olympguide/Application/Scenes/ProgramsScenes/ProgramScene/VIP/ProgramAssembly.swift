@@ -9,7 +9,7 @@ import UIKit
 
 final class ProgramAssembly {
     static func build(
-        for program: ShortProgramModel,
+        for program: ProgramShortModel,
         by university: UniversityModel
     ) -> UIViewController {
         let viewContoller = ProgramViewController(for: program, by: university)
