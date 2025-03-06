@@ -33,7 +33,7 @@ enum Program {
         }
         
         struct ViewModel {
-            let link: String
+            let program: GroupOfProgramsModel.ProgramModel
         }
     }
 }

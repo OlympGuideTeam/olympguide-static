@@ -5,14 +5,17 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
+import Foundation
+
 // MARK: - Business Logic
 protocol OlympiadBusinessLogic {
     func loadUniversities(with request: Olympiad.LoadUniversities.Request)
 }
 
 // MARK: - Data Store
-protocol DataStore {
-    
+protocol OlympiadDataStore {
+    var programs: [[ProgramWithBenefitsModel]]? { get }
+    var universities: [UniversityModel]? { get }
 }
 
 // MARK: - Presentation Logic
@@ -27,10 +30,10 @@ protocol OlympiadDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol OlympiadRoutingLogic {
-    func routeToProgram()
+    func routeToProgram(indexPath: IndexPath)
 }
 
 // MARK: - Data Passing
 protocol OlympiadDataPassing {
-    var dataStore: DataStore? { get }
+    var dataStore: OlympiadDataStore? { get }
 }

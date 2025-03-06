@@ -8,11 +8,68 @@
 import UIKit
 
 final class BenefitViewController: UIViewController {
-    let viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel
+    struct Program {
+        let code: String
+        let name: String
+        let university: String
+    }
+    
+    struct Olympiad {
+        let name: String
+        let level: Int
+        let profile: String
+    }
+    
+    struct Benefit {
+        let minClass: Int
+        let minDiplomaLevel: Int
+        let isBVI: Bool
+        
+        let confirmationSubjects: [BenefitModel.ConfirmationSubject]?
+        let fullScoreSubjects: [String]?
+    }
+    
+    var program: Program?
+    var olympiad: Olympiad?
+    var benefit: Benefit?
+    
     let informationStackView: UIStackView = UIStackView()
     
-    init(with viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel) {
-        self.viewModel = viewModel
+    init(
+        with viewModel: BenefitsByOlympiads.Load.ViewModel.BenefitViewModel
+    ) {
+        self.olympiad = Olympiad(
+            name: viewModel.olympiadName,
+            level: viewModel.olympiadLevel,
+            profile: viewModel.olympiadProfile
+        )
+        
+        self.benefit = Benefit(
+            minClass: viewModel.minClass,
+            minDiplomaLevel: viewModel.minDiplomaLevel,
+            isBVI: viewModel.isBVI,
+            confirmationSubjects: viewModel.confirmationSubjects,
+            fullScoreSubjects: viewModel.fullScoreSubjects
+        )
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    init(
+        with viewModel: BenefitsByPrograms.Load.ViewModel.BenefitViewModel, index: Int
+    ) {
+        self.program = Program(
+            code: viewModel.program.field,
+            name: viewModel.program.programName,
+            university: viewModel.program.university
+        )
+        let benefitInformation = viewModel.benefitInformation[index]
+        self.benefit = Benefit(
+            minClass: benefitInformation.minClass,
+            minDiplomaLevel: benefitInformation.minDiplomaLevel,
+            isBVI: benefitInformation.isBVI,
+            confirmationSubjects: benefitInformation.confirmationSubjects,
+            fullScoreSubjects: benefitInformation.fullScoreSubjects
+        )
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -39,6 +96,7 @@ final class BenefitViewController: UIViewController {
         
         configureInformatonStack()
         configureOlympiadTitleLabel()
+        configureProgramNameLabel()
         configureOlympiadNameLabel()
         configureOlympiadInformation()
         configureBenefitInformationStack()
@@ -61,7 +119,7 @@ final class BenefitViewController: UIViewController {
         let olympiadTitleLabel: UILabel = UILabel()
         olympiadTitleLabel.font = FontManager.shared.font(for: .tableTitle)
         olympiadTitleLabel.textColor = .black
-        olympiadTitleLabel.text = "Олимпиада"
+        olympiadTitleLabel.text = "Льгота"
         olympiadTitleLabel.textAlignment = .center
         
         informationStackView.addArrangedSubview(olympiadTitleLabel)
@@ -69,13 +127,26 @@ final class BenefitViewController: UIViewController {
         olympiadTitleLabel.pinCenterX(to: informationStackView.centerXAnchor)
     }
     
-    private func configureOlympiadNameLabel() {
+    private func configureProgramNameLabel() {
+        guard let program = self.program else { return }
         let nameLabel: UILabel = UILabel()
         nameLabel.font = FontManager.shared.font(for: .commonInformation)
         nameLabel.numberOfLines = 0
         nameLabel.lineBreakMode = .byWordWrapping
         
-        nameLabel.text = viewModel.olympiadName
+        nameLabel.text = program.name
+        
+        informationStackView.addArrangedSubview(nameLabel)
+    }
+    
+    private func configureOlympiadNameLabel() {
+        guard let olympiad = self.olympiad else { return }
+        let nameLabel: UILabel = UILabel()
+        nameLabel.font = FontManager.shared.font(for: .commonInformation)
+        nameLabel.numberOfLines = 0
+        nameLabel.lineBreakMode = .byWordWrapping
+        
+        nameLabel.text = olympiad.name
         
         informationStackView.addArrangedSubview(nameLabel)
     }
@@ -88,43 +159,82 @@ final class BenefitViewController: UIViewController {
         olympiadInformationStack.distribution = .fill
         olympiadInformationStack.alignment = .leading
         
-        olympiadInformationStack.addArrangedSubview(configureLevelLabel())
-        olympiadInformationStack.addArrangedSubview(configureProfileLabel())
-        olympiadInformationStack.addArrangedSubview(configureClassLebel())
+        configureCodeLabel(olympiadInformationStack)
+        configureUniversityLabel(olympiadInformationStack)
+        configureLevelLabel(olympiadInformationStack)
+        configureProfileLabel(olympiadInformationStack)
+        configureClassLebel(olympiadInformationStack)
+        configureMinDiplomaLabel(olympiadInformationStack)
         
         informationStackView.addArrangedSubview(olympiadInformationStack)
     }
     
-    private func configureLevelLabel() -> UILabel {
+    private func configureCodeLabel(_ stack: UIStackView) {
+        guard let program = self.program else { return }
+        let codeLabel: UILabel = UILabel()
+        codeLabel.font = FontManager.shared.font(for: .additionalInformation)
+        codeLabel.textColor = UIColor(hex: "#787878")
+        codeLabel.text = "Код направления: \(program.code)"
+        
+        stack.addArrangedSubview(codeLabel)
+    }
+    
+    private func configureUniversityLabel(_ stack: UIStackView) {
+        guard let program = self.program else { return }
+        let universitLabel: UILabel = UILabel()
+        universitLabel.font = FontManager.shared.font(for: .additionalInformation)
+        universitLabel.textColor = UIColor(hex: "#787878")
+        universitLabel.text = "Вуз: \(program.university)"
+        
+        stack.addArrangedSubview(universitLabel)
+    }
+    
+    private func configureLevelLabel(_ stack: UIStackView) {
+        guard let olympiad = self.olympiad else { return }
+
         let levelLabel: UILabel = UILabel()
         levelLabel.font = FontManager.shared.font(for: .additionalInformation)
         levelLabel.textColor = UIColor(hex: "#787878")
-        levelLabel.text = "Уровень: \(String(repeating: "I", count: viewModel.olympiadLevel))"
+        levelLabel.text = "Уровень: \(String(repeating: "I", count: olympiad.level))"
         
-        return levelLabel
+        stack.addArrangedSubview(levelLabel)
     }
     
-    private func configureProfileLabel() -> UILabel {
+    private func configureProfileLabel(_ stack: UIStackView) {
+        guard let olympiad = self.olympiad else { return }
         let profileLabel: UILabel = UILabel()
         profileLabel.font = FontManager.shared.font(for: .additionalInformation)
         profileLabel.textColor = UIColor(hex: "#787878")
         profileLabel.numberOfLines = 0
         profileLabel.lineBreakMode = .byWordWrapping
-        profileLabel.text = "Профиль: \(viewModel.olympiadProfile)"
+        profileLabel.text = "Профиль: \(olympiad.profile)"
         
-        return profileLabel
+        stack.addArrangedSubview(profileLabel)
     }
     
-    private func configureClassLebel() -> UILabel {
+    private func configureClassLebel(_ stack: UIStackView) {
+        guard let benefit = self.benefit else { return }
         let classLabel: UILabel = UILabel()
         classLabel.font = FontManager.shared.font(for: .additionalInformation)
         classLabel.textColor = UIColor(hex: "#787878")
-        classLabel.text = "Класс: \(viewModel.minClass)"
+        classLabel.text = "Класс: \(benefit.minClass)"
         
-        return classLabel
+        stack.addArrangedSubview(classLabel)
+    }
+    
+    private func configureMinDiplomaLabel(_ stack: UIStackView) {
+        guard let benefit = self.benefit else { return }
+        let minDiplomaLabel = UILabel()
+        minDiplomaLabel.font = FontManager.shared.font(for: .additionalInformation)
+        minDiplomaLabel.textColor = UIColor(hex: "#787878")
+        let minDiplomaLevelText = benefit.minDiplomaLevel == 1 ? "победитель" : "призёр"
+        
+        minDiplomaLabel.text = "Диплом: \(minDiplomaLevelText)"
+        stack.addArrangedSubview(minDiplomaLabel)
     }
     
     private func configureBenefitInformationStack() {
+        guard let benefit = self.benefit else { return }
         let benefitInformationStack = UIStackView()
         
         benefitInformationStack.axis = .vertical
@@ -136,7 +246,7 @@ final class BenefitViewController: UIViewController {
         
         informationStackView.addArrangedSubview(benefitInformationStack)
         
-        guard let fullScoreSubjects = viewModel.fullScoreSubjects else { return }
+        guard let fullScoreSubjects = benefit.fullScoreSubjects else { return }
         
         for subject in fullScoreSubjects {
             let subjectLabel: UILabel = UILabel()
@@ -150,13 +260,14 @@ final class BenefitViewController: UIViewController {
     }
     
     private func configureBenefitLabel() -> UILabel {
+        guard let benefit = self.benefit else { return UILabel() }
         let benefitLabel: UILabel = UILabel()
         benefitLabel.font = FontManager.shared.font(for: .additionalInformation)
         benefitLabel.textColor = .black
         benefitLabel.numberOfLines = 0
         benefitLabel.lineBreakMode = .byWordWrapping
         
-        let benefitText = viewModel.isBVI ? "БВИ" : "100 баллов за ЕГЭ по одному из следующих предметов:"
+        let benefitText = benefit.isBVI ? "БВИ" : "100 баллов за ЕГЭ по одному из следующих предметов:"
         
         benefitLabel.text = "Льгота: \(benefitText)"
         
@@ -165,7 +276,7 @@ final class BenefitViewController: UIViewController {
     
     private func configurationConfirmationSubjects() {
         guard
-            let confirmationSubjects = viewModel.confirmationSubjects,
+            let confirmationSubjects = benefit?.confirmationSubjects,
                 confirmationSubjects.count > 0
         else { return }
 

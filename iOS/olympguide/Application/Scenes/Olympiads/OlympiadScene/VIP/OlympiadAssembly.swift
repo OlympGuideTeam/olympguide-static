@@ -20,7 +20,8 @@ final class OlympiadAssembly {
         interactor.presenter = presenter
         interactor.worker = worker
         presenter.viewController = viewController
-//        router.dataStore = interactor
+        router.dataStore = interactor
+        router.viewController = viewController
         
         return viewController
     }

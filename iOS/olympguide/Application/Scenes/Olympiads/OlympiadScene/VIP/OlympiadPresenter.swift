@@ -53,7 +53,8 @@ extension OlympiadPresenter : BenefitsByProgramsPresentationLogic {
             let program = BenefitsByPrograms.Load.ViewModel.BenefitViewModel.Program(
                 programID: model.program.programID,
                 programName: model.program.name,
-                field: model.program.field
+                field: model.program.field,
+                university: model.program.university
             )
             
             let benefitInformation = model.benefits.map { benefit in

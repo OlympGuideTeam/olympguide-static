@@ -36,6 +36,7 @@ final class SubjectsStack: UIStackView {
             let optionalSubjectsStack = OptionalSubjectsStack(subjects: optionalSubjects)
             addArrangedSubview(optionalSubjectsStack)
         }
+        setHeight(34)
     }
 }
 
