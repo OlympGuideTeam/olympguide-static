@@ -38,4 +38,28 @@ final class ProgramAssembly {
         
         return viewContoller
     }
+    
+    static func build(
+        for programID: Int,
+        name: String,
+        code: String,
+        university: UniversityModel
+    ) -> UIViewController {
+        let viewContoller = ProgramViewController(
+            for: programID,
+            name: name,
+            code: code,
+            university: university
+        )
+        let interactor = ProgramInteractor()
+        let presenter = ProgramPresenter()
+        let worker = ProgramWorker()
+        
+        viewContoller.interactor = interactor
+        interactor.presenter = presenter
+        interactor.worker = worker
+        presenter.viewController = viewContoller
+        
+        return viewContoller
+    }
 }
