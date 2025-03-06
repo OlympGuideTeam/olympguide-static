@@ -22,9 +22,22 @@ extension ProgramPresenter : ProgramPresentationLogic {
             return
         }
         
-        guard let link = response.program?.link else { return }
+        guard let program = response.program else { return }
         
-        let viewModel = Program.Load.ViewModel(link: link)
+        let programModel = GroupOfProgramsModel.ProgramModel(
+            programID: program.programID,
+            name: program.name,
+            field: program.field,
+            budgetPlaces: program.budgetPlaces,
+            paidPlaces: program.paidPlaces,
+            cost: program.cost,
+            requiredSubjects: program.requiredSubjects,
+            optionalSubjects: program.optionalSubjects,
+            like: program.like,
+            link: program.link ?? ""
+        )
+        
+        let viewModel = Program.Load.ViewModel(program: programModel)
         viewController?.displayLoadProgram(with: viewModel)
     }
 }
