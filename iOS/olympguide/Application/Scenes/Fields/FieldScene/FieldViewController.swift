@@ -103,6 +103,31 @@ final class FieldViewController: UIViewController {
         programsTitleLabel.font = FontManager.shared.font(for: .tableTitle)
         programsTitleLabel.textColor = .black
         informationStackView.addArrangedSubview(programsTitleLabel)
+        
+        let searchButton = getSearchButton()
+        
+        searchButton.action = { [weak self] in
+            guard let self else { return }
+            self.router?.routeToSearch(fieldId: self.field.fieldId)
+        }
+        informationStackView.addSubview(searchButton)
+        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
+        searchButton.pinCenterY(to: programsTitleLabel)
+    }
+    
+    private func getSearchButton() -> UIClosureButton {
+        let searchButton = UIClosureButton()
+        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchButton.tintColor = .black
+        searchButton.contentHorizontalAlignment = .fill
+        searchButton.contentVerticalAlignment = .fill
+        searchButton.imageView?.contentMode = .scaleAspectFit
+
+        
+        searchButton.setWidth(28)
+        searchButton.setHeight(28)
+        
+        return searchButton
     }
     
     func configureRefreshControl() {
@@ -233,26 +258,6 @@ extension FieldViewController : UITableViewDelegate {
             tableView.setContentOffset(currentOffset, animated: false)
         }
         return header
-    }
-    
-    @objc
-    func toggleSection(_ sender: UIButton) {
-        let section = sender.tag
-        
-        var currentOffset = tableView.contentOffset
-        let headerRectBefore = tableView.rectForHeader(inSection: section)
-        
-        programs[section].isExpanded.toggle()
-        
-        UIView.performWithoutAnimation {
-            tableView.reloadSections(IndexSet(integer: section), with: .none)
-            tableView.layoutIfNeeded()
-        }
-        let headerRectAfter = tableView.rectForHeader(inSection: section)
-        
-        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
-        currentOffset.y += deltaY
-        tableView.setContentOffset(currentOffset, animated: false)
     }
 }
 

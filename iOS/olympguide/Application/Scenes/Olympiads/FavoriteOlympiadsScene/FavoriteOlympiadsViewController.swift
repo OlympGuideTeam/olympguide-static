@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -32,7 +33,7 @@ fileprivate enum Constants {
 final class FavoriteOlympiadsViewController : UIViewController {
     
     // MARK: - VIP
-    var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
+    var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic & FavoriteOlympiadsBusinessLogic)?
     var router: OlympiadsRoutingLogic?
     
     // MARK: - Variables
@@ -40,6 +41,7 @@ final class FavoriteOlympiadsViewController : UIViewController {
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     private var olympiads: [OlympiadViewModel] = []
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -52,8 +54,15 @@ final class FavoriteOlympiadsViewController : UIViewController {
             Olympiads.Load.Request(params: Dictionary<String, Set<String>>())
         )
         
-        let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
+        let backItem = UIBarButtonItem(
+            title: Constants.Strings.backButtonTitle,
+            style: .plain,
+            target: nil,
+            action: nil
+        )
         navigationItem.backBarButtonItem = backItem
+        
+        setupBindings()
     }
     
     // MARK: - Methods
@@ -94,6 +103,16 @@ final class FavoriteOlympiadsViewController : UIViewController {
         tableView.showsVerticalScrollIndicator = false
     }
     
+    func getEmptyLabel() -> UILabel? {
+        if !olympiads.isEmpty { return nil }
+        let emptyLabel = UILabel(frame: self.tableView.bounds)
+        emptyLabel.text = "Избранных олимпиад пока нет"
+        emptyLabel.textAlignment = .center
+        emptyLabel.textColor = .black
+        emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
+        return emptyLabel
+    }
+    
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -123,6 +142,12 @@ extension FavoriteOlympiadsViewController: UITableViewDataSource {
         
         let olympiadViewModel = olympiads[indexPath.row]
         cell.configure(with: olympiadViewModel)
+        cell.favoriteButtonTapped = { sender, isFavorite in
+            if !isFavorite {
+                FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: sender.tag)
+            }
+        }
+        
         return cell
     }
 }
@@ -145,18 +170,48 @@ extension FavoriteOlympiadsViewController : OlympiadsDisplayLogic {
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            if self.olympiads.isEmpty {
-                let emptyLabel = UILabel(frame: self.tableView.bounds)
-                emptyLabel.text = "Избранных олимпиад пока нет"
-                emptyLabel.textAlignment = .center
-                emptyLabel.textColor = .black
-                emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
-                self.tableView.backgroundView = emptyLabel
-            } else {
-                self.tableView.backgroundView = nil
-            }
+            tableView.backgroundView = getEmptyLabel()
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+}
+
+// MARK: - Combine
+extension FavoriteOlympiadsViewController {
+    private func setupBindings() {
+        FavoritesManager.shared.olympiadEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let olympiad):
+                    if !self.olympiads.contains(where: { $0.olympiadId == olympiad.olympiadID}) {
+                        var viewModel = olympiad.toViewModel()
+                        viewModel.like = true
+                        
+                        let insertIndex = self.olympiads.firstIndex { $0.olympiadId > olympiad.olympiadID } ?? self.olympiads.count
+                        
+                        self.interactor?.likeOlympiad(olympiad, at: insertIndex)
+                        self.olympiads.insert(viewModel, at: insertIndex)
+                        
+                        let newIndex = IndexPath(row: insertIndex, section: 0)
+                        self.tableView.insertRows(at: [newIndex], with: .automatic)
+                        self.tableView.backgroundView = nil
+                    }
+                case .removed(let olympiadId):
+                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId }) {
+                        self.olympiads.remove(at: index)
+                        self.interactor?.dislikeOlympiad(at: index)
+                        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+                        self.tableView.backgroundView = self.getEmptyLabel()
+                    }
+                case .error(let olympiadId):
+                    interactor?.handleBatchError(olympiadID: olympiadId)
+                case .access(let olympiadId, let isFavorite):
+                    interactor?.handleBatchSuccess(olympiadID: olympiadId, isFavorite: isFavorite)
+                }
+            }
+            .store(in: &cancellables)
     }
 }

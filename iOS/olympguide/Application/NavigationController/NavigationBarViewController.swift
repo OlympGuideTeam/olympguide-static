@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 protocol NonTabBarVC { }
 
@@ -31,6 +32,7 @@ fileprivate enum Constants {
 class NavigationBarViewController: UINavigationController {
     var searchButtonPressed: ((_: UIButton) -> Void)?
     var bookMarkButtonPressed: ((_: UIButton) -> Void)?
+    private var authCancellable: AnyCancellable?
     
     private let searchButton: UIButton = {
         let button = UIButton()
@@ -87,7 +89,7 @@ class NavigationBarViewController: UINavigationController {
     
     private func configureBookMarkButton() {
         navigationBar.addSubview(bookMarkButton)
-
+        
         bookMarkButton.alpha = 0.0
         bookMarkButton.isHidden = true
         
@@ -115,30 +117,50 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
         willShow viewController: UIViewController,
         animated: Bool
     ) {
+        let isAuthenticated = AuthManager.shared.isAuthenticated
+        let shouldShowBookMark = (viewController is WithBookMarkButton) && isAuthenticated
+        
         guard let coordinator = navigationController.transitionCoordinator else {
             self.searchButton.alpha = (viewController is WithSearchButton) ? 1.0 : 0.0
             self.searchButton.isHidden = (viewController is WithSearchButton) ? false : true
-            self.bookMarkButton.alpha = (viewController is WithBookMarkButton) ? 1.0 : 0.0
-            self.bookMarkButton.isHidden = (viewController is WithBookMarkButton) ? false : true
+            self.bookMarkButton.alpha = shouldShowBookMark ? 1.0 : 0.0
+            self.bookMarkButton.isHidden = !shouldShowBookMark
             return
         }
-        guard let tabBarVC = tabBarController as? TabBarViewController else { return }
         
         coordinator.animateAlongsideTransition(in: navigationBar, animation: { _ in
             self.searchButton.isHidden = false
             self.bookMarkButton.isHidden = false
             self.searchButton.alpha = (viewController is WithSearchButton) ? 1.0 : 0.0
-            self.bookMarkButton.alpha = (viewController is WithBookMarkButton) ? 1.0 : 0.0
-            tabBarVC.customTabBar.alpha = (viewController is NonTabBarVC) ? 0.0 : 1.0
+            self.bookMarkButton.alpha = shouldShowBookMark ? 1.0 : 0.0
+            if let tabBarVC = self.tabBarController as? TabBarViewController {
+                tabBarVC.customTabBar.alpha = (viewController is NonTabBarVC) ? 0.0 : 1.0
+            }
         }, completion: { context in
             self.searchButton.isHidden = (viewController is WithSearchButton) ? false : true
-            self.bookMarkButton.isHidden = (viewController is WithBookMarkButton) ? false : true
+            self.bookMarkButton.isHidden = !shouldShowBookMark
             if context.isCancelled,
                let fromVC = context.viewController(forKey: .from) {
                 self.searchButton.alpha = (fromVC is WithSearchButton) ? 1.0 : 0.0
-                self.bookMarkButton.alpha = (viewController is WithBookMarkButton) ? 1.0 : 0.0
-                tabBarVC.customTabBar.alpha = (viewController is NonTabBarVC) ? 0.0 : 1.0
+                self.bookMarkButton.alpha = (fromVC is WithBookMarkButton) && isAuthenticated ? 1.0 : 0.0
+                if let tabBarVC = self.tabBarController as? TabBarViewController {
+                    tabBarVC.customTabBar.alpha = (fromVC is NonTabBarVC) ? 0.0 : 1.0
+                }
             }
         })
+    }
+    
+    func setupBindings() {
+        authCancellable = AuthManager.shared.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                guard
+                    let self = self,
+                    let topVC = self.topViewController
+                else { return }
+                let shouldShowBookMark = (topVC is WithBookMarkButton) && isAuth
+                self.bookMarkButton.alpha = shouldShowBookMark ? 1.0 : 0.0
+                self.bookMarkButton.isHidden = !shouldShowBookMark
+            }
     }
 }

@@ -24,5 +24,10 @@ final class FieldRouter: FieldRoutingLogic, FieldDataPassing {
         
         viewController?.navigationController?.pushViewController(programVC, animated: true)
     }
+    
+    func routeToSearch(fieldId: Int) {
+        let searchVC = SearchAssembly<ProgramByFieldSearchStrategy>.build(with: "/field/\(fieldId)/programs")
+        viewController?.navigationController?.pushViewController(searchVC, animated: true)
+    }
 }
 
