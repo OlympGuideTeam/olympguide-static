@@ -6,11 +6,29 @@
 //
 
 import UIKit
+import Combine
 
 final class UIUniversityView: UIView {
     private let logoImageView = UIImageViewWithShimmer(frame: .zero)
     private let nameLabel = UILabel()
     private let regionLabel = UILabel()
+    private var authCancellable: AnyCancellable?
+    
+    var arrowIsHidden: Bool = true  {
+        didSet {
+            arrowImageView.isHidden = arrowIsHidden
+            favoriteButton.isHidden = !arrowIsHidden
+        }
+    }
+    
+    var isExpanded: Bool = false {
+        didSet {
+            arrowImageView.image = isExpanded ?
+                UIImage(systemName: "chevron.up") :
+                UIImage(systemName: "chevron.down")
+        }
+    }
+    
     let favoriteButton: UIButton = {
         let button = UIButton()
         button.tintColor = .black
@@ -21,9 +39,12 @@ final class UIUniversityView: UIView {
         return button
     }()
     
+    let arrowImageView: UIImageView = UIImageView()
+    
     init() {
         super.init(frame: .zero)
         configureLayout()
+        setupBindings()
     }
     
     @available(*, unavailable)
@@ -36,18 +57,14 @@ final class UIUniversityView: UIView {
         addSubview(nameLabel)
         addSubview(regionLabel)
         addSubview(favoriteButton)
+        addSubview(arrowImageView)
 
-        
-        
-        // Configure logoImageView
         logoImageView.contentMode = .scaleAspectFit
         
-        // Configure nameLabel
         nameLabel.font =  FontManager.shared.font(for: .commonInformation)
         nameLabel.numberOfLines = 0
         nameLabel.lineBreakMode = .byWordWrapping
         
-        // Configure regionLabel
         regionLabel.font = FontManager.shared.font(for: .region)
         regionLabel.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
                 
@@ -68,6 +85,13 @@ final class UIUniversityView: UIView {
         favoriteButton.pinRight(to: self.trailingAnchor)
         favoriteButton.setWidth(22)
         favoriteButton.setHeight(22)
+        
+        arrowImageView.contentMode = .scaleAspectFit
+        arrowImageView.tintColor = .black
+        arrowImageView.setWidth(17)
+        arrowImageView.pinTop(to: regionLabel.bottomAnchor, 5)
+        arrowImageView.pinRight(to: self.trailingAnchor)
+        arrowImageView.isHidden = true
         
         self.pinBottom(to: nameLabel.bottomAnchor, 0, .grOE)
         self.pinBottom(to: logoImageView.bottomAnchor, 0, .grOE)
@@ -90,6 +114,25 @@ final class UIUniversityView: UIView {
             self.logoImageView.image = image
         }
         nameLabel.calculateHeight(with: UIScreen.main.bounds.width - left - right - 80 - 37 - 15)
+//        if !arrowIsHidden {
+//            favoriteButton.isHidden = true
+//        } else {
+//            favoriteButton.isHidden = !AuthManager.shared.isAuthenticated
+//        }
+        favoriteButton.isHidden = true
         favoriteButton.tag = viewModel.universityID
+    }
+    
+    func setupBindings() {
+        authCancellable = AuthManager.shared.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                guard let self else { return }
+                if !arrowIsHidden {
+                    favoriteButton.isHidden = true
+                } else {
+                    favoriteButton.isHidden = !isAuth
+                }
+            }
     }
 }
