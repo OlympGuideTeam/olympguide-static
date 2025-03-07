@@ -9,6 +9,9 @@ import Foundation
 
 protocol OlympiadsBusinessLogic {
     func loadOlympiads(_ request: Olympiads.Load.Request)
+    func favoriteStatus(at index: Int) -> Bool
+    func olympiadModel(at index: Int) -> OlympiadModel
+    func setFavoriteStatus(at index: Int, to isFavorite: Bool)
 }
 
 protocol OlympiadsPresentationLogic {
