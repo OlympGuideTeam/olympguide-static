@@ -27,4 +27,16 @@ final class OlympiadsInteractor: OlympiadsBusinessLogic, OlympiadsDataStore {
             }
         }
     }
+    
+    func favoriteStatus(at index: Int) -> Bool {
+        return olympiads[index].like
+    }
+    
+    func setFavoriteStatus(at index: Int, to isFavorite: Bool) {
+        olympiads[index].like = isFavorite
+    }
+    
+    func olympiadModel(at index: Int) -> OlympiadModel {
+        olympiads[index]
+    }
 }
