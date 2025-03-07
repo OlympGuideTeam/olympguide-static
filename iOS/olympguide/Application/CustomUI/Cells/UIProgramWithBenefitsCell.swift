@@ -72,4 +72,8 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
             benefitsStack.addArrangedSubview(bs)
         }
     }
+    
+    func hideSeparator(isHidden: Bool) {
+        separatorView.isHidden = isHidden
+    }
 }
