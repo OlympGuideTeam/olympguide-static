@@ -10,6 +10,9 @@ import Foundation
 // MARK: - Business Logic
 protocol OlympiadBusinessLogic {
     func loadUniversities(with request: Olympiad.LoadUniversities.Request)
+    func setFavoriteStatus(_ status: Bool, to universityId: Int)
+    func favoriteStatusAt(index: Int) -> Bool
+    func universityModel(at index: Int) -> UniversityModel?
 }
 
 // MARK: - Data Store
@@ -31,6 +34,7 @@ protocol OlympiadDisplayLogic: AnyObject {
 // MARK: - Routing Logic
 protocol OlympiadRoutingLogic {
     func routeToProgram(indexPath: IndexPath)
+    func routeToSearch(olympiadId: Int)
 }
 
 // MARK: - Data Passing
