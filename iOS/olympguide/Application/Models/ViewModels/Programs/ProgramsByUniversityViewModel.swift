@@ -7,6 +7,6 @@
 
 struct ProgramsByUniversityViewModel {
     let university: UniversityViewModel
-    let programs: [ProgramViewModel]
+    var programs: [ProgramViewModel]
     var isExpanded: Bool = false
 }

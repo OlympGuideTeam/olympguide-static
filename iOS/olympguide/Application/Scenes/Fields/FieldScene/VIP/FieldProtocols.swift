@@ -30,6 +30,7 @@ protocol FieldDisplayLogic: AnyObject {
 // MARK: - Routing Logic
 protocol FieldRoutingLogic {
     func routeToProgram(indexPath: IndexPath)
+    func routeToSearch(fieldId: Int)
 }
 
 // MARK: - Data Passing

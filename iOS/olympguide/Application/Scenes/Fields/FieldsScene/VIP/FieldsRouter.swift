@@ -16,7 +16,7 @@ final class FieldsRouter: FieldsRoutingLogic {
     }
     
     func routeToSearch() {
-        let searchVC = SearchAssembly<FieldSearchStrategy>.build()
+        let searchVC = SearchAssembly<FieldSearchStrategy>.build(with: "/fields")
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
