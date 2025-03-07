@@ -5,18 +5,20 @@
 //  Created by Tom Tim on 27.02.2025.
 //
 
+import Foundation
+
 // MARK: - Business Logic
 protocol FavoriteProgramsBusinessLogic {
     func loadPrograms(with request: FavoritePrograms.Load.Request)
+    func likeProgram(_ univer: UniversityModel, _ program: ProgramShortModel)
     func handleBatchError(programID: Int)
     func handleBatchSuccess(programID: Int, isFavorite: Bool)
-    func dislikeProgram(at index: Int)
-    func likeProgram(_ program: ProgramModel, at insertIndex: Int)
+    func dislikeProgram(at indexPath: IndexPath)
 }
 
 // MARK: - Data Store
 protocol FavoriteProgramsDataStore {
-    var programs: [ProgramModel] { get }
+    var programs: [ProgramsByUniversityModel] { get }
 }
 
 // MARK: - Presentation Logic
@@ -31,7 +33,7 @@ protocol FavoriteProgramsDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol FavoriteProgramsRoutingLogic {
-    func routeToProgram(with index: Int)
+    func routeToProgram(indexPath: IndexPath)
 }
 
 // MARK: - Data Passing
