@@ -8,14 +8,13 @@
 import UIKit
 
 final class SearchAssembly<Strategy: SearchStrategy> {
-    static func build() -> UIViewController {
-        let searchVC = SearchViewController<Strategy>(
-            searchType: .olympiads
-        )
+    static func build(with endpoint: String) -> UIViewController {
+        let searchVC = SearchViewController<Strategy>()
         
         let strategy = Strategy()
         let worker = GenericSearchWorker<Strategy>(
-            strategy: strategy
+            strategy: strategy,
+            endpoint: endpoint
         )
         let interactor = SearchInteractor<Strategy>(worker: worker)
         let presenter = SearchPresenter<Strategy>()
