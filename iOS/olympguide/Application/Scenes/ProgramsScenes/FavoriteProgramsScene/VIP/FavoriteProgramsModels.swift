@@ -12,11 +12,11 @@ enum FavoritePrograms {
         
         struct Response {
             var error: Error? = nil
-            var programs: [ProgramModel]? = nil
+            var programs: [ProgramsByUniversityModel]? = nil
         }
         
         struct ViewModel {
-            let programs: [ProgramViewModel]
+            let programs: [ProgramsByUniversityViewModel]
         }
     }
 }
