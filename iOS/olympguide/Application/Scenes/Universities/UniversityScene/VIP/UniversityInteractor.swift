@@ -91,4 +91,8 @@ extension UniversityInteractor : ProgramsBusinessLogic {
     func setFavorite(at indexPath: IndexPath, isFavorite: Bool) {
         groupsOfPrograms[indexPath.section].programs[indexPath.row].like  = isFavorite
     }
+    
+    func program(at indexPath: IndexPath) -> ProgramShortModel {
+        groupsOfPrograms[indexPath.section].programs[indexPath.row]
+    }
 }
