@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 protocol WithSearchButton { }
 
@@ -39,6 +40,8 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
     var router: OlympiadsRoutingLogic?
     
+    private var cancellables = Set<AnyCancellable>()
+    
     // MARK: - Variables
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
@@ -64,6 +67,8 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
         interactor?.loadOlympiads(
             Olympiads.Load.Request(params: Dictionary<String, Set<String>>())
         )
+        
+        setupBindings()
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
@@ -173,13 +178,29 @@ extension OlympiadsViewController: UITableViewDataSource {
         if olympiads.count != 0 {
             let olympiadViewModel = olympiads[indexPath.row]
             cell.configure(with: olympiadViewModel)
+            cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
+                guard let self = self else { return }
+                if isFavorite {
+                    self.olympiads[indexPath.row].like = true
+                    guard
+                        let model = self.interactor?.olympiadModel(at: indexPath.row)
+                    else { return }
+                    
+                    FavoritesManager.shared.addOlympiadToFavorites(model: model)
+                } else {
+                    self.olympiads[indexPath.row].like = false
+                    FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: sender.tag)
+                }
+            }
         } else {
             cell.configureShimmer()
         }
+        
+        
         return cell
     }
 }
-    
+
 extension OlympiadsViewController: UITableViewDelegate {
     func tableView(
         _ tableView: UITableView,
@@ -193,10 +214,52 @@ extension OlympiadsViewController: UITableViewDelegate {
 // MARK: - FilterSortViewDelegate
 extension OlympiadsViewController: FilterSortViewDelegate {
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-       
+        
     }
     
     func filterSortView(_ view: FilterSortView, didTapFilterWith title: String) {
-      
+        
+    }
+}
+
+// MARK: - Combine
+extension OlympiadsViewController {
+    private func setupBindings() {
+        FavoritesManager.shared.olympiadEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let olympiad):
+                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiad.olympiadID} ) {
+                        if self.olympiads[index].like == true { break }
+                        self.olympiads[index].like = true
+                        self.tableView.reloadRows(
+                            at: [IndexPath(row: index, section: 0)],
+                            with: .automatic
+                        )
+                    }
+                case .removed(let olympiadId):
+                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId} ) {
+                        if self.olympiads[index].like == false { break }
+                        self.olympiads[index].like = false
+                        self.tableView.reloadRows(
+                            at: [IndexPath(row: index, section: 0)],
+                            with: .automatic
+                        )
+                    }
+                case .error(let olympiadId):
+                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId} ) {
+                        if self.olympiads[index].like == interactor?.favoriteStatus(at: index) { break }
+                        self.olympiads[index].like = interactor?.favoriteStatus(at: index) ?? false
+                    }
+                case .access(let olympiadId, let isFavorite):
+                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId} ) {
+                        interactor?.setFavoriteStatus(at: index, to: isFavorite)
+                    }
+                }
+                
+            }.store(in: &cancellables)
+        
     }
 }
