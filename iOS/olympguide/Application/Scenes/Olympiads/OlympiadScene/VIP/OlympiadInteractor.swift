@@ -29,6 +29,20 @@ extension OlympiadInteractor : OlympiadBusinessLogic {
             }
         }
     }
+    
+    func favoriteStatusAt(index: Int) -> Bool {
+        return universities?[index].like ?? false
+    }
+    
+    func setFavoriteStatus(_ status: Bool, to universityId: Int) {
+        if let index = universities?.firstIndex(where: { $0.universityID == universityId }) {
+            universities?[index].like = status
+        }
+    }
+    
+    func universityModel(at index: Int) -> UniversityModel? {
+        universities?[index]
+    }
 }
 
 extension OlympiadInteractor : BenefitsByProgramsBusinessLogic {
