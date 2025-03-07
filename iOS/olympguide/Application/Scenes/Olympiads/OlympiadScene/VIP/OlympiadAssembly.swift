@@ -15,7 +15,7 @@ final class OlympiadAssembly {
         let worker = OlympiadWorker()
         let router = OlympiadRouter()
         
-        viewController.inteactor = interactor
+        viewController.interactor = interactor
         viewController.router = router
         interactor.presenter = presenter
         interactor.worker = worker
