@@ -6,7 +6,9 @@
 //
 
 struct OlympiadViewModel {
+    let olympiadId: Int
     let name: String
     let profile: String
     let level: String
+    var like: Bool
 }

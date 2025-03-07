@@ -10,7 +10,7 @@ import UIKit
 final class FavoriteOlympiadsAssembly {
     static func build() -> UIViewController {
         let viewController = FavoriteOlympiadsViewController()
-        let interactor = OlympiadsInteractor()
+        let interactor = FavoriteOlympiadsInteractor()
         let presenter = OlympiadsPresenter()
         let router = OlympiadsRouter()
         let worker = FavoriteOlympiadsWorker()

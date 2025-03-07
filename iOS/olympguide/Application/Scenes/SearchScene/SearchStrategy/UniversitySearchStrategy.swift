@@ -11,7 +11,7 @@ final class UniversitySearchStrategy: SearchStrategy {
     typealias ModelType = UniversityModel
     typealias ViewModelType = UniversityViewModel
     typealias ResponseType = UniversityModel
-    
+    static var searchTitle: String = "Поиск по ВУЗам"
     func configureCell(
         tableView: UITableView,
         indexPath: IndexPath,
@@ -39,15 +39,9 @@ final class UniversitySearchStrategy: SearchStrategy {
     }
     
     static func modelToViewModel(
-        _ model: UniversityModel
-    ) -> UniversityViewModel {
-        UniversityViewModel(
-            universityID: model.universityID,
-            name: model.name,
-            logoURL: model.logo,
-            region: model.region,
-            like: model.like ?? false
-        )
+        _ model: [UniversityModel]
+    ) -> [UniversityViewModel] {
+        model.map { $0.toViewModel() }
     }
     
     static func build(

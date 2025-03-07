@@ -43,9 +43,9 @@ extension UniversityRouter: ProgramsRoutingLogic {
     }
     
     func routeToSearch() {
-//        let searchVC = SearchViewController(searchType: .fields)
-//        searchVC.modalPresentationStyle = .overFullScreen
-//        viewController?.navigationController?.pushViewController(searchVC, animated: true)
+        let searchVC = SearchAssembly<ProgramInUniSearchStrategy>.build(with: "/university/1/programs/by-field")
+        searchVC.modalPresentationStyle = .overFullScreen
+        viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
 

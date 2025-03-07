@@ -17,19 +17,7 @@ final class FavoriteProgramsPresenter : FavoriteProgramsPresentationLogic {
         
         guard let programs = response.programs else { return }
         
-        let viewPrograms  = programs.map { program in
-            ProgramViewModel(
-                programID: program.programID,
-                name: program.name,
-                code: program.field,
-                budgetPlaces: program.budgetPlaces,
-                paidPlaces: program.paidPlaces,
-                cost: program.cost,
-                like: program.like,
-                requiredSubjects: program.requiredSubjects,
-                optionalSubjects: program.optionalSubjects
-            )
-        }
+        let viewPrograms  = programs.map { $0.toViewModel() }
         
         let viewModel = FavoritePrograms.Load.ViewModel(programs: viewPrograms)
         viewController?.displayLoadProgramsResult(with: viewModel)

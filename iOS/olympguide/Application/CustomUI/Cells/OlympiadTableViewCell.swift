@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -41,7 +42,7 @@ fileprivate enum Constants {
     }
 }
 
-class OlympiadTableViewCell: UITableViewCell {
+class OlympiadTableViewCell: UICellWithFavoriteButton {
     
     // MARK: - Variables
     static let identifier = Constants.Identifier.cellIdentifier
@@ -49,17 +50,6 @@ class OlympiadTableViewCell: UITableViewCell {
     private let nameLabel = UILabel()
     private let levelAndProfileLabel = UILabel()
     private let benefitLabel: UILabel = UILabel()
-    
-    private let favoriteButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .black
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        button.setImage(UIImage(systemName: Constants.Images.bookmark), for: .normal)
-        return button
-    }()
     
     private let separatorLine: UIView = {
         let view = UIView()
@@ -103,18 +93,18 @@ class OlympiadTableViewCell: UITableViewCell {
         benefitLabel.font = Constants.Fonts.levelAndProfileLabelFont
         benefitLabel.textColor = Constants.Colors.levelAndProfileTextColor
         
-        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
+        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
         
         levelAndProfileLabel.pinTop(to: contentView.topAnchor, 20)
         levelAndProfileLabel.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.interItemSpacing)
-        levelAndProfileLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
+        levelAndProfileLabel.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         
         nameLabel.pinTop(to: levelAndProfileLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.interItemSpacing)
         nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
 //        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
         
-        favoriteButton.pinCenterY(to: contentView)
+        favoriteButton.pinTop(to: levelAndProfileLabel.bottomAnchor, 5)
         favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         favoriteButton.setWidth(Constants.Dimensions.favoriteButtonSize)
         favoriteButton.setHeight(Constants.Dimensions.favoriteButtonSize)
@@ -138,7 +128,10 @@ class OlympiadTableViewCell: UITableViewCell {
     }
     
     // MARK: - Methods
-    func configure(with viewModel: OlympiadViewModel) {
+    func configure(
+        with viewModel: OlympiadViewModel,
+        isFaforiteButtonVisible: Bool = true
+    ) {
         nameLabel.text = viewModel.name
         levelAndProfileLabel.text = "\(viewModel.level) уровень | \(viewModel.profile)"
         benefitLabel.text = nil
@@ -146,11 +139,19 @@ class OlympiadTableViewCell: UITableViewCell {
         shimmerLayer.stopAnimating()
         shimmerLayer.removeAllConstraints()
         isUserInteractionEnabled = true
-
+        let newImageName = viewModel.like ? Constants.Images.bookmarkFill : Constants.Images.bookmark
+        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
         favoriteButton.isHidden = AuthManager.shared.isAuthenticated ? false : true
+        favoriteButton.tag = viewModel.olympiadId
+        
+        if isFaforiteButtonVisible && AuthManager.shared.isAuthenticated {
+            favoriteButton.isHidden = false
+        }
     }
     
-    func configure(with viewModel: OlympiadWithBenefitViewModel) {
+    func configure(
+        with viewModel: OlympiadWithBenefitViewModel
+    ) {
         nameLabel.text = viewModel.olympiadName
         let level = "\(String(repeating: "I", count: viewModel.olympiadLevel)) уровень"
         levelAndProfileLabel.text = "\(level) | \(viewModel.olympiadProfile)"
@@ -177,10 +178,46 @@ class OlympiadTableViewCell: UITableViewCell {
     }
     
     // MARK: - Objc funcs
-    @objc private func favoriteButtonTapped() {
+    @objc private func favoriteButtonTapped(_ sender: UIButton) {
         let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
         let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        favoriteButtonTapped?(sender, !isFavorite)
     }
 }
 
+
+class UICellWithFavoriteButton: UITableViewCell {
+    private var authCancellable: AnyCancellable?
+    var isFavoriteButtonHidden: Bool = false
+    var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
+    let favoriteButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = .black
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        button.setImage(UIImage(systemName: Constants.Images.bookmark), for: .normal)
+        return button
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupBindings()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setupBindings() {
+        authCancellable = AuthManager.shared.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                guard let self else { return }
+                self.favoriteButton.isHidden = !isAuth || self.isFavoriteButtonHidden
+            }
+    }
+}

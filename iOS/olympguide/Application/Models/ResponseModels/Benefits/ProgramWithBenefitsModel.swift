@@ -20,4 +20,24 @@ struct ProgramWithBenefitsModel : Codable {
     
     let program: Program
     let benefits: [BenefitModel]
+    
+    func toViewModel() -> ProgramWithBenefitsViewModel {
+        ProgramWithBenefitsViewModel(
+            program: ProgramWithBenefitsViewModel.Program(
+                programID: program.programID,
+                programName: program.name,
+                field: program.field,
+                university: program.university
+            ),
+            benefitInformation: benefits.map {
+                ProgramWithBenefitsViewModel.BenefitInformationViewModel(
+                    minClass: $0.minClass,
+                    minDiplomaLevel: $0.minDiplomaLevel,
+                    isBVI: $0.isBVI,
+                    confirmationSubjects: $0.confirmationSubjects,
+                    fullScoreSubjects: $0.fullScoreSubjects
+                )
+            }
+        )
+    }
 }

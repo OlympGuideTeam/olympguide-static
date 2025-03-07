@@ -11,8 +11,9 @@ final class ProgramRouter: ProgramRoutingLogic, ProgramDataPassing {
     weak var viewController: UIViewController?
     var dataStore: ProgramDataStore?
     
-    func routeTo() {
-        
+    func routeToSearch(programId: Int) {
+        let searchVC = SearchAssembly<OlympiadWithBenefitsSearchStrategy>.build(with: "/program/\(programId)/benefits")
+        viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
 

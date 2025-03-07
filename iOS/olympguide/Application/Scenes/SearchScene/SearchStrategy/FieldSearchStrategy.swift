@@ -11,6 +11,7 @@ final class FieldSearchStrategy: SearchStrategy {
     typealias ModelType = GroupOfFieldsModel.FieldModel
     typealias ViewModelType = GroupOfFieldsViewModel.FieldViewModel
     typealias ResponseType = GroupOfFieldsModel
+    static var searchTitle: String = "Поиск по направления"
     
     func endpoint() -> String {
         "/fields"
@@ -51,12 +52,14 @@ final class FieldSearchStrategy: SearchStrategy {
     }
     
     static func modelToViewModel(
-        _ model: GroupOfFieldsModel.FieldModel
-    ) -> GroupOfFieldsViewModel.FieldViewModel {
-        GroupOfFieldsViewModel.FieldViewModel(
-            name: model.name,
-            code: model.code
-        )
+        _ model: [GroupOfFieldsModel.FieldModel]
+    ) -> [GroupOfFieldsViewModel.FieldViewModel] {
+        model.map { field in
+            GroupOfFieldsViewModel.FieldViewModel(
+                name: field.name,
+                code: field.code
+            )
+        }
     }
     
     static func build(with model: GroupOfFieldsModel.FieldModel) -> UIViewController {

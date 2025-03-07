@@ -17,7 +17,7 @@ final class UniversitiesRouter: UniversitiesRoutingLogic {
     }
     
     func routeToSearch() {
-        let searchVC = SearchAssembly<UniversitySearchStrategy>.build()
+        let searchVC = SearchAssembly<UniversitySearchStrategy>.build(with: "/universities")
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }

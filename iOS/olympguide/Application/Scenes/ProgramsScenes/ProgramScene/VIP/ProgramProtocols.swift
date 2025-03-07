@@ -32,7 +32,7 @@ protocol ProgramDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol ProgramRoutingLogic {
-    func routeTo()
+    func routeToSearch(programId: Int)
 }
 
 // MARK: - Data Passing

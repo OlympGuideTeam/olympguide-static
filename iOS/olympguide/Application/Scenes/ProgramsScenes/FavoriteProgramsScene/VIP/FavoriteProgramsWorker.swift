@@ -9,7 +9,7 @@ import Foundation
 
 protocol FavoriteProgramsWorkerLogic {
     func fetchPrograms(
-        completion: @escaping (Result<[ProgramModel], Error>) -> Void
+        completion: @escaping (Result<[ProgramsByUniversityModel], Error>) -> Void
     )
 }
 
@@ -22,17 +22,17 @@ class FavoriteProgramsWorker : FavoriteProgramsWorkerLogic {
     }
     
     func fetchPrograms(
-        completion: @escaping (Result<[ProgramModel], Error>) -> Void
+        completion: @escaping (Result<[ProgramsByUniversityModel], Error>) -> Void
     ) {
         networkService.request(
             endpoint: "/user/favourite/programs",
             method: .get,
             queryItems: nil,
             body: nil
-        ) { (result: Result<[ProgramModel], NetworkError>) in
+        ) { (result: Result<[ProgramsByUniversityModel]?, NetworkError>) in
             switch result {
-            case .success(let olympiads):
-                completion(.success(olympiads))
+            case .success(let programs):
+                completion(.success(programs ?? []))
             case .failure(let error):
                 completion(.failure(error))
             }

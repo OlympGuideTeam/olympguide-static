@@ -12,7 +12,7 @@ final class OlympiadsRouter: OlympiadsRoutingLogic, OlympiadsDataPassing {
     var dataStore: OlympiadsDataStore?
     
     func routeToSearch() {
-        let searchVC = SearchAssembly<OlympiadSearchStrategy>.build()
+        let searchVC = SearchAssembly<OlympiadSearchStrategy>.build(with: "/olympiads")
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
     

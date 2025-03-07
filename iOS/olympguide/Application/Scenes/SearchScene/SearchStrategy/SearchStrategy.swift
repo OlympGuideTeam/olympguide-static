@@ -14,6 +14,8 @@ protocol SearchStrategy {
     associatedtype ViewModelType
     associatedtype ResponseType: Decodable
     
+    static var searchTitle: String { get }
+    
     func endpoint() -> String
     func queryItems(for query: String) -> [URLQueryItem]
     
@@ -29,6 +31,6 @@ protocol SearchStrategy {
     func titleForItem(_ model: ModelType) -> String
     func responseTypeToModel(_ response: [ResponseType]) -> [ModelType]
     
-    static func modelToViewModel(_ model: ModelType) -> ViewModelType
+    static func modelToViewModel(_ model: [ModelType]) -> [ViewModelType]
     static func build(with model: ModelType) -> UIViewController
 }

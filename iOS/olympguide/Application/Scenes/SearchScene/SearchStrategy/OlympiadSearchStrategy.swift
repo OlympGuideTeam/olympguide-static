@@ -13,6 +13,8 @@ struct OlympiadSearchStrategy: SearchStrategy {
     typealias ViewModelType = OlympiadViewModel
     typealias ResponseType = OlympiadModel
     
+    static var searchTitle: String = "Поиск по олимпиадам"
+    
     func endpoint() -> String {
         "/olympiads"
     }
@@ -52,12 +54,8 @@ struct OlympiadSearchStrategy: SearchStrategy {
         return model.name
     }
     
-    static func modelToViewModel(_ model: OlympiadModel) -> OlympiadViewModel {
-        OlympiadViewModel(
-            name: model.name,
-            profile: model.profile,
-            level: String(repeating: "I", count: model.level)
-        )
+    static func modelToViewModel(_ model: [OlympiadModel]) -> [OlympiadViewModel] {
+        model.map { $0.toViewModel() }
     }
     
     static func build(with model: ModelType) -> UIViewController {

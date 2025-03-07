@@ -19,7 +19,7 @@ final class SearchPresenter<Strategy: SearchStrategy>: SearchPresentationLogic {
             return
         }
         
-        let viewItems = items.map { Strategy.modelToViewModel($0) }
+        let viewItems = Strategy.modelToViewModel(items)
         let viewModel = Search.TextDidChange.ViewModel(items: viewItems)
         viewController?.displayTextDidChange(viewModel: viewModel)
     }

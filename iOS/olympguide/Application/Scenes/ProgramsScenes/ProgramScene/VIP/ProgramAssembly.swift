@@ -16,11 +16,14 @@ final class ProgramAssembly {
         let interactor = ProgramInteractor()
         let presenter = ProgramPresenter()
         let worker = ProgramWorker()
+        let router = ProgramRouter()
         
         viewContoller.interactor = interactor
+        viewContoller.router = router
         interactor.presenter = presenter
         interactor.worker = worker
         presenter.viewController = viewContoller
+        router.viewController = viewContoller
         
         return viewContoller
     }

@@ -17,7 +17,7 @@ final class FavoriteProgramsViewController: UIViewController {
     private let tableView: UITableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private var programs: [ProgramViewModel] = []
+    private var programs: [ProgramsByUniversityViewModel] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,20 +28,20 @@ final class FavoriteProgramsViewController: UIViewController {
         interactor?.loadPrograms(with: .init())
     }
     
-//    override func viewDidDisappear(_ animated: Bool) {
-//        super.viewDidDisappear(animated)
-//        programs = programs.map { program in
-//            var modifiedProgram = program
-//            modifiedProgram.like = isFavorite(
-//                programID: program.programID,
-//                serverValue: program.like
-//            )
-//            return modifiedProgram
-//        }.filter { $0.like }
-//
-//        tableView.reloadData()
-//        tableView.backgroundView = getEmptyLabel()
-//    }
+    //    override func viewDidDisappear(_ animated: Bool) {
+    //        super.viewDidDisappear(animated)
+    //        programs = programs.map { program in
+    //            var modifiedProgram = program
+    //            modifiedProgram.like = isFavorite(
+    //                programID: program.programID,
+    //                serverValue: program.like
+    //            )
+    //            return modifiedProgram
+    //        }.filter { $0.like }
+    //
+    //        tableView.reloadData()
+    //        tableView.backgroundView = getEmptyLabel()
+    //    }
     
     private func configureUI() {
         configureNavigationBar()
@@ -66,13 +66,20 @@ final class FavoriteProgramsViewController: UIViewController {
         
         tableView.frame = view.bounds
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-
+        
         tableView.register(
             ProgramTableViewCell.self,
             forCellReuseIdentifier: ProgramTableViewCell.identifier
         )
+        
+        tableView.register(
+            UIUniversityHeader.self,
+            forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
+        )
+        
         tableView.dataSource = self
         tableView.delegate = self
+        
         tableView.backgroundColor = .white
         tableView.separatorStyle = .none
         tableView.refreshControl = refreshControl
@@ -102,11 +109,15 @@ final class FavoriteProgramsViewController: UIViewController {
 
 // MARK: - UITableViewDataSource
 extension FavoriteProgramsViewController : UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return programs.count
+    }
+    
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        return programs.count
+        programs[section].isExpanded ? programs[section].programs.count : 0
     }
     
     func tableView(
@@ -114,21 +125,18 @@ extension FavoriteProgramsViewController : UITableViewDataSource {
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: ProgramTableViewCell.identifier,
-            for: indexPath
-        ) as? ProgramTableViewCell else {
-            fatalError("Could not dequeue cell")
-        }
+            withIdentifier: ProgramTableViewCell.identifier
+        ) as? ProgramTableViewCell
+        else { return UITableViewCell() }
         
-        let program = programs[indexPath.row]
-        cell.configure(with: program)
+        cell.configure(with: programs[indexPath.section].programs[indexPath.row])
         
         cell.favoriteButtonTapped = { sender, isFavorite in
             if !isFavorite {
                 FavoritesManager.shared.removeProgramFromFavorites(programID: sender.tag)
             }
+            
         }
-        
         return cell
     }
 }
@@ -140,7 +148,41 @@ extension FavoriteProgramsViewController : UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        router?.routeToProgram(with: indexPath.row)
+        router?.routeToProgram(indexPath: indexPath)
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        viewForHeaderInSection section: Int
+    ) -> UIView? {
+        
+        guard let header = tableView.dequeueReusableHeaderFooterView(
+            withIdentifier: UIUniversityHeader.identifier
+        ) as? UIUniversityHeader
+        else { return nil }
+        
+        header.configure(
+            with: programs[section].university,
+            isExpanded: programs[section].isExpanded
+        )
+        header.toggleSection = { [weak self] section in
+            guard let self = self else { return }
+            var currentOffset = tableView.contentOffset
+            let headerRectBefore = tableView.rectForHeader(inSection: section)
+            
+            programs[section].isExpanded.toggle()
+            
+            UIView.performWithoutAnimation {
+                tableView.reloadSections(IndexSet(integer: section), with: .none)
+                tableView.layoutIfNeeded()
+            }
+            let headerRectAfter = tableView.rectForHeader(inSection: section)
+            
+            let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+            currentOffset.y += deltaY
+            tableView.setContentOffset(currentOffset, animated: false)
+        }
+        return header
     }
 }
 
@@ -149,12 +191,10 @@ extension FavoriteProgramsViewController : FavoriteProgramsDisplayLogic {
     func displayLoadProgramsResult(with viewModel: FavoritePrograms.Load.ViewModel) {
         
         programs = viewModel.programs
-                
+        
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            
             self.tableView.backgroundView = getEmptyLabel()
-            
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
@@ -169,35 +209,20 @@ extension FavoriteProgramsViewController {
             .sink { [weak self] event in
                 guard let self = self else { return }
                 switch event {
-                case .added(let program):
-                    if !self.programs.contains(where: {$0.programID == program.programID}) {
-                        let viewModel = ProgramViewModel(
-                            programID: program.programID,
-                            name: program.name,
-                            code: program.field,
-                            budgetPlaces: program.budgetPlaces,
-                            paidPlaces: program.paidPlaces,
-                            cost: program.cost,
-                            like: true,
-                            requiredSubjects: program.requiredSubjects,
-                            optionalSubjects: program.optionalSubjects
-                        )
-                        
-                        let insertIndex = self.programs.firstIndex { $0.programID > program.programID } ?? self.programs.count
-                        
-                        self.interactor?.likeProgram(program, at: insertIndex)
-                        self.programs.insert(viewModel, at: insertIndex)
-                        
-                        let newIndex = IndexPath(row: insertIndex, section: 0)
-                        self.tableView.insertRows(at: [newIndex], with: .automatic)
-                        self.tableView.backgroundView = nil
-                    }
+                case .added(let univer, let program):
+                    self.interactor?.likeProgram(univer, program)
                 case .removed(let programID):
-                    if let index = self.programs.firstIndex(where: { $0.programID == programID }) {
-                        if !self.programs[index].like { break }
-                        self.programs.remove(at: index)
+                    if let index = self.findIndexPath(programID: programID) {
+                        tableView.beginUpdates()
+                        self.programs[index.section].programs.remove(at: index.row)
                         self.interactor?.dislikeProgram(at: index)
-                        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+                        self.tableView.deleteRows(at: [index], with: .automatic)
+                        if self.programs[index.section].programs.isEmpty {
+                            self.programs.remove(at: index.section)
+                            
+                            self.tableView.deleteSections(IndexSet(integer: index.section), with: .automatic)
+                        }
+                        tableView.endUpdates()
                         self.tableView.backgroundView = self.getEmptyLabel()
                     }
                 case .error(let programID):
@@ -213,6 +238,17 @@ extension FavoriteProgramsViewController {
             programID: programID,
             serverValue: serverValue
         )
+    }
+    
+    private func findIndexPath(programID: Int) -> IndexPath? {
+        for (section, program) in programs.enumerated() {
+            if let index = program.programs.firstIndex(where: {
+                $0.programID == programID
+            }) {
+                return IndexPath(row: index, section: section)
+            }
+        }
+        return nil
     }
 }
 

@@ -217,8 +217,8 @@ final class ProgramTableViewCell: UITableViewCell {
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
     
-    func hideSeparator() {
-        separatorLine.isHidden = true
+    func hideSeparator(_ isHidden: Bool) {
+        separatorLine.isHidden = isHidden
     }
     
     // MARK: - Objc funcs

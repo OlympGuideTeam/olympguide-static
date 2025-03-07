@@ -13,13 +13,7 @@ final class OlympiadsPresenter: OlympiadsPresentationLogic {
 
     func presentOlympiads(_ response: Olympiads.Load.Response) {
         
-        let viewModels = response.olympiads.map { olympiad in
-            OlympiadViewModel(
-                name: olympiad.name,
-                profile: olympiad.profile,
-                level: String(repeating: "I", count: olympiad.level)
-            )
-        }
+        let viewModels = response.olympiads.map { $0.toViewModel() }
         
         let viewModel = Olympiads.Load.ViewModel(olympiads: viewModels)
         viewController?.displayOlympiads(viewModel)

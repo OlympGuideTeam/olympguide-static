@@ -11,10 +11,17 @@ final class FavoriteProgramsRouter: FavoriteProgramsRoutingLogic, FavoriteProgra
     var dataStore: FavoriteProgramsDataStore?
     weak var viewController: UIViewController?
     
-    func routeToProgram(with index: Int) {
-        guard let program = dataStore?.programs[index] else { return }
+    func routeToProgram(indexPath: IndexPath) {
+        guard let programs = dataStore?.programs else { return }
         
-        let programVC = ProgramAssembly.build(for: program)
+        let university = programs[indexPath.section].univer
+        let program = programs[indexPath.section].programs[indexPath.row]
+        
+        let programVC = ProgramAssembly.build(
+            for: program,
+            by: university
+        )
+        
         viewController?.navigationController?.pushViewController(programVC, animated: true)
     }
 }

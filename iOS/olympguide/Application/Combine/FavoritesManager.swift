@@ -16,8 +16,12 @@ final class FavoritesManager: ObservableObject {
     @Published private(set) var likedPrograms: Set<Int> = []
     @Published private(set) var unlikedPrograms: Set<Int> = []
     
+    @Published private(set) var likedOlympiads: Set<Int> = []
+    @Published private(set) var unlikedOlympiads: Set<Int> = []
+    
     let universityEventSubject = PassthroughSubject<UniversityFavoriteEvent, Never>()
     let programEventSubject = PassthroughSubject<ProgramFavoriteEvent, Never>()
+    let olympiadEventSubject = PassthroughSubject<OlympiadFavoriteEvent, Never>()
     
     enum UniversityFavoriteEvent {
         case added(UniversityModel)
@@ -27,7 +31,14 @@ final class FavoritesManager: ObservableObject {
     }
     
     enum ProgramFavoriteEvent {
-        case added(ProgramModel)
+        case added(UniversityModel, ProgramShortModel)
+        case removed(Int)
+        case error(Int)
+        case access(Int, Bool)
+    }
+    
+    enum OlympiadFavoriteEvent {
+        case added(OlympiadModel)
         case removed(Int)
         case error(Int)
         case access(Int, Bool)
@@ -107,11 +118,11 @@ extension FavoritesManager {
 
 // MARK: - Programs
 extension FavoritesManager {
-    func addProgramToFavorites(viewModel: ProgramModel) {
-        let id = viewModel.programID
+    func addProgramToFavorites(_ univer: UniversityModel, _ program: ProgramShortModel) {
+        let id = program.programID
         likedPrograms.insert(id)
         unlikedPrograms.remove(id)
-        programEventSubject.send(.added(viewModel))
+        programEventSubject.send(.added(univer, program))
         FavoritesBatcher.shared.addProgramChange(
             programID: id,
             isFavorite: true
@@ -133,6 +144,41 @@ extension FavoritesManager {
             return false
         }
         if !serverValue, likedPrograms.contains(programID) {
+            return true
+        }
+        return serverValue
+    }
+}
+
+
+// MARK: - Olympiads
+extension FavoritesManager {
+    func addOlympiadToFavorites(model: OlympiadModel) {
+        let id = model.olympiadID
+        likedOlympiads.insert(id)
+        unlikedOlympiads.remove(id)
+        olympiadEventSubject.send(.added(model))
+        FavoritesBatcher.shared.addOlympiadChange(
+            olympiadID: id,
+            isFavorite: true
+        )
+    }
+    
+    func removeOlympiadFromFavorites(olympiadId: Int) {
+        likedOlympiads.remove(olympiadId)
+        unlikedOlympiads.insert(olympiadId)
+        olympiadEventSubject.send(.removed(olympiadId))
+        FavoritesBatcher.shared.addOlympiadChange(
+            olympiadID: olympiadId,
+            isFavorite: false
+        )
+    }
+    
+    func isOlympiadFavorite(olympiadId: Int, serverValue: Bool) -> Bool {
+        if serverValue, unlikedOlympiads.contains(olympiadId) {
+            return false
+        }
+        if !serverValue, likedOlympiads.contains(olympiadId) {
             return true
         }
         return serverValue

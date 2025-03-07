@@ -21,10 +21,8 @@ final class SearchViewController<Strategy: SearchStrategy>: UIViewController, No
     var strategy: Strategy?
     
     // MARK: - Lifecycle
-    init(
-        searchType: SearchType
-    ) {
-        self.customSearchBar = CustomTextField(with: searchType.title)
+    init() {
+        self.customSearchBar = CustomTextField(with: Strategy.searchTitle)
         super.init(nibName: nil, bundle: nil)
     }
     

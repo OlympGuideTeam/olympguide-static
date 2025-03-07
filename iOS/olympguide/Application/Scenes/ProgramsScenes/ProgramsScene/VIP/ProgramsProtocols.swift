@@ -12,6 +12,7 @@ protocol ProgramsBusinessLogic {
     func loadPrograms(with request: Programs.Load.Request)
     func restoreFavorite(at indexPath: IndexPath) -> Bool
     func setFavorite(at indexPath: IndexPath, isFavorite: Bool)
+    func program(at indexPath: IndexPath) -> ProgramShortModel
 }
 
 // MARK: - Data Store
