@@ -34,7 +34,7 @@ fileprivate enum Constants {
 
 final class ProgramViewController : UIViewController, WithBookMarkButton {
     var interactor: (ProgramBusinessLogic & BenefitsByOlympiadsBusinessLogic)?
-    var router: (ProgramRoutingLogic & BenefitsByOlympiadsRoutingLogic)?
+    var router: (ProgramRoutingLogic /*& BenefitsByOlympiadsRoutingLogic*/)?
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -47,6 +47,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     let university: UniversityModel
     let codeLabel: UILabel = UILabel()
     let programNameLabel = UILabel()
+    let benefitsLabel = UILabel()
     var program: ProgramShortModel?
     var benefits: [OlympiadWithBenefitViewModel] = []
     var link: String? = nil
@@ -176,21 +177,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             
             
             if isFavorite {
-                let model = ProgramModel(
-                    programID: program.programID,
-                    name: program.name,
-                    field: program.field,
-                    budgetPlaces: program.budgetPlaces,
-                    paidPlaces: program.paidPlaces,
-                    cost: program.cost,
-                    requiredSubjects: program.requiredSubjects,
-                    optionalSubjects: program.optionalSubjects ?? [],
-                    like: true,
-                    university: university,
-                    link: self.link
-                )
-                
-                FavoritesManager.shared.addProgramToFavorites(viewModel: model)
+                FavoritesManager.shared.addProgramToFavorites(self.university, program)
             } else {
                 FavoritesManager.shared.removeProgramFromFavorites(programID: program.programID)
             }
@@ -214,6 +201,7 @@ extension ProgramViewController {
         configureCostLabel()
         configureSubjectsStack()
         configureBenefitsLabel()
+        configureSearchButton()
         
         configureRefreshControl()
         configureTableView()
@@ -362,7 +350,6 @@ extension ProgramViewController {
     }
     
     private func configureBenefitsLabel() {
-        let benefitsLabel = UILabel()
         benefitsLabel.text = "Льготы"
         benefitsLabel.font = FontManager.shared.font(for: .tableTitle)
         
@@ -423,6 +410,28 @@ extension ProgramViewController {
         emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
         
         return emptyLabel
+    }
+    
+    private func configureSearchButton() {
+        let searchButton = UIClosureButton()
+        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchButton.tintColor = .black
+        searchButton.contentHorizontalAlignment = .fill
+        searchButton.contentVerticalAlignment = .fill
+        searchButton.imageView?.contentMode = .scaleAspectFit
+        
+        searchButton.action = { [weak self] in
+            guard let self else { return }
+            self.router?.routeToSearch(programId: self.programId)
+        }
+        
+        informationContainer.addSubview(searchButton)
+        
+        searchButton.pinRight(to: informationContainer.trailingAnchor, 20)
+        searchButton.pinCenterY(to: benefitsLabel.centerYAnchor)
+        
+        searchButton.setWidth(28)
+        searchButton.setHeight(28)
     }
     
     @objc private func handleRefresh() {
@@ -560,7 +569,7 @@ extension ProgramViewController {
             .sink { [weak self] event in
                 guard let self = self else { return }
                 switch event {
-                case.added(let program):
+                case.added(_, let program):
                     if program.programID == self.programId {
                         self.isFavorite = true
                     }
