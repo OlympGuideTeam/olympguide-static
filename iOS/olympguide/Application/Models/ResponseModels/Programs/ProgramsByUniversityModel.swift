@@ -7,7 +7,7 @@
 
 struct ProgramsByUniversityModel : Codable {
     let univer: UniversityModel
-    let programs: [ProgramShortModel]
+    var programs: [ProgramShortModel]
     
     func toViewModel() -> ProgramsByUniversityViewModel {
         ProgramsByUniversityViewModel(
