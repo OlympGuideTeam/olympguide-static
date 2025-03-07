@@ -429,7 +429,7 @@ extension UniversityViewController : UITableViewDataSource {
         let isLastCell = indexPath.row == totalRows - 1
         
         if isLastCell {
-            cell.hideSeparator()
+            cell.hideSeparator(true)
         }
         
         cell.favoriteButtonTapped = {[weak self] sender, isFavorite in
@@ -437,20 +437,10 @@ extension UniversityViewController : UITableViewDataSource {
             self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = isFavorite
             let viewModel = self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
             if isFavorite {
-                let model = ProgramModel(
-                    programID: viewModel.programID,
-                    name: viewModel.name,
-                    field: viewModel.code,
-                    budgetPlaces: viewModel.budgetPlaces,
-                    paidPlaces: viewModel.paidPlaces,
-                    cost: viewModel.cost,
-                    requiredSubjects: viewModel.requiredSubjects,
-                    optionalSubjects: viewModel.optionalSubjects ?? [],
-                    like: viewModel.like,
-                    university: self.university,
-                    link: nil
-                )
-                FavoritesManager.shared.addProgramToFavorites(viewModel: model)
+                guard
+                    let model = self.interactor?.program(at: indexPath)
+                else { return }
+                FavoritesManager.shared.addProgramToFavorites(university, model)
             } else {
                 self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = false
                 FavoritesManager.shared.removeProgramFromFavorites(programID: viewModel.programID)
@@ -557,7 +547,7 @@ extension UniversityViewController {
             .sink { [weak self] event in
                 guard let self = self else { return }
                 switch event {
-                case .added(let program):
+                case .added(let university, let program):
                     if let groupIndex = groupOfProgramsViewModel.firstIndex(where: { group in
                         group.programs.contains(where: { $0.programID == program.programID })
                     }) {
