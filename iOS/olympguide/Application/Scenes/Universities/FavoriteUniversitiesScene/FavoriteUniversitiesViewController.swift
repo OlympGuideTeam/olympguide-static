@@ -204,20 +204,15 @@ extension FavoriteUniversitiesViewController {
                 switch event {
                 case .added(let university):
                     if !self.universities.contains(where: { $0.universityID == university.universityID }) {
-                        let viewModel = UniversityViewModel(
-                            universityID: university.universityID,
-                            name: university.name,
-                            logoURL: university.logo,
-                            region: university.region,
-                            like: true
-                        )
+                        var viewModel = university.toViewModel()
+                        viewModel.like = true
                         
                         let insertIndex = self.universities.firstIndex {$0.universityID > university.universityID} ?? self.universities.count
                         
                         self.interactor?.likeUniversity(university, at: insertIndex)
                         self.universities.insert(viewModel, at: insertIndex)
                         
-                        let newIndex = IndexPath(row: self.universities.count - 1, section: 0)
+                        let newIndex = IndexPath(row: insertIndex, section: 0)
                         self.tableView.insertRows(at: [newIndex], with: .automatic)
                         self.tableView.backgroundView = nil
                     }
