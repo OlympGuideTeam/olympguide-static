@@ -78,7 +78,7 @@ extension UniversityWorker : ProgramsWorkerLogic {
         var queryItems = [URLQueryItem]()
         
         params.forEach {
-            queryItems.append(URLQueryItem(name: $0.key, value: $0.value))
+            queryItems.append($0.urlValue)
         }
         
         networkService.request(
