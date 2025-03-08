@@ -35,20 +35,18 @@ fileprivate enum CellConstants {
     }
 }
 
-final class ProgramTableViewCell: UITableViewCell {
+final class ProgramTableViewCell: UICellWithFavoriteButton {
     
     // MARK: - Variables
     static let identifier = CellConstants.Identifier.cellIdentifier
     
     private let informationStack: UIStackView = UIStackView()
-    private let favoriteButton: UIButton = UIButton()
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
     private let subjectsStack: SubjectsStack = SubjectsStack()
     private let separatorLine: UIView = UIView()
     
-    var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
     
     // MARK: - Lifecycle
     override init(

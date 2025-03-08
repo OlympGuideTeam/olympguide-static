@@ -10,12 +10,15 @@ final class OlympiadsInteractor: OlympiadsBusinessLogic, OlympiadsDataStore {
     var presenter: OlympiadsPresentationLogic?
     var worker: OlympiadsWorkerLogic?
     var olympiads: [OlympiadModel] = []
-    var params: Dictionary<String, Set<String>> = [:]
+    var params: Dictionary<ParamType, SingleOrMultipleArray<Param>> = [:]
     
     func loadOlympiads(_ request: Olympiads.Load.Request) {
-        params = request.params
+        let params: [Param] = request.params.flatMap { key, value in
+            value.array
+        }
+        self.params = request.params
         worker?.fetchOlympiads(
-            with: []
+            with: params
         ) { [weak self] result in
             switch result {
             case .success(let olympiads):

@@ -38,15 +38,16 @@ enum Options {
         }
         
         struct ViewModel {
-            struct OptionViewModel {
-                let id: Int
-                let name: String
-            }
-            
             let options: [OptionViewModel]
         }
     }
 }
+
+struct OptionViewModel {
+    let id: Int
+    let name: String
+}
+
 
 struct DynamicCodingKeys: CodingKey {
     var stringValue: String

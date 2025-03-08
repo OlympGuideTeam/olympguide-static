@@ -37,7 +37,7 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
     
     override func didTapDeleteButton() {
         super.didTapDeleteButton()
-        selectedIndecies = []
+        selectedIndecies.removeAll()
     }
     
     override func didTapSearchBar() {
@@ -57,7 +57,7 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
             title: "Регион",
             isMultipleChoice: false,
             selectedIndices: selectedIndecies,
-            count: 87,
+//            count: 87,
             endPoint: endPoint
         )
         optionVC.delegate = self
@@ -67,7 +67,7 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
 }
 
 extension RegionTextField : OptionsViewControllerDelegate {
-    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [Options.FetchOptions.ViewModel.OptionViewModel]) {
+    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [OptionViewModel], paramType: ParamType?) {
         selectedIndecies = optionsIndicies
         if optionsIndicies.isEmpty {
             setTextFieldText("")

@@ -35,6 +35,9 @@ final class FilterSortView: UIView {
     // MARK: - Variables
     weak var delegate: FilterSortViewDelegate?
     
+    var sortButttonTapped: ((_: UIButton) -> Void)?
+    var filterButtonTapped: ((_: FilterButton) -> Void)?
+    
     private lazy var horizontalScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsHorizontalScrollIndicator = false
@@ -53,13 +56,18 @@ final class FilterSortView: UIView {
     init(sortingOptions: [String], filteringOptions: [String]) {
         super.init(frame: .zero)
         setupUI()
-        configure(sortingOptions: sortingOptions, filteringOptions: filteringOptions)
+//        configure(sortingOptions: sortingOptions, filteringOptions: filteringOptions)
     }
     
     init (filteringOptions: [String]) {
         super.init(frame: .zero)
         setupUI()
-        configure(filteringOptions: filteringOptions)
+//        configure(filteringOptions: filteringOptions)
+    }
+    
+    init() {
+        super.init(frame: .zero)
+        setupUI()
     }
     
     override init(frame: CGRect) {
@@ -90,7 +98,7 @@ final class FilterSortView: UIView {
         horizontalStackView.pinHeight(to: horizontalScrollView)
     }
     
-    func configure(sortingOptions: [String], filteringOptions: [String]) {
+    func configure(sortingOption: String?, filteringOptions: [String]) {
         horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         let space = UIView()
@@ -99,9 +107,10 @@ final class FilterSortView: UIView {
         
         let sortButton = createSortButton()
         horizontalStackView.addArrangedSubview(sortButton)
+//        sortButton.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
         
-        for filter in filteringOptions {
-            let filterButton = createFilterButton(with: filter)
+        for (index ,filterName) in filteringOptions.enumerated() {
+            let filterButton = createFilterButton(with: filterName, tag: index)
             horizontalStackView.addArrangedSubview(filterButton)
         }
     }
@@ -111,8 +120,8 @@ final class FilterSortView: UIView {
         space.setWidth(Constants.Dimensions.spaceWidth)
         horizontalStackView.addArrangedSubview(space)
         
-        for filter in filteringOptions {
-            let filterButton = createFilterButton(with: filter)
+        for (index ,filterName) in filteringOptions.enumerated() {
+            let filterButton = createFilterButton(with: filterName, tag: index)
             horizontalStackView.addArrangedSubview(filterButton)
         }
     }
@@ -123,30 +132,33 @@ final class FilterSortView: UIView {
         button.tintColor = Constants.Colors.tintColor
         button.setWidth(Constants.Dimensions.sortButtonSize)
         button.setHeight(Constants.Dimensions.sortButtonSize)
-//        button.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(sortButtonTapped(_:)), for: .touchUpInside)
         return button
     }
     
-    private func createFilterButton(with title: String) -> UIButton {
+    private func createFilterButton(with title: String, tag: Int) -> UIButton {
         let button = FilterButton(title: title)
         //        button.isSelectedItem.toggle()
+        button.tag = tag
         button.tintColor = .black
-//        button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
         return button
 //        UIButton(type: .system)
     }
     
     // MARK: - Objc funcs
-    @objc private func sortButtonTapped() {
-        delegate?.filterSortViewDidTapSortButton(self)
+//    @objc private func sortButtonTapped() {
+//        delegate?.filterSortViewDidTapSortButton(self)
+//    }
+    
+    @objc private func filterButtonTapped(_ sender: UIButton) {
+        guard let filterButton = sender as? FilterButton else { return }
+        filterButtonTapped?(filterButton)
     }
     
-//    @objc private func filterButtonTapped(_ sender: UIButton) {
-//        guard let filterButton = sender as? FilterButton else { return }
-//        let title = filterButton.filterTitle
-//        
-//        delegate?.filterSortView(self, didTapFilterWith: title)
-//    }
+    @objc func sortButtonTapped(_ sender: UIButton) {
+        sortButttonTapped?(sender)
+    }
 }
 
 

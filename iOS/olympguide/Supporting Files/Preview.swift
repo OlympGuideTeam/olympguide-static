@@ -65,6 +65,45 @@ struct BenefitViewControllerWrapper : UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
+struct OptionsViewControllerWrapper : UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        let models = [
+            OptionViewModel(
+                id: 1,
+                name: "По уровню"
+            ),
+            OptionViewModel(
+                id: 2,
+                name: "По профилю"
+            ),
+            OptionViewModel(
+                id: 3,
+                name: "По имени"
+            ),
+            OptionViewModel(
+                id: 4,
+                name: "По имени"
+            ),
+            OptionViewModel(
+                id: 5,
+                name: "По имени"
+            )
+        ]
+        
+        let vc = OptionsViewController(
+            title: "Сортировать",
+            isMultipleChoice: false,
+            selectedIndices: Set(),
+            options: models
+        )
+        vc.navigationItem.largeTitleDisplayMode = .never
+        return vc
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+
 #Preview {
-    FieldViewControllerWrapper()
+    OptionsViewControllerWrapper()
 }

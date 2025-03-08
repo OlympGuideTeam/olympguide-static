@@ -51,7 +51,7 @@ final class FavoriteOlympiadsViewController : UIViewController {
         configureTableView()
         
         interactor?.loadOlympiads(
-            Olympiads.Load.Request(params: Dictionary<String, Set<String>>())
+            Olympiads.Load.Request(params: Dictionary<ParamType, SingleOrMultipleArray<Param>>())
         )
         
         let backItem = UIBarButtonItem(
@@ -118,7 +118,7 @@ final class FavoriteOlympiadsViewController : UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.interactor?.loadOlympiads(
                 Olympiads.Load.Request(
-                    params: Dictionary<String, Set<String>>()
+                    params: Dictionary<ParamType, SingleOrMultipleArray<Param>>()
                 )
             )
             self.refreshControl.endRefreshing()
