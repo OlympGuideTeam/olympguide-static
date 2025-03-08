@@ -163,7 +163,6 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         arrowImageView.pinCenterY(to: self)
         arrowImageView.pinRight(to: self.trailingAnchor, Constants.Dimensions.arrowRightMargin)
         
-        // Начальная конфигурация (по умолчанию)
         configureDefault()
     }
     
@@ -173,10 +172,9 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         arrowImageView.tintColor = Constants.Colors.arrowTintColor
         let config = UIImage.SymbolConfiguration(weight: .light)
         arrowImageView.image = UIImage(systemName: Constants.Images.arrowImageName, withConfiguration: config)
-        // Используем Regular шрифт в состоянии по умолчанию
         titleLabelCustom.font = Constants.Fonts.defaultTitleFont
         titleLabelCustom.textColor = Constants.Colors.defaultTitleTextColor
-        addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+//        addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     private func configureSelected() {
@@ -188,24 +186,14 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         titleLabelCustom.textColor = Constants.Colors.selectedTitleTextColor
     }
     
-    @objc func buttonTapped() {
-        let optionVC = OptionsViewController(
-            title: filterTitle,
-            isMultipleChoice: isMultipleChoice,
-            selectedIndices: selectedIndecies,
-            count: count,
-            endPoint: endPoint
-        )
-        optionVC.delegate = self
-    }
 }
 
-extension FilterButton : OptionsViewControllerDelegate {
-    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [Options.FetchOptions.ViewModel.OptionViewModel]) {
-        selectedIndecies = optionsIndicies
-//        delegate
-    }
-    
-    func didCancle() { }
-}
+//extension FilterButton : OptionsViewControllerDelegate {
+//    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [OptionViewModel]) {
+//        selectedIndecies = optionsIndicies
+////        delegate
+//    }
+//    
+//    func didCancle() { }
+//}
 
