@@ -54,7 +54,7 @@ extension OlympiadWorker : BenefitsByProgramsWorkerLogic {
         var queryItems: [URLQueryItem] = []
         queryItems.append(URLQueryItem(name: "university_id", value: "\(universityId)"))
         for param in params {
-            queryItems.append(URLQueryItem(name: param.key, value: param.value))
+            queryItems.append(param.urlValue)
         }
         
         networkService.request(
