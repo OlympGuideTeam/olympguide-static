@@ -7,6 +7,11 @@
 
 import UIKit
 
+enum InitMethod {
+    case endpoint(endpoint: String)
+    case models([OptionViewModel])
+}
+
 // MARK: - Constants
 fileprivate enum Constants {
     // MARK: - Colors
@@ -88,22 +93,32 @@ fileprivate enum Constants {
 
 
 protocol OptionsViewControllerDelegate: AnyObject {
-    func didSelectOption(_ options: Set<Int>, _ optionsNames: [Options.FetchOptions.ViewModel.OptionViewModel])
+    func didSelectOption(_ options: Set<Int>, _ optionsNames: [OptionViewModel], paramType: ParamType?)
     func didCancle()
+}
+
+extension OptionsViewControllerDelegate {
+    func didCancle() {}
+}
+
+protocol OptionsViewControllerButtonDelegate {
+    
 }
 
 final class OptionsViewController: UIViewController {
     
     // MARK: - Properties
     weak var delegate: OptionsViewControllerDelegate?
+    var buttonDelegate: OptionsViewControllerButtonDelegate?
+    
     var interactor: (OptionsDataStore & OptionsBusinessLogic)?
     
-    private var options: [Options.FetchOptions.ViewModel.OptionViewModel] = []
+    private var options: [OptionViewModel] = []
     
     private let dimmingView = UIView()
     private let containerView = UIView()
     private var finalY: CGFloat = 0
-    private var endPoint: String = ""
+    private var endPoint: String?
     
     private var initialSelectedIndices: Set<Int> = []
     var selectedIndices: Set<Int> = []
@@ -115,6 +130,8 @@ final class OptionsViewController: UIViewController {
     private let titleLabel: UILabel = UILabel()
     private let cancelButton: UIButton = UIButton()
     private let saveButton: UIButton = UIButton()
+    
+    private var paramType: ParamType?
     
     private var isMultipleChoice: Bool
     lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
@@ -143,21 +160,51 @@ final class OptionsViewController: UIViewController {
         title: String,
         isMultipleChoice: Bool,
         selectedIndices: Set<Int>,
-        count: Int,
-        endPoint: String
+        options: [OptionViewModel],
+        paramType: ParamType? = nil
     ) {
-        self.count = count
+        self.count = options.count
+        self.titleLabel.text = title
+        self.isMultipleChoice = isMultipleChoice
+        self.options = options
+        self.paramType = paramType
+        super.init(nibName: nil, bundle: nil)
+        
+        self.selectedIndices = selectedIndices
+        self.currentSelectedIndices = self.selectedIndices
+        for index in selectedIndices {
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            selectedScrollView.addButtonToStackView(with: options[index].name, tag: index)
+        }
+        
+        for i in 0..<self.options.count {
+            allToCurrent[i] = i
+            currentToAll[i] = i
+        }
+        currentCount = self.options.count
+        
+        setup()
+        
+        animateShowSafely()
+    }
+    
+    init(
+        title: String,
+        isMultipleChoice: Bool,
+        selectedIndices: Set<Int>,
+//        count: Int,
+        endPoint: String,
+        paramType: ParamType? = nil
+    ) {
+//        self.count = count
+        self.paramType = paramType
         self.endPoint = endPoint
         self.titleLabel.text = title
         self.isMultipleChoice = isMultipleChoice
         super.init(nibName: nil, bundle: nil)
         
-        self.selectedIndices = currentSelectedIndices
+        self.selectedIndices = selectedIndices
         self.currentSelectedIndices = self.selectedIndices
-        
-        for index in currentSelectedIndices {
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        }
         
         setup()
     }
@@ -175,7 +222,10 @@ final class OptionsViewController: UIViewController {
         configureGesture()
 //        configureUI()
         
-        interactor?.loadOptions(request: Options.FetchOptions.Request(endPoint: endPoint))
+        guard let endPoint else { return }
+        
+        let request = Options.FetchOptions.Request(endPoint: endPoint)
+        interactor?.loadOptions(request: request)
     }
     
     // MARK: - Setup
@@ -206,8 +256,8 @@ final class OptionsViewController: UIViewController {
         configureSaveButton()
         if count >= Constants.Numbers.rowsLimit {
             configureSearchBar()
+            configureSelectedScrollContainer()
         }
-        configureSelectedScrollContainer()
         configureTableView()
     }
     
@@ -349,6 +399,16 @@ final class OptionsViewController: UIViewController {
         UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
             self.containerView.frame.origin.y = self.finalY
             self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewFinalAlpha)
+        }
+    }
+    
+    func animateShowSafely() {
+        if view.window != nil {
+            animateShow()
+        } else {
+            DispatchQueue.main.async {
+                self.animateShowSafely()
+            }
         }
     }
     
@@ -524,11 +584,11 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     func saveButtonTouchUp(_ sender: UIButton) {
         buttonTouchUp(sender)
         initialSelectedIndices = selectedIndices
-        var names: [Options.FetchOptions.ViewModel.OptionViewModel] = []
+        var names: [OptionViewModel] = []
         for index in selectedIndices {
             names.append(options[index])
         }
-        delegate?.didSelectOption(selectedIndices, names)
+        delegate?.didSelectOption(selectedIndices, names, paramType: self.paramType)
         animateDismiss {
             self.dismiss(animated: false)
         }
@@ -574,14 +634,21 @@ extension OptionsViewController: OptionsDisplayLogic {
             currentToAll[i] = i
         }
         currentCount = self.options.count
+        count = self.options.count
         DispatchQueue.main.async {[weak self] in
-            self?.tableView.reloadData()
+            guard let self = self else { return }
+            self.tableView.reloadData()
+            for index in currentSelectedIndices {
+                tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+                selectedScrollView.addButtonToStackView(with: options[index].name, tag: index)
+            }
         }
-        animateShow()
+        animateShowSafely()
     }
     
 }
 
+// MARK: - SelectedBarDelegate
 extension OptionsViewController : SelectedBarDelegate {
     func toggleCustomTextField() {
         guard let containerHeightConstraint = self.containerHeightConstraint else { return }
