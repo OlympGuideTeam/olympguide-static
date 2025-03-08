@@ -86,7 +86,6 @@ test-output/
 
 # python
 *.pyc
-*.pyc
 
 # load_service
 *.pdf
