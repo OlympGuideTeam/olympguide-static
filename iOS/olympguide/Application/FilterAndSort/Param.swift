@@ -5,53 +5,97 @@
 //  Created by Tom Tim on 24.02.2025.
 //
 
-enum Param {
-    case level(Int)
-    case diplomaClass(Int)
-    case region(Int)
+import Foundation
+
+
+enum ParamType: String {
+    case sort
+    case region
+    case olympiadLevel = "level"
+    case olympiadProfile = "profile"
     
-    init?(_ param_name: String, _ param_value: Any) {
-        switch param_name {
-            case "level":
-            if let value = param_value as? Int {
-                self = .level(value)
-                return
-            }
-        case "diploma_class":
-            if let value = param_value as? Int {
-                self = .diplomaClass(value)
-                return
-            }
-        case "region":
-            if let value = param_value as? Int {
-                self = .region(value)
-                return
-            }
+}
+
+struct Param {
+    let paramType: ParamType
+    let value: String
+    
+    var urlValue: URLQueryItem {
+        URLQueryItem(name: paramType.rawValue, value: self.value)
+    }
+    
+    
+    init?(paramType: ParamType, option: OptionViewModel) {
+        self.paramType = paramType
+        
+        switch paramType {
+        case .region, .olympiadLevel:
+            self.value = String(option.id)
         default:
-            return nil
-        }
-        return nil
-    }
-    
-    var key: String {
-        switch self {
-        case .level:
-            return "level"
-        case .diplomaClass:
-            return "class"
-        case .region:
-            return "region"
-        }
-    }
-    
-    var value: String {
-        switch self {
-        case .level(let value):
-            return String(value)
-        case .diplomaClass(let value):
-            return String(value)
-        case .region(let value):
-            return String(value)
+            self.value = option.name
         }
     }
 }
+
+//enum Paramm {
+//    case level(Int)
+//    case diplomaClass(Int)
+//    case region(Int)
+//    case unknown(String, String)
+//    
+//    init?(_ param_name: String, _ param_value: Any) {
+//        switch param_name {
+//            case "level":
+//            if let value = param_value as? Int {
+//                self = .level(value)
+//                return
+//            }
+//        case "diploma_class":
+//            if let value = param_value as? Int {
+//                self = .diplomaClass(value)
+//                return
+//            }
+//        case "region":
+//            if let value = param_value as? Int {
+//                self = .region(value)
+//                return
+//            }
+//        default:
+//            if let value = param_value as? CustomStringConvertible {
+//                self = .unknown(param_name, value.description)
+//                return
+//            }
+//        }
+//        return nil
+//    }
+//    
+//    var key: String {
+//        switch self {
+//        case .level:
+//            return "level"
+//        case .diplomaClass:
+//            return "class"
+//        case .region:
+//            return "region"
+//        case .unknown(let key, _):
+//            return key
+//        }
+//    }
+//    
+//    var value: String {
+//        switch self {
+//        case .level(let value):
+//            return String(value)
+//        case .diplomaClass(let value):
+//            return String(value)
+//        case .region(let value):
+//            return String(value)
+//        case .unknown(_, let value):
+//            return value
+//        }
+//    }
+//    
+//    var urlValue: URLQueryItem {
+//        URLQueryItem(name: self.key, value: self.value)
+//    }
+//}
