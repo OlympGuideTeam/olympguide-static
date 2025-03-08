@@ -11,7 +11,7 @@ final class FavoriteOlympiadsInteractor : OlympiadsBusinessLogic, OlympiadsDataS
     var worker: OlympiadsWorkerLogic?
     var olympiads: [OlympiadModel] = []
     var removedOlympiads: [Int: OlympiadModel] = [:]
-    var params: Dictionary<String, Set<String>> = [:]
+    var params: Dictionary<ParamType, SingleOrMultipleArray<Param>> = [:]
     
     func loadOlympiads(_ request: Olympiads.Load.Request) {
         params = request.params
