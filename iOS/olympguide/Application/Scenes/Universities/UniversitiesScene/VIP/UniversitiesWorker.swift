@@ -28,7 +28,7 @@ final class UniversitiesWorker : UniversitiesWorkerLogic {
         var queryItems = [URLQueryItem]()
         
         for param in params {
-            queryItems.append(URLQueryItem(name: param.key, value: param.value))
+            queryItems.append(param.urlValue)
         }
         
         networkService.request(
