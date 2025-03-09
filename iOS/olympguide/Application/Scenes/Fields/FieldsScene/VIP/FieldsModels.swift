@@ -11,8 +11,7 @@ enum Fields {
     // MARK: - Use Cases
     enum Load {
         struct Request {
-            let searchQuery: String?
-            let degree: String?
+            let params: Dictionary<ParamType, SingleOrMultipleArray<Param>>
         }
         
         struct Response {

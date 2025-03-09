@@ -34,11 +34,13 @@ enum Options {
         }
         
         struct Response {
-            let options: [DynamicOption]
+            var options: [DynamicOption]? = nil
+            var error: Error? = nil
         }
         
         struct ViewModel {
-            let options: [OptionViewModel]
+            var options: [OptionViewModel]? = nil
+            var error: Error? = nil
         }
     }
 }
@@ -60,32 +62,42 @@ struct DynamicCodingKeys: CodingKey {
 struct DynamicOption: Decodable {
     let id: Int
     let name: String
-
+    
+    static var pseudoID: Int = 0 {
+        didSet {
+            if pseudoID < 0 { pseudoID = 0 }
+        }
+    }
+    
+    static func nextID() -> Int {
+        pseudoID += 1
+        return pseudoID
+    }
+    
     init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-        
-        var idValue: Int?
-        var nameValue: String?
-        
-        for key in container.allKeys {
-            if key.stringValue == "name" {
-                nameValue = try container.decode(String.self, forKey: key)
-            } else if key.stringValue.hasSuffix("_id") {
-                idValue = try container.decode(Int.self, forKey: key)
+        if let container = try? decoder.container(keyedBy: DynamicCodingKeys.self) {
+            var idValue: Int?
+            var nameValue: String?
+            
+            for key in container.allKeys {
+                if key.stringValue == "name" {
+                    nameValue = try container.decode(String.self, forKey: key)
+                } else if key.stringValue.hasSuffix("_id") {
+                    idValue = try container.decode(Int.self, forKey: key)
+                }
+            }
+            
+            if let id = idValue, let name = nameValue {
+                self.id = id
+                self.name = name
+                return
             }
         }
         
-        guard let idValue, let nameValue else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: container.codingPath,
-                    debugDescription: "Отсутствует один из необходимых ключей: id или name"
-                )
-            )
-        }
-        
-        self.id = idValue
-        self.name = nameValue
+        let singleValueContainer = try decoder.singleValueContainer()
+        let name = try singleValueContainer.decode(String.self)
+        self.name = name
+        self.id = DynamicOption.nextID()
     }
 }
 

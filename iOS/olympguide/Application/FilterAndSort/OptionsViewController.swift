@@ -8,7 +8,7 @@
 import UIKit
 
 enum InitMethod {
-    case endpoint(endpoint: String)
+    case endpoint(String)
     case models([OptionViewModel])
 }
 
@@ -93,7 +93,7 @@ fileprivate enum Constants {
 
 
 protocol OptionsViewControllerDelegate: AnyObject {
-    func didSelectOption(_ options: Set<Int>, _ optionsNames: [OptionViewModel], paramType: ParamType?)
+    func didSelectOption(_ indices: Set<Int>, _ options: [OptionViewModel], paramType: ParamType?)
     func didCancle()
 }
 
@@ -102,9 +102,10 @@ extension OptionsViewControllerDelegate {
 }
 
 protocol OptionsViewControllerButtonDelegate {
-    
+    func setButtonView(_: [OptionViewModel])
 }
 
+// MARK: - OptionsViewController
 final class OptionsViewController: UIViewController {
     
     // MARK: - Properties
@@ -589,6 +590,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             names.append(options[index])
         }
         delegate?.didSelectOption(selectedIndices, names, paramType: self.paramType)
+        buttonDelegate?.setButtonView(names)
         animateDismiss {
             self.dismiss(animated: false)
         }
@@ -596,7 +598,6 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
 }
 
 // MARK: - CustomTextFieldDelegate
-
 extension OptionsViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
         let request = Options.TextDidChange.Request(query: text)
@@ -628,7 +629,22 @@ extension OptionsViewController: OptionsDisplayLogic {
     }
     
     func displayFetchOptions(viewModel: Options.FetchOptions.ViewModel) {
-        self.options = viewModel.options
+        if let error = viewModel.error {
+            let presentingVC = presentingViewController
+            
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                self.dismiss(animated: true) {
+                    presentingVC?.showAlert(
+                        with: error.localizedDescription,
+                        cancelTitle: "Ок"
+                    )
+                }
+            }
+        }
+        
+        guard let options = viewModel.options else { return }
+        
+        self.options = options
         for i in 0..<self.options.count {
             allToCurrent[i] = i
             currentToAll[i] = i
