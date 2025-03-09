@@ -37,6 +37,7 @@ final class FilterSortView: UIView {
     
     var sortButttonTapped: ((_: UIButton) -> Void)?
     var filterButtonTapped: ((_: FilterButton) -> Void)?
+    var crossButtonTapped: ((_: UIButton) -> Void)?
     
     private lazy var horizontalScrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -98,7 +99,15 @@ final class FilterSortView: UIView {
         horizontalStackView.pinHeight(to: horizontalScrollView)
     }
     
-    func configure(sortingOption: String?, filteringOptions: [String]) {
+    func configure(
+        sortingOption: String?,
+        filteringOptions: [String]
+    ) {
+        guard sortingOption != nil else {
+            configure(filteringOptions: filteringOptions)
+            return
+        }
+        
         horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         let space = UIView()
@@ -107,7 +116,6 @@ final class FilterSortView: UIView {
         
         let sortButton = createSortButton()
         horizontalStackView.addArrangedSubview(sortButton)
-//        sortButton.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
         
         for (index ,filterName) in filteringOptions.enumerated() {
             let filterButton = createFilterButton(with: filterName, tag: index)
@@ -116,12 +124,13 @@ final class FilterSortView: UIView {
     }
     
     func configure(filteringOptions: [String]) {
+        horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let space = UIView()
         space.setWidth(Constants.Dimensions.spaceWidth)
         horizontalStackView.addArrangedSubview(space)
         
         for (index ,filterName) in filteringOptions.enumerated() {
-            let filterButton = createFilterButton(with: filterName, tag: index)
+            let filterButton = createFilterButton(with: filterName, tag: index - 1)
             horizontalStackView.addArrangedSubview(filterButton)
         }
     }
@@ -140,7 +149,9 @@ final class FilterSortView: UIView {
         let button = FilterButton(title: title)
         //        button.isSelectedItem.toggle()
         button.tag = tag
+        button.crossButton.tag = tag
         button.tintColor = .black
+        button.crossButton.addTarget(self, action: #selector(crossButtonTapped(_:)), for: .touchUpInside)
         button.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
         return button
 //        UIButton(type: .system)
@@ -158,6 +169,10 @@ final class FilterSortView: UIView {
     
     @objc func sortButtonTapped(_ sender: UIButton) {
         sortButttonTapped?(sender)
+    }
+    
+    @objc func crossButtonTapped(_ sender: UIButton) {
+        crossButtonTapped?(sender)
     }
 }
 
