@@ -35,7 +35,6 @@ fileprivate enum Constants {
         static let titleLeftMargin: CGFloat = 16
         static let titleRightMargin: CGFloat = 6
         static let arrowRightMargin: CGFloat = 10
-        // Размер иконки стрелки, как мы задаём её вручную
         static let arrowSize: CGFloat = 22
     }
 }
@@ -45,25 +44,24 @@ protocol ScrolledButtonProtocol {
     var isSelectedItem: Bool { get set }
 }
 
-
-protocol FilterSortButtonDelegate: AnyObject {
-    func filterSortButtonDidSelect(_ button: FilterButton, with view: OptionsViewController)
-}
-
 class FilterButton: UIButton, ScrolledButtonProtocol {
     
     // MARK: - Variables
     private var titleLabelCustom: UILabel = UILabel()
+    let plusLabel: UILabel = UILabel()
     let arrowImageView: UIImageView = UIImageView()
-    weak var delegate: FilterSortButtonDelegate?
-    
+    let crossButton: UIButton = {
+        let button = UIButton()
+        button.tintColor = .black
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        button.setImage(UIImage(systemName: "chevron.down"), for: .normal)
+        return button
+    }()
     var filterTitle: String {
         return titleLabelCustom.text ?? ""
     }
-    var selectedIndecies: Set<Int> = []
-    private var endPoint: String = ""
-    private var count: Int = 0
-    private var isMultipleChoice: Bool = false
     
     private var _isSelectedItem = false
     var isSelectedItem: Bool {
@@ -75,35 +73,22 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
             } else {
                 configureDefault()
             }
-            self.invalidateIntrinsicContentSize()
         }
     }
+    
+    var filterInitTitle: String
     
     // MARK: - Lifecycle
     init(
         title: String
     ) {
+        self.filterInitTitle = title
+        
         super.init(frame: .zero)
         self.titleLabelCustom.text = title
         isUserInteractionEnabled = true
         configureUI()
     }
-    
-    init(
-        title: String,
-        endpoint: String,
-        count: Int,
-        isMultipleChoice: Bool = false
-    ) {
-        self.isMultipleChoice = isMultipleChoice
-        self.count = count
-        self.endPoint = endpoint
-        super.init(frame: .zero)
-        self.titleLabelCustom.text = title
-        isUserInteractionEnabled = true
-        configureUI()
-    }
-
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
@@ -117,32 +102,12 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         }
     }
     
-    // Переопределяем intrinsicContentSize, чтобы ширина учитывала максимальный размер текста
-    override var intrinsicContentSize: CGSize {
-        let text = titleLabelCustom.text ?? ""
-        
-        // Вычисляем ширину текста для обоих шрифтов
-        let attributesDefault = [NSAttributedString.Key.font: Constants.Fonts.defaultTitleFont]
-        let attributesSelected = [NSAttributedString.Key.font: Constants.Fonts.selectedTitleFont]
-        let sizeDefault = (text as NSString).size(withAttributes: attributesDefault)
-        let sizeSelected = (text as NSString).size(withAttributes: attributesSelected)
-        
-        let textWidth = max(sizeDefault.width, sizeSelected.width)
-        
-        // Общая ширина = отступ слева + ширина текста + отступ справа (между текстом и иконкой) + ширина иконки + отступ справа от иконки
-        let totalWidth = Constants.Dimensions.titleLeftMargin +
-                         textWidth +
-                         Constants.Dimensions.titleRightMargin +
-                         Constants.Dimensions.arrowSize +
-                         Constants.Dimensions.arrowRightMargin
-        
-        return CGSize(width: totalWidth, height: Constants.Dimensions.buttonHeight)
-    }
-    
     // MARK: - Private funcs
     private func configureUI() {
         addSubview(titleLabelCustom)
+        addSubview(crossButton)
         addSubview(arrowImageView)
+        addSubview(plusLabel)
         
         layer.cornerRadius = Constants.Dimensions.cornerRadius
         clipsToBounds = true
@@ -153,39 +118,75 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         // Настройка arrowImageView
         arrowImageView.setWidth(Constants.Dimensions.arrowSize)
         arrowImageView.setHeight(Constants.Dimensions.arrowSize)
+        crossButton.setWidth(Constants.Dimensions.arrowSize)
+        crossButton.setHeight(Constants.Dimensions.arrowSize)
         
         // Расстановка констрейнтов (пример с использованием методов pin*)
         titleLabelCustom.pinTop(to: self.topAnchor)
         titleLabelCustom.pinLeft(to: self.leadingAnchor, Constants.Dimensions.titleLeftMargin)
         titleLabelCustom.pinBottom(to: self.bottomAnchor, Constants.Dimensions.titleBottomMargin)
-        titleLabelCustom.pinRight(to: arrowImageView.leadingAnchor, Constants.Dimensions.titleRightMargin)
+//        titleLabelCustom.pinRight(to: crossButton.leadingAnchor, Constants.Dimensions.titleRightMargin)
+        
+        plusLabel.pinTop(to: self.topAnchor)
+        plusLabel.pinLeft(to: titleLabelCustom.trailingAnchor)
+        plusLabel.pinRight(to: crossButton.leadingAnchor, Constants.Dimensions.titleRightMargin)
+        plusLabel.font = Constants.Fonts.selectedTitleFont
+        plusLabel.pinBottom(to: self.bottomAnchor, Constants.Dimensions.titleBottomMargin)
+        plusLabel.textColor = UIColor(hex: "#999999")
+        
         
         arrowImageView.pinCenterY(to: self)
+        crossButton.pinCenterY(to: self)
+        crossButton.pinRight(to: self.trailingAnchor, Constants.Dimensions.arrowRightMargin)
         arrowImageView.pinRight(to: self.trailingAnchor, Constants.Dimensions.arrowRightMargin)
-        
+        arrowImageView.contentMode = .scaleAspectFit
+        arrowImageView.tintColor = Constants.Colors.arrowTintColor
+        let config = UIImage.SymbolConfiguration(weight: .light)
+        arrowImageView.image = UIImage(systemName: Constants.Images.arrowImageName, withConfiguration: config)
+        crossButton.setImage(UIImage(systemName: Constants.Images.crossImageName), for: .normal)
+        crossButton.tintColor = Constants.Colors.crossTintColor
+        crossButton.addTarget(self, action: #selector(crossButtonTapped), for: .touchUpInside)
         configureDefault()
     }
     
     private func configureDefault() {
-        arrowImageView.contentMode = .scaleAspectFit
+        crossButton.isHidden = true
+        arrowImageView.isHidden = false
+        titleLabelCustom.text = filterInitTitle
         backgroundColor = Constants.Colors.defaultBackgroundColor
-        arrowImageView.tintColor = Constants.Colors.arrowTintColor
-        let config = UIImage.SymbolConfiguration(weight: .light)
-        arrowImageView.image = UIImage(systemName: Constants.Images.arrowImageName, withConfiguration: config)
         titleLabelCustom.font = Constants.Fonts.defaultTitleFont
         titleLabelCustom.textColor = Constants.Colors.defaultTitleTextColor
 //        addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     private func configureSelected() {
-        arrowImageView.contentMode = .scaleAspectFill
+        crossButton.isHidden = false
+        arrowImageView.isHidden = true
         backgroundColor = Constants.Colors.selectedBackgroundColor
-        arrowImageView.tintColor = Constants.Colors.crossTintColor
-        arrowImageView.image = UIImage(systemName: Constants.Images.crossImageName)
         titleLabelCustom.font = Constants.Fonts.selectedTitleFont
         titleLabelCustom.textColor = Constants.Colors.selectedTitleTextColor
     }
     
+    @objc private func crossButtonTapped() {
+        plusLabel.text = ""
+        configureDefault()
+    }
+}
+
+extension FilterButton : OptionsViewControllerButtonDelegate {
+    func setButtonView(_ options : [OptionViewModel]) {
+        plusLabel.text = ""
+        if options.isEmpty {
+            configureDefault()
+        } else  {
+            let minOption = options.min(by: { $0.id < $1.id })
+            titleLabelCustom.text = minOption?.name ?? options[0].name
+            configureSelected()
+            if options.count > 1 {
+                plusLabel.text = "+\(options.count - 1)"
+            }
+        }
+    }
 }
 
 //extension FilterButton : OptionsViewControllerDelegate {
