@@ -13,7 +13,7 @@ enum BenefitsByPrograms {
             let olympiadID: Int
             let universityID: Int
             let section: Int
-            var params: [Param] = []
+            var params: [ParamType: SingleOrMultipleArray<Param>]
         }
         
         struct Response {

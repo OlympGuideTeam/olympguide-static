@@ -9,7 +9,7 @@ enum Field {
     enum LoadPrograms {
         struct Request {
             let fieldID: Int
-            var params: [Param] = []
+            let params: [ParamType: SingleOrMultipleArray<Param>]
         }
         
         struct Response {

@@ -37,9 +37,12 @@ extension ProgramInteractor : ProgramBusinessLogic {
 // MARK: - BenefitsBusinessLogic
 extension ProgramInteractor: BenefitsByOlympiadsBusinessLogic {
     func loadOlympiads(with request: BenefitsByOlympiads.Load.Request) {
+        let params: [Param] = request.params.flatMap { key, value in
+            value.array
+        }
         worker?.fetchBenefits(
             for: request.programID,
-            with: request.params
+            with: params
         ) { [weak self] result in
             switch result {
             case .success(let olympiads):

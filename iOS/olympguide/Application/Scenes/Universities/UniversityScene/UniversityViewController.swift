@@ -169,9 +169,9 @@ extension UniversityViewController {
         configureEmailButton()
         configureProgramLabel()
         configureSegmentedControl()
-        configureFilterSortViewUI()
-        configureLastSpace()
         configureFilterSortView()
+        configureLastSpace()
+        setupFilterSortView()
         
         configureRefreshControl()
         configureTableView()
@@ -247,7 +247,7 @@ extension UniversityViewController {
         informationStackView.addArrangedSubview(horizontalStack)
     }
     
-    private func configureFilterSortViewUI() {
+    private func configureFilterSortView() {
         informationStackView.pinToPrevious(13)
         
         informationStackView.addArrangedSubview(filterSortView)
@@ -510,10 +510,11 @@ extension UniversityViewController : UITableViewDelegate {
     }
 }
 
+// MARK: - OptionsViewControllerDelegate
 extension UniversityViewController: OptionsViewControllerDelegate {
     func didSelectOption(
         _ indices: Set<Int>,
-        _ optionsNames: [OptionViewModel],
+        _ options: [OptionViewModel],
         paramType: ParamType?
     ) {
         guard let paramType = paramType else { return }
@@ -522,7 +523,7 @@ extension UniversityViewController: OptionsViewControllerDelegate {
         filterItems[index].selectedIndices = indices
         
         filterItems[index].selectedParams.clear()
-        for option in optionsNames {
+        for option in options {
             if let param = Param(paramType: paramType, option: option) {
                 filterItems[index].selectedParams.add(param)
             }

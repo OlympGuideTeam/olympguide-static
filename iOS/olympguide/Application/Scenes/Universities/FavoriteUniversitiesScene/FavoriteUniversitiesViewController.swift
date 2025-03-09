@@ -57,7 +57,7 @@ class FavoriteUniversitiesViewController: UIViewController {
         configureTableView()
         
         interactor?.loadUniversities(
-            Universities.Load.Request(params: Dictionary<String, Set<String>>())
+            Universities.Load.Request(params: .init())
         )
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
@@ -119,7 +119,7 @@ class FavoriteUniversitiesViewController: UIViewController {
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.interactor?.loadUniversities(
-                Universities.Load.Request(params: Dictionary<String, Set<String>>())
+                Universities.Load.Request(params: .init())
             )
             self.refreshControl.endRefreshing()
         }
