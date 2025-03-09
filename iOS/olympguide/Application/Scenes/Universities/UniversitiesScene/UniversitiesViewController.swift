@@ -41,19 +41,15 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
     var router: UniversitiesRoutingLogic?
     
+    var filterItems: [FilterItem] = []
+    var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
+    
     // MARK: - Variables
     private let tableView = UITableView()
     private let titleLabel: UILabel = UILabel()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private lazy var filterSortView: FilterSortView = {
-        let view = FilterSortView(
-            sortingOptions: ["Сортировка A", "Сортировка B"],
-            filteringOptions: ["Регион"]
-        )
-        view.delegate = self
-        return view
-    }()
+    lazy var filterSortView: FilterSortView = FilterSortView()
     
     private var universities: [UniversityViewModel] = []
     private var cancellables = Set<AnyCancellable>()
@@ -61,20 +57,46 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupFilterItems()
         configureNavigationBar()
         configureRefreshControl()
         configureFilterSortView()
         configureTableView()
         setupBindings()
-        interactor?.loadUniversities(
-            Universities.Load.Request(params: Dictionary<String, Set<String>>())
+        
+        loadUniversities()
+    }
+    
+    func loadUniversities() {
+        let request = Universities.Load.Request(params: selectedParams)
+        interactor?.loadUniversities(request)
+    }
+    
+    private func setupFilterItems() {
+        let regionFilterItem = FilterItem(
+            paramType: .region,
+            title: "Регион",
+            initMethod: .endpoint("/meta/university-regions"),
+            isMultipleChoice: true
         )
+        
+        filterItems = [
+            regionFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
+        }
     }
     
     // MARK: - Methods
     func displayError(message: String) {
         print("Error: \(message)")
     }
+}
+
+// MARK: - UI Configuration
+extension UniversitiesViewController {
     
     private func configureNavigationBar() {
         let backItem = UIBarButtonItem(
@@ -96,12 +118,6 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     func configureRefreshControl() {
         refreshControl.tintColor = Constants.Colors.refreshTint
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-    }
-    
-    private func configureFilterSortView() {
-        view.addSubview(filterSortView)
-        filterSortView.pinLeft(to: view.leadingAnchor)
-        filterSortView.pinRight(to: view.trailingAnchor)
     }
     
     // MARK: - Private funcs
@@ -126,7 +142,7 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         
         headerContainer.addSubview(filterSortView)
         
-        filterSortView.pinTop(to: headerContainer.topAnchor)
+        filterSortView.pinTop(to: headerContainer.topAnchor, 13)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor)
@@ -139,7 +155,12 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         )
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
         
-        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        headerContainer.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: tableView.bounds.width,
+            height: height
+        )
         
         tableView.tableHeaderView = headerContainer
     }
@@ -147,10 +168,9 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.interactor?.loadUniversities(
-                Universities.Load.Request(params: Dictionary<String, Set<String>>())
-            )
-            self.refreshControl.endRefreshing()
+            [weak self] in
+            self?.loadUniversities()
+            self?.refreshControl.endRefreshing()
         }
     }
 }
@@ -202,17 +222,7 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
     }
 }
 
-// MARK: - FilterSortViewDelegate
-extension UniversitiesViewController: FilterSortViewDelegate {
-    
-    func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-    }
-    
-    func filterSortView(_ view: FilterSortView, didTapFilterWith title: String) {
-    }
-}
-
-extension UniversitiesViewController: UniversitiesDisplayLogic {
+extension UniversitiesViewController : UniversitiesDisplayLogic {
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
         for i in 0..<universities.count {
@@ -224,6 +234,40 @@ extension UniversitiesViewController: UniversitiesDisplayLogic {
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+}
+
+// MARK: - OptionsViewControllerDelegate
+extension UniversitiesViewController : OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ indices: Set<Int>,
+        _ optionsNames: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        guard let paramType = paramType else { return }
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
+        for option in optionsNames {
+            if let param = Param(paramType: paramType, option: option) {
+                filterItems[index].selectedParams.add(param)
+            }
+        }
+        
+        selectedParams[paramType] = filterItems[index].selectedParams
+        
+        loadUniversities()
+    }
+}
+
+// MARK: - Filterble
+extension UniversitiesViewController : Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        loadUniversities()
     }
 }
 
