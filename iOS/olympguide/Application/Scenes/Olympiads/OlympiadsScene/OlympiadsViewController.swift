@@ -39,61 +39,74 @@ final class OlympiadsViewController: UIViewController, WithSearchButton {
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
     var router: OlympiadsRoutingLogic?
     
-    var sortSelectedIndicies: Set<Int> = []
-    var filtersSelectedIndicies: [Set<Int>] = [[], []]
-    let sortInit: InitMethod = .models(
-        [
-            OptionViewModel(id: 1, name: "По уровню"),
-            OptionViewModel(id: 2, name: "По профилю"),
-            OptionViewModel(id: 3, name: "По имени")
-        ]
-    )
-
-    let filtersInits: [InitMethod] = [
-        .models([
-            OptionViewModel(id: 1, name: "I уровень"),
-            OptionViewModel(id: 2, name: "II уровень"),
-            OptionViewModel(id: 3, name: "III уровень"),
-        ]),
-        .endpoint(endpoint: "/meta/olympiad-profiles")
-    ]
-    
-    let filtersTypes: [ParamType] = [.olympiadLevel, .olympiadProfile]
+    var filterItems: [FilterItem] = []
+    private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
     private var cancellables = Set<AnyCancellable>()
-    
-    private var selectedParams: Dictionary<ParamType, SingleOrMultipleArray<Param>> = [
-        .sort: SingleOrMultipleArray<Param>(isMultiple: false),
-        .olympiadLevel: SingleOrMultipleArray<Param>(isMultiple: true),
-        .olympiadProfile: SingleOrMultipleArray<Param>(isMultiple: true),
-    ]
     
     // MARK: - Variables
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private lazy var filterSortView: FilterSortView = FilterSortView()
+    lazy var filterSortView: FilterSortView = FilterSortView()
     
     private var olympiads: [OlympiadViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupFilterItems()
         configureUI()
         
-        interactor?.loadOlympiads(
-            Olympiads.Load.Request(params: Dictionary<ParamType, SingleOrMultipleArray<Param>>())
-        )
+        loadOlympiads()
         
         setupBindings()
-        
-        let backItem = UIBarButtonItem(
-            title: Constants.Strings.backButtonTitle,
-            style: .plain,
-            target: nil,
-            action: nil
+    }
+    
+    private func loadOlympiads() {
+        let request = Olympiads.Load.Request(params: selectedParams)
+        interactor?.loadOlympiads(request)
+    }
+    
+    private func setupFilterItems() {
+        let sortItem = FilterItem(
+            paramType: .sort,
+            title: "Сортировать",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "По уровню"),
+                OptionViewModel(id: 2, name: "По профилю"),
+                OptionViewModel(id: 3, name: "По имени")
+            ]),
+            isMultipleChoice: false
         )
-        navigationItem.backBarButtonItem = backItem
+        
+        let levelFilterItem = FilterItem(
+            paramType: .olympiadLevel,
+            title: "Уровень",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "I уровень"),
+                OptionViewModel(id: 2, name: "II уровень"),
+                OptionViewModel(id: 3, name: "III уровень")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        let profileFilterItem = FilterItem(
+            paramType: .olympiadProfile,
+            title: "Профиль",
+            initMethod: .endpoint("/meta/olympiad-profiles"),
+            isMultipleChoice: true
+        )
+        
+        filterItems = [
+            sortItem,
+            levelFilterItem,
+            profileFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
+        }
     }
 }
 
@@ -101,7 +114,7 @@ final class OlympiadsViewController: UIViewController, WithSearchButton {
 extension OlympiadsViewController {
     private func configureUI() {
         configureNavigationBar()
-        configureFilterSortView()
+        setupFilterSortView()
         configureRefreshControl()
         configureTableView()
     }
@@ -112,6 +125,14 @@ extension OlympiadsViewController {
     
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.olympiadsTitle
+        
+        let backItem = UIBarButtonItem(
+            title: Constants.Strings.backButtonTitle,
+            style: .plain,
+            target: nil,
+            action: nil
+        )
+        navigationItem.backBarButtonItem = backItem
         
         if let navigationController = self.navigationController as? NavigationBarViewController {
             navigationController.searchButtonPressed = { [weak self] sender in
@@ -124,68 +145,6 @@ extension OlympiadsViewController {
     private func configureRefreshControl() {
         refreshControl.tintColor = Constants.Colors.refreshTint
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-    }
-    
-    private func configureFilterSortView() {
-        filterSortView.configure(
-            sortingOption: nil,
-            filteringOptions: ["Уровень", "Профиль"]
-        )
-        
-        filterSortView.sortButttonTapped = { [weak self] _ in
-            guard let self = self else { return }
-            
-            var optionsVC: OptionsViewController?
-            switch sortInit {
-            case .endpoint(let endpoint):
-                optionsVC = OptionsViewController(
-                    title: "Сортировать",
-                    isMultipleChoice: false,
-                    selectedIndices: sortSelectedIndicies,
-//                    count: 87,
-                    endPoint: endpoint
-                )
-            case .models(let models):
-                optionsVC = OptionsViewController(
-                    title: "Сортировать",
-                    isMultipleChoice: false,
-                    selectedIndices: sortSelectedIndicies,
-                    options: models
-                )
-            }
-            guard let optionsVC else { return }
-            optionsVC.delegate = self
-            optionsVC.modalPresentationStyle = .overFullScreen
-            present(optionsVC, animated: false)
-        }
-        
-        filterSortView.filterButtonTapped = { [weak self] sender in
-            guard let self else { return }
-            let initMethod = filtersInits[sender.tag]
-            var optionsVC: OptionsViewController?
-            switch initMethod {
-            case .endpoint(let endpoint):
-                optionsVC = OptionsViewController(
-                    title: sender.filterTitle,
-                    isMultipleChoice: true,
-                    selectedIndices: filtersSelectedIndicies[sender.tag],
-                    endPoint: endpoint,
-                    paramType: filtersTypes[sender.tag]
-                )
-            case .models(let models):
-                optionsVC = OptionsViewController(
-                    title: sender.filterTitle,
-                    isMultipleChoice: true,
-                    selectedIndices: filtersSelectedIndicies[sender.tag],
-                    options: models,
-                    paramType: filtersTypes[sender.tag]
-                )
-            }
-            guard let optionsVC else { return }
-            optionsVC.delegate = self
-            optionsVC.modalPresentationStyle = .overFullScreen
-            present(optionsVC, animated: false)
-        }
     }
     
     // MARK: - Private funcs
@@ -218,10 +177,18 @@ extension OlympiadsViewController {
         
         headerContainer.layoutIfNeeded()
         
-        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
         
-        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        headerContainer.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: tableView.bounds.width,
+            height: height
+        )
         
         tableView.tableHeaderView = headerContainer
     }
@@ -229,12 +196,9 @@ extension OlympiadsViewController {
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.interactor?.loadOlympiads(
-                Olympiads.Load.Request(
-                    params: Dictionary<ParamType, SingleOrMultipleArray<Param>>()
-                )
-            )
-            self.refreshControl.endRefreshing()
+            [weak self] in
+            self?.loadOlympiads()
+            self?.refreshControl.endRefreshing()
         }
     }
 }
@@ -297,17 +261,6 @@ extension OlympiadsViewController: UITableViewDelegate {
     }
 }
 
-// MARK: - FilterSortViewDelegate
-extension OlympiadsViewController: FilterSortViewDelegate {
-    func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-        
-    }
-    
-    func filterSortView(_ view: FilterSortView, didTapFilterWith title: String) {
-        
-    }
-}
-
 // MARK: - OlympiadsDisplayLogic
 extension OlympiadsViewController : OlympiadsDisplayLogic {
     func displayOlympiads(_ viewModel: Olympiads.Load.ViewModel) {
@@ -319,32 +272,43 @@ extension OlympiadsViewController : OlympiadsDisplayLogic {
     }
 }
 
+// MARK: - OptionsViewControllerDelegate
 extension OlympiadsViewController : OptionsViewControllerDelegate {
     func didSelectOption(
-        _ options: Set<Int>,
+        _ indices: Set<Int>,
         _ optionsNames: [OptionViewModel],
         paramType: ParamType?
     ) {
         guard let paramType = paramType else { return }
-        selectedParams[paramType]?.clear()
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
         for option in optionsNames {
             if let param = Param(paramType: paramType, option: option) {
-                selectedParams[paramType]?.add(param)
+                filterItems[index].selectedParams.add(param)
             }
         }
-        if paramType == .sort {
-            sortSelectedIndicies = options
-        } else if paramType == .olympiadLevel {
-            filtersSelectedIndicies[0] = options
-        } else if paramType == .olympiadProfile {
-            filtersSelectedIndicies[1] = options
+        
+        selectedParams[paramType]?.clear()
+        for param in filterItems[index].selectedParams.array {
+            selectedParams[paramType]?.add(param)
         }
         
-        let request = Olympiads.Load.Request(params: selectedParams)
-        interactor?.loadOlympiads(request)
+        loadOlympiads()
     }
 }
 
+// MARK: - Filterble
+extension OlympiadsViewController: Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        
+        loadOlympiads()
+    }
+}
 
 // MARK: - Combine
 extension OlympiadsViewController {
