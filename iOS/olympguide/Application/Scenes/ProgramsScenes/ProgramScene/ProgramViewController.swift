@@ -202,6 +202,7 @@ extension ProgramViewController {
         configureSubjectsStack()
         configureBenefitsLabel()
         configureSearchButton()
+        setupFilterSortView()
         
         configureRefreshControl()
         configureTableView()

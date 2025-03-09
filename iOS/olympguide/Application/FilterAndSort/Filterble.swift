@@ -12,7 +12,7 @@ protocol Filterble : OptionsViewControllerDelegate & UIViewController {
     var filterItems: [FilterItem] { get set}
     func presentOptionsVC(forItemAt index: Int, from sender: OptionsViewControllerButtonDelegate?)
     func deleteFilter(forItemAt index: Int)
-    func configureFilterSortView()
+    func setupFilterSortView()
 }
 
 extension Filterble {
@@ -45,7 +45,7 @@ extension Filterble {
         present(optionsVC, animated: false)
     }
     
-    func configureFilterSortView() {
+    func setupFilterSortView() {
         let sortItem = filterItems.first(where: { $0.paramType == .sort })
         let filterItemsWithoutSort = filterItems.filter { $0.paramType != .sort }
         

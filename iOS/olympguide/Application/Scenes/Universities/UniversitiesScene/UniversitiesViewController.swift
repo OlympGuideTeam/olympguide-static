@@ -60,7 +60,7 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         setupFilterItems()
         configureNavigationBar()
         configureRefreshControl()
-        configureFilterSortView()
+        setupFilterSortView()
         configureTableView()
         setupBindings()
         
