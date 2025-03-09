@@ -10,13 +10,16 @@ final class UniversitiesInteractor: UniversitiesBusinessLogic, UniversitiesDataS
     var presenter: UniversitiesPresentationLogic?
     var worker: UniversitiesWorkerLogic?
     var universities: [UniversityModel] = []
-    var params: Dictionary<String, Set<String>> = [:]
+    var params: Dictionary<ParamType, SingleOrMultipleArray<Param>> = [:]
     var removeUniversities: [Int: UniversityModel] = [:]
     
     func loadUniversities(_ request: Universities.Load.Request) {
         params = request.params
+        let params: [Param] = request.params.flatMap { key, value in
+            value.array
+        }
         worker?.fetchUniversities(
-            with: []
+            with: params
         ) { [weak self] result in
             switch result {
             case .success(let universities):
