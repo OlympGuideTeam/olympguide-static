@@ -142,15 +142,15 @@ extension FieldViewController {
         programsTitleLabel.calculateHeight(with: view.frame.width - 20 - 20)
         informationStackView.addArrangedSubview(programsTitleLabel)
         
-//        let searchButton = getSearchButton()
-//        
-//        searchButton.action = { [weak self] in
-//            guard let self else { return }
-//            self.router?.routeToSearch(fieldId: self.field.fieldId)
-//        }
-//        informationStackView.addSubview(searchButton)
-//        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
-//        searchButton.pinCenterY(to: programsTitleLabel)
+        let searchButton = getSearchButton()
+        
+        searchButton.action = { [weak self] in
+            guard let self else { return }
+            self.router?.routeToSearch(fieldId: self.field.fieldId)
+        }
+        informationStackView.addSubview(searchButton)
+        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
+        searchButton.pinCenterY(to: programsTitleLabel)
     }
     
     private func getSearchButton() -> UIClosureButton {
@@ -298,6 +298,9 @@ extension FieldViewController : UITableViewDelegate {
             with: programs[section].university,
             isExpanded: programs[section].isExpanded
         )
+        
+        header.tag = section
+        
         header.toggleSection = { [weak self] section in
             guard let self = self else { return }
             var currentOffset = tableView.contentOffset
