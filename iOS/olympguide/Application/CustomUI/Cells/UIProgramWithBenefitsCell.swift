@@ -73,7 +73,7 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
         }
     }
     
-    func hideSeparator(isHidden: Bool) {
+    func hideSeparator(_ isHidden: Bool) {
         separatorView.isHidden = isHidden
     }
 }

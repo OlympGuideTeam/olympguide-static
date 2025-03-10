@@ -208,6 +208,7 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
                     FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
                 }
             }
+            cell.hideSeparator(indexPath.row == universities.count - 1)
         } else {
             cell.configureShimmer()
         }

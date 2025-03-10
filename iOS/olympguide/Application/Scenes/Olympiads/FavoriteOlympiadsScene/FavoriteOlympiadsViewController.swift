@@ -127,11 +127,17 @@ final class FavoriteOlympiadsViewController : UIViewController {
 }
 
 extension FavoriteOlympiadsViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         return olympiads.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: OlympiadTableViewCell.identifier,
             for: indexPath
@@ -147,7 +153,7 @@ extension FavoriteOlympiadsViewController: UITableViewDataSource {
                 FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: sender.tag)
             }
         }
-        
+        cell.hideSeparator(indexPath.row == olympiads.count - 1)
         return cell
     }
 }
@@ -205,6 +211,12 @@ extension FavoriteOlympiadsViewController {
                         self.interactor?.dislikeOlympiad(at: index)
                         self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
                         self.tableView.backgroundView = self.getEmptyLabel()
+                        if index == self.olympiads.count && index != 0 {
+                            let indexPath = IndexPath(row: index - 1, section: 0)
+                            if let cell = tableView.cellForRow(at: indexPath) as? OlympiadTableViewCell {
+                                cell.hideSeparator(true)
+                            }
+                        }
                     }
                 case .error(let olympiadId):
                     interactor?.handleBatchError(olympiadID: olympiadId)

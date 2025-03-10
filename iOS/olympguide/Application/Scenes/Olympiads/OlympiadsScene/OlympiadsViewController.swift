@@ -241,6 +241,8 @@ extension OlympiadsViewController: UITableViewDataSource {
                     FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: sender.tag)
                 }
             }
+            
+            cell.hideSeparator(indexPath.row == olympiads.count - 1)
         } else {
             cell.configureShimmer()
         }
