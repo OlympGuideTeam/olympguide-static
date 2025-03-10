@@ -20,6 +20,7 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     
     private let olympiad: OlympiadModel
     private let informationStackView: UIStackView = UIStackView()
+    private let searchButton = UIClosureButton()
     private let tableView: UITableView = UITableView()
     
     private var universities: [UniversityViewModel] = []
@@ -239,13 +240,12 @@ extension OlympiadViewController {
     }
     
     private func getSearchButton() -> UIClosureButton {
-        let searchButton = UIClosureButton()
         searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
         searchButton.tintColor = .black
         searchButton.contentHorizontalAlignment = .fill
         searchButton.contentVerticalAlignment = .fill
         searchButton.imageView?.contentMode = .scaleAspectFit
-        
+        searchButton.isEnabled = false
         
         searchButton.setWidth(28)
         searchButton.setHeight(28)
@@ -412,6 +412,8 @@ extension OlympiadViewController : OlympiadDisplayLogic {
         universities = viewModel.universities
         isExpanded = [Bool](repeating: false, count: universities.count)
         programs = [[ProgramWithBenefitsViewModel]] (repeating: [], count: universities.count)
+        searchButton.isEnabled = true
+        
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()
         }

@@ -19,6 +19,7 @@ protocol OlympiadBusinessLogic {
 protocol OlympiadDataStore {
     var programs: [[ProgramWithBenefitsModel]]? { get }
     var universities: [UniversityModel]? { get }
+    var allUniversities: [UniversityModel]? { get }
 }
 
 // MARK: - Presentation Logic
