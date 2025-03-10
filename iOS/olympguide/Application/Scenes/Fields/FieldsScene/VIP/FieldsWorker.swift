@@ -16,17 +16,13 @@ class FieldsWorker {
     }
     
     func fetchFields(
-        degree: String?,
-        search: String?,
+        with params: [Param],
         completion: @escaping (Result<[GroupOfFieldsModel], Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
-
-        if let degree = degree {
-            queryItems.append(URLQueryItem(name: "sort", value: degree))
-        }
-        if let search = search {
-            queryItems.append(URLQueryItem(name: "search", value: search))
+        
+        for param in params {
+            queryItems.append(param.urlValue)
         }
 
         networkService.request(
