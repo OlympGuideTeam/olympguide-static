@@ -51,6 +51,7 @@ final class BenefitViewController: UIViewController {
             confirmationSubjects: viewModel.confirmationSubjects,
             fullScoreSubjects: viewModel.fullScoreSubjects
         )
+        
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -80,6 +81,13 @@ final class BenefitViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        modalPresentationStyle = .pageSheet
+        if let sheet = sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.selectedDetentIdentifier = .medium
+        }
+        
         configureUI()
     }
     

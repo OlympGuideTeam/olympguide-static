@@ -137,7 +137,7 @@ class FieldsTableButton: UIButton {
         }
 
         let nameLabel = UILabel()
-        nameLabel.text = capitalizeFirstLetter(input: name)
+        nameLabel.text = capitalizeFirstLetter(name)
         nameLabel.font = FontManager.shared.font(for: .commonInformation)
         nameLabel.textColor = .black
         nameLabel.numberOfLines = 0
@@ -149,7 +149,7 @@ class FieldsTableButton: UIButton {
         self.addTarget(self, action: #selector(didTap), for: .touchUpInside)
     }
     
-    private func capitalizeFirstLetter(input: String) -> String {
+    private func capitalizeFirstLetter(_ input: String) -> String {
         guard let firstChar = input.first else { return "" }
         return firstChar.uppercased() + input.dropFirst().lowercased()
     }

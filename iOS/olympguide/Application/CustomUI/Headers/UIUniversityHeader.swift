@@ -26,12 +26,12 @@ final class UIUniversityHeader: UITableViewHeaderFooterView {
         contentView.addGestureRecognizer(tapGesture)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     private func configureBackgroundView() {
-
         contentView.addSubview(background)
         background.backgroundColor = .red
         background.pinTop(to: contentView.topAnchor, 5)

@@ -28,7 +28,12 @@ final class OlympiadRouter: OlympiadRoutingLogic, OlympiadDataPassing {
     }
     
     func routeToSearch(olympiadId: Int) {
-        let searchVC = SearchAssembly<ProgramWithBenefitsSearchStrategy>.build(with: "/olympiad/\(olympiadId)/benefits")
+        let strategy = ProgramWithBenefitsSearchStrategy()
+        strategy.allUniversities = dataStore?.allUniversities
+        let searchVC = SearchAssembly<ProgramWithBenefitsSearchStrategy>.build(
+            with: "/olympiad/\(olympiadId)/benefits",
+            strategy: strategy
+        )
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }

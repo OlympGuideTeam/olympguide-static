@@ -441,24 +441,7 @@ extension ProgramViewController {
         tableView.refreshControl = refreshControl
         tableView.showsVerticalScrollIndicator = false
         
-        informationContainer.setNeedsLayout()
-        informationContainer.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let fittingSize = informationContainer.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        
-        informationContainer.frame.size.height = fittingSize.height
-        
-        tableView.tableHeaderView = informationContainer
-        
-        tableView.tableHeaderView = informationContainer
+        updateHeaderSize()
     }
     
     func getEmptyLabel() -> UILabel? {
@@ -544,6 +527,26 @@ extension ProgramViewController: UITableViewDataSource {
         
         return cell
     }
+    
+    func updateHeaderSize() {
+        informationContainer.setNeedsLayout()
+        informationContainer.layoutIfNeeded()
+
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let fittingSize = informationContainer.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+
+        informationContainer.frame.size.height = fittingSize.height
+        
+        // Ключевой момент — пересетить headerView
+        tableView.tableHeaderView = informationContainer
+    }
 }
 
 // MARK: - UITableViewDelegate
@@ -554,11 +557,7 @@ extension ProgramViewController : UITableViewDelegate {
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
         let detailVC = BenefitViewController(with: benefits[indexPath.row])
-        detailVC.modalPresentationStyle = .pageSheet
-        if let sheet = detailVC.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
-            sheet.selectedDetentIdentifier = .medium
-        }
+        
         present(detailVC, animated: true)
     }
     
@@ -613,22 +612,8 @@ extension ProgramViewController : ProgramDisplayLogic {
             optionalSubjects: viewModel.program.optionalSubjects ?? []
         )
         
-        informationContainer.setNeedsLayout()
-        informationContainer.layoutIfNeeded()
+        updateHeaderSize()
         
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let fittingSize = informationContainer.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        
-        informationContainer.frame.size.height = fittingSize.height
-        tableView.setNeedsLayout()
-        tableView.layoutIfNeeded()
         configureFavoriteButton()
     }
     

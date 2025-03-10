@@ -147,8 +147,8 @@ extension FieldsViewController {
         )
         
         tableView.register(
-            UITableViewHeaderFooterView.self,
-            forHeaderFooterViewReuseIdentifier: "ReusableHeader"
+            UIFieldHeader.self,
+            forHeaderFooterViewReuseIdentifier: UIFieldHeader.identifier
         )
         
         tableView.dataSource = self
@@ -211,14 +211,15 @@ extension FieldsViewController: UITableViewDataSource {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: FieldTableViewCell.identifier,
-            for: indexPath
-        ) as? FieldTableViewCell
-        else {
-            return UITableViewCell()
-        }
+//        guard let cell = tableView.dequeueReusableCell(
+//            withIdentifier: FieldTableViewCell.identifier,
+//            for: indexPath
+//        ) as? FieldTableViewCell
+//        else {
+//            return UITableViewCell()
+//        }
         
+        let cell = FieldTableViewCell()
         let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
         cell.configure(with: fieldViewModel)
         return cell
@@ -243,20 +244,42 @@ extension FieldsViewController: UITableViewDelegate {
         _ tableView: UITableView,
         viewForHeaderInSection section: Int
     ) -> UIView? {
-        let headerButton = FieldsTableButton(
+        
+        guard
+            let header = tableView.dequeueReusableHeaderFooterView(
+                withIdentifier: UIFieldHeader.identifier
+            ) as? UIFieldHeader
+        else {
+            return nil
+        }
+        
+        header.configure(
             name: fields[section].name,
             code: fields[section].code,
             isExpanded: fields[section].isExpanded
         )
         
-        headerButton.tag = section
-        headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
-        
-        if fields[section].isExpanded {
-            headerButton.backgroundView.backgroundColor = UIColor(hex: "#E0E8FE")
+        header.tag = section
+        header.toggleSection = { [weak self] section in
+            guard let self else { return }
+            var currentOffset = self.tableView.contentOffset
+            let headerRectBefore = self.tableView.rectForHeader(inSection: section)
+            
+            self.fields[section].isExpanded.toggle()
+            
+            UIView.performWithoutAnimation {
+                self.tableView.reloadSections(IndexSet(integer: section), with: .none)
+                self.tableView.layoutIfNeeded()
+            }
+            let headerRectAfter = self.tableView.rectForHeader(inSection: section)
+            
+            let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+            currentOffset.y += deltaY
+            self.tableView.setContentOffset(currentOffset, animated: false)
         }
-        return headerButton
+        return header
     }
+
     
     @objc
     func toggleSection(_ sender: UIButton) {

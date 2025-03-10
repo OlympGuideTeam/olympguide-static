@@ -54,12 +54,12 @@ struct OlympiadSearchStrategy: SearchStrategy {
         return model.name
     }
     
-    static func modelToViewModel(_ model: [OlympiadModel]) -> [OlympiadViewModel] {
+    func modelToViewModel(_ model: [OlympiadModel]) -> [OlympiadViewModel] {
         model.map { $0.toViewModel() }
     }
     
-    static func build(with model: ModelType) -> UIViewController {
-        OlympiadAssembly.build(with: model)
+    func build(with model: ModelType) -> (UIViewController?, PresentMethod?) {
+        (OlympiadAssembly.build(with: model), .push)
     }
     
     func responseTypeToModel(_ response: [OlympiadModel]) -> [OlympiadModel] {

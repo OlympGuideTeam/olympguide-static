@@ -51,7 +51,7 @@ final class FieldSearchStrategy: SearchStrategy {
         model.name
     }
     
-    static func modelToViewModel(
+    func modelToViewModel(
         _ model: [GroupOfFieldsModel.FieldModel]
     ) -> [GroupOfFieldsViewModel.FieldViewModel] {
         model.map { field in
@@ -62,8 +62,8 @@ final class FieldSearchStrategy: SearchStrategy {
         }
     }
     
-    static func build(with model: GroupOfFieldsModel.FieldModel) -> UIViewController {
-        UIViewController()
+    func build(with model: GroupOfFieldsModel.FieldModel) -> (UIViewController?, PresentMethod?) {
+        (nil, nil)
     }
     
     func responseTypeToModel(_ response: [GroupOfFieldsModel]) -> [GroupOfFieldsModel.FieldModel] {

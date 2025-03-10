@@ -9,6 +9,7 @@ final class OlympiadInteractor : OlympiadDataStore {
     var presenter: (OlympiadPresentationLogic & BenefitsByProgramsPresentationLogic)?
     var worker: (OlympiadWorkerLogic & BenefitsByProgramsWorkerLogic)?
     var universities: [UniversityModel]?
+    var allUniversities: [UniversityModel]?
     var programs: [[ProgramWithBenefitsModel]]?
 }
 
@@ -20,6 +21,9 @@ extension OlympiadInteractor : OlympiadBusinessLogic {
             switch result {
             case .success(let universities):
                 self?.universities = universities
+                if self?.allUniversities == nil {
+                    self?.allUniversities = universities
+                }
                 self?.programs = [[ProgramWithBenefitsModel]] (repeating: [], count: universities.count)
                 let response = Olympiad.LoadUniversities.Response(universities: universities)
                 self?.presenter?.presentLoadUniversities(with: response)

@@ -8,7 +8,7 @@
 import UIKit
 
 final class OlympiadWithBenefitsSearchStrategy: SearchStrategy {
-    typealias ModelType = OlympiadWithBenefitsModel
+    typealias ModelType = OlympiadWithBenefitViewModel
     typealias ViewModelType = OlympiadWithBenefitViewModel
     typealias ResponseType = OlympiadWithBenefitsModel
     static var searchTitle: String = "Поиск по льготам"
@@ -43,19 +43,19 @@ final class OlympiadWithBenefitsSearchStrategy: SearchStrategy {
         return cell
     }
     
-    func titleForItem(_ model: OlympiadWithBenefitsModel) -> String {
-        model.olympiad.name
+    func titleForItem(_ model: OlympiadWithBenefitViewModel) -> String {
+        model.olympiadName
     }
     
-    func responseTypeToModel(_ response: [OlympiadWithBenefitsModel]) -> [OlympiadWithBenefitsModel] {
-        response
+    func responseTypeToModel(_ response: [OlympiadWithBenefitsModel]) -> [OlympiadWithBenefitViewModel] {
+        response.flatMap { $0.toViewModel() }
     }
     
-    static func modelToViewModel(_ model: [OlympiadWithBenefitsModel]) -> [OlympiadWithBenefitViewModel] {
-        model.flatMap { $0.toViewModel() }
+    func modelToViewModel(_ model: [OlympiadWithBenefitViewModel]) -> [OlympiadWithBenefitViewModel] {
+        model
     }
     
-    static func build(with model: OlympiadWithBenefitsModel) -> UIViewController {
-        UIViewController()
+    func build(with model: OlympiadWithBenefitViewModel) -> (UIViewController?, PresentMethod?) {
+        (BenefitViewController(with: model), .present)
     }
 }

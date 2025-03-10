@@ -12,6 +12,9 @@ final class ProgramWithBenefitsSearchStrategy: SearchStrategy {
     typealias ViewModelType = ProgramWithBenefitsViewModel
     typealias ResponseType = ProgramWithBenefitsModel
     
+    var allUniversities: [UniversityModel]?
+    var viewModels: [ViewModelType]?
+    
     static var searchTitle: String = "Поиск по программам"
     
     func endpoint() -> String {
@@ -44,6 +47,27 @@ final class ProgramWithBenefitsSearchStrategy: SearchStrategy {
             fatalError("Could not dequeue cell")
         }
         cell.configure(with: viewMmodel, indexPath: indexPath)
+        
+//        for view in cell.benefitsStack.arrangedSubviews {
+//            guard let subview = view as? BenefitStackView else { continue }
+//            subview.createPreviewVC = { [weak self] indexPath, index in
+//                guard let self = self else { return nil }
+//                let program = self.programs[indexPath.section][indexPath.row]
+//                let previewVC = BenefitViewController(with: program, index: index)
+//                return previewVC
+//            }
+//        }
+        
+        for view in cell.benefitsStack.arrangedSubviews {
+            guard let subview = view as? BenefitStackView else { continue }
+//            guard let currentVC = subview.findViewController() else { continue }
+            subview.createPreviewVC = { [weak self] indexPath, index in
+                guard let self = self else { return nil }
+                guard let program = self.viewModels?[indexPath.row] else { return nil }
+                let previewVC = BenefitViewController(with: program, index: index)
+                return previewVC
+            }
+        }
         return cell
     }
     
@@ -54,16 +78,37 @@ final class ProgramWithBenefitsSearchStrategy: SearchStrategy {
     func responseTypeToModel(
         _ response: [ProgramWithBenefitsModel]
     ) -> [ProgramWithBenefitsModel] {
-        response
+         response
     }
     
-    static func modelToViewModel(
+    func modelToViewModel(
         _ model: [ProgramWithBenefitsModel]
     ) -> [ProgramWithBenefitsViewModel] {
-        model.map { $0.toViewModel() }
+        self.viewModels =  model.map { $0.toViewModel() }
+        return viewModels ?? []
     }
     
-    static func build(with model: ProgramWithBenefitsModel) -> UIViewController {
-        UIViewController()
+    func build(with model: ProgramWithBenefitsModel) -> (UIViewController?, PresentMethod?) {
+        guard let allUniversities = allUniversities else {
+            return (nil, nil)
+        }
+        
+        let universityId = model.program.universityID
+        guard let index = allUniversities.firstIndex(where: { $0.universityID == universityId}) else {
+            return (nil, nil)
+        }
+        
+        let university = allUniversities[index]
+        let programId = model.program.programID
+        let name = model.program.name
+        let code = model.program.field
+        
+        let programVC = ProgramAssembly.build(
+            for: programId,
+            name: name,
+            code: code,
+            university: university
+        )
+        return (programVC, .push)
     }
 }

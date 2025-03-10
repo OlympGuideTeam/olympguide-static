@@ -12,6 +12,8 @@ enum SearchProgramType {
 }
 
 final class ProgramInUniSearchStrategy : SearchStrategy {
+    var university: UniversityModel?
+    
     typealias ModelType = ProgramShortModel
     typealias ViewModelType = ProgramViewModel
     typealias ResponseType = GroupOfProgramsModel
@@ -58,13 +60,16 @@ final class ProgramInUniSearchStrategy : SearchStrategy {
         return response.flatMap { $0.programs }
     }
     
-    static func modelToViewModel(_ model: [ProgramShortModel]) -> [ProgramViewModel] {
+    func modelToViewModel(_ model: [ProgramShortModel]) -> [ProgramViewModel] {
         model.map { $0.toViewModel() }
     }
     
-    static func build(
+    func build(
         with model: ProgramShortModel
-    ) -> UIViewController {
-        UIViewController()
+    ) -> (UIViewController?, PresentMethod?) {
+        guard let university = self.university else {
+            return (nil, nil)
+        }
+        return (ProgramAssembly.build(for: model, by: university), .push)
     }
 }
