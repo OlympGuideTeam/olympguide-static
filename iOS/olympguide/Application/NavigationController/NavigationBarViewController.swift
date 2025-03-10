@@ -70,7 +70,26 @@ class NavigationBarViewController: UINavigationController {
     private func configureNavigationBar() {
         navigationBar.barTintColor = .white
         navigationBar.shadowImage = UIImage()
+        let appearance = UINavigationBarAppearance()
+        
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        appearance.titleTextAttributes = [
+            .foregroundColor: UIColor.black,
+            .font: FontManager.shared.font(for: .titleLbel)
+        ]
+        
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: UIColor.black,
+            .font: FontManager.shared.font(for: .largeTitleLabel)
+        ]
+        appearance.shadowColor = .clear
+        
+        navigationBar.standardAppearance = appearance
+        navigationBar.compactAppearance = appearance
+        navigationBar.scrollEdgeAppearance = appearance
         navigationBar.prefersLargeTitles = true
+        navigationBar.barStyle = .default
     }
     
     private func configureSearchButton() {
