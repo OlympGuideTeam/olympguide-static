@@ -36,23 +36,25 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     var interactor: (ProgramBusinessLogic & BenefitsByOlympiadsBusinessLogic)?
     var router: (ProgramRoutingLogic /*& BenefitsByOlympiadsRoutingLogic*/)?
     
+    var filterSortView: FilterSortView = FilterSortView()
+    var filterItems: [FilterItem] = []
+    private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
+    
     private var cancellables = Set<AnyCancellable>()
     
-    let programId: Int
-    let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
-    var startIsFavorite: Bool?
-    var isFavorite: Bool?
-    let universityNameLabel: UILabel = UILabel()
-    let regionLabel: UILabel = UILabel()
-    let university: UniversityModel
-    let codeLabel: UILabel = UILabel()
-    let programNameLabel = UILabel()
-    let benefitsLabel = UILabel()
-    var program: ProgramShortModel?
-    var benefits: [OlympiadWithBenefitViewModel] = []
-    var link: String? = nil
+    private let programId: Int
+    private var startIsFavorite: Bool?
+    private var isFavorite: Bool?
+    private let university: UniversityModel
+    private let codeLabel: UILabel = UILabel()
+    private let programNameLabel = UILabel()
+    private let benefitsLabel = UILabel()
+    private var program: ProgramShortModel?
+    private var benefits: [OlympiadWithBenefitViewModel] = []
+    private var link: String? = nil
     
     private let informationContainer: UIView = UIView()
+    private let universityView: UIUniversityView = UIUniversityView()
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
@@ -124,18 +126,10 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupFilterItems()
         configureUI()
         setupBindings()
-        
-        ImageLoader.shared.loadImage(from: university.logo) { [weak self] (image: UIImage?) in
-            guard let self = self, let image = image else { return }
-            self.logoImageView.stopShimmer()
-            self.logoImageView.image = image
-        }
-        
-        let benefitRequest = BenefitsByOlympiads.Load.Request(programID: programId)
-        interactor?.loadOlympiads(with: benefitRequest)
-        
+        loadOlympiads()
         if webSiteButton.titleLabel?.text == nil {
             let programRequest = Program.Load.Request(programID: programId)
             interactor?.loadProgram(with: programRequest)
@@ -145,7 +139,88 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         configureFavoriteButton()
+    }
+    
+    private func loadOlympiads() {
+        let benefitRequest = BenefitsByOlympiads.Load.Request(
+            programID: programId,
+            params: selectedParams
+        )
+        interactor?.loadOlympiads(with: benefitRequest)
+    }
+    
+    private func setupFilterItems() {
+        let sortItem = FilterItem(
+            paramType: .sort,
+            title: "Сортировать",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "По уровню олимпиады"),
+                OptionViewModel(id: 2, name: "По профилю олимпиады")
+            ]),
+            isMultipleChoice: false
+        )
         
+        let levelFilterItem = FilterItem(
+            paramType: .olympiadLevel,
+            title: "Уровень",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "I уровень"),
+                OptionViewModel(id: 2, name: "II уровень"),
+                OptionViewModel(id: 3, name: "III уровень")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        let profileFilterItem = FilterItem(
+            paramType: .olympiadProfile,
+            title: "Профиль олимпиады",
+            initMethod: .endpoint("/meta/olympiad-profiles"),
+            isMultipleChoice: true
+        )
+        
+        let benefitFilterItem = FilterItem(
+            paramType: .benefit,
+            title: "Льгота",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "БВИ"),
+                OptionViewModel(id: 2, name: "100 баллов")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        let minDiplomaLevelFilterItem = FilterItem(
+            paramType: .minClass,
+            title: "Минимальный класс диплома",
+            initMethod: .models([
+                OptionViewModel(id: 10, name: "10 класс"),
+                OptionViewModel(id: 11, name: "11 класс")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        let diplomaLevelFilterItem = FilterItem(
+            paramType: .minDiplomaLevel,
+            title: "Степень диплома",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "Победитель"),
+                OptionViewModel(id: 3, name: "Призёр")
+            ]),
+            isMultipleChoice: true
+        )
+            
+        
+        filterItems = [
+            sortItem,
+            levelFilterItem,
+            profileFilterItem,
+            benefitFilterItem,
+            minDiplomaLevelFilterItem,
+            diplomaLevelFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
+        }
     }
     
     private func configureFavoriteButton() {
@@ -190,9 +265,7 @@ extension ProgramViewController {
     private func configureUI() {
         view.backgroundColor = .white
         configureNavigationBar()
-        configureLogoImageView()
-        configureRegionLabel()
-        configureUniversityNameLabel()
+        configureUniversityView()
         configureCodeLabel()
         configureProgramNameLabel()
         configureWebButton()
@@ -203,13 +276,12 @@ extension ProgramViewController {
         configureBenefitsLabel()
         configureSearchButton()
         setupFilterSortView()
+        configureFilterViewUI()
         
         configureRefreshControl()
         configureTableView()
         
         reloadFavoriteButton()
-        
-        logoImageView.startShimmer()
     }
     
     private func configureNavigationBar() {
@@ -218,40 +290,15 @@ extension ProgramViewController {
         navigationItem.backBarButtonItem = backItem
     }
     
-    private func configureLogoImageView() {
-        informationContainer.addSubview(logoImageView)
+    private func configureUniversityView() {
+        informationContainer.addSubview(universityView)
         
-        logoImageView.contentMode = .scaleAspectFit
+        universityView.configure(with: university.toViewModel(), 20, 20)
+        universityView.favoriteButtonIsHidden = true
         
-        logoImageView.pinLeft(to: informationContainer.leadingAnchor, Constants.Dimensions.logoLeftMargin)
-        logoImageView.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
-        logoImageView.setWidth(Constants.Dimensions.logoSize)
-        logoImageView.setHeight(Constants.Dimensions.logoSize)
-    }
-    
-    private func configureRegionLabel() {
-        regionLabel.font = Constants.Fonts.regionLabelFont
-        regionLabel.textColor = Constants.Colors.regionTextColor
-        regionLabel.text = university.region
-        
-        informationContainer.addSubview(regionLabel)
-        
-        regionLabel.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
-        regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-    }
-    
-    private func configureUniversityNameLabel() {
-        universityNameLabel.font = Constants.Fonts.nameLabelFont
-        universityNameLabel.numberOfLines = 0
-        universityNameLabel.lineBreakMode = .byWordWrapping
-        universityNameLabel.text = university.name
-        
-        informationContainer.addSubview(universityNameLabel)
-
-        universityNameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
-        universityNameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        universityNameLabel.pinRight(to: informationContainer.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        universityNameLabel.calculateHeight(with: view.frame.width - 15 - 15 - 80 - 15)
+        universityView.pinTop(to: informationContainer.topAnchor, 30)
+        universityView.pinLeft(to: informationContainer.leadingAnchor, 20)
+        universityView.pinRight(to: informationContainer.trailingAnchor, 20)
     }
     
     private func configureCodeLabel() {
@@ -261,7 +308,7 @@ extension ProgramViewController {
         }
         
         informationContainer.addSubview(codeLabel)
-        codeLabel.pinTop(to: logoImageView.bottomAnchor, 30)
+        codeLabel.pinTop(to: universityView.bottomAnchor, 30)
 //        codeLabel.pinTop(to: universityNameLabel.bottomAnchor, 30, .grOE)
         codeLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
         codeLabel.calculateHeight(with: view.frame.width - 40)
@@ -357,11 +404,18 @@ extension ProgramViewController {
         informationContainer.addSubview(benefitsLabel)
         benefitsLabel.pinTop(to: subjectsStack.bottomAnchor, 20)
         benefitsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
-        benefitsLabel.pinBottom(to: informationContainer.bottomAnchor)
         
         //        let textSize = text.size(withAttributes: [.font: font])
         //
         //        programsLabel.setHeight(textSize.height)
+    }
+    
+    private func configureFilterViewUI() {
+        informationContainer.addSubview(filterSortView)
+        filterSortView.pinTop(to: benefitsLabel.bottomAnchor, 13)
+        filterSortView.pinLeft(to: informationContainer.leadingAnchor)
+        filterSortView.pinRight(to: informationContainer.trailingAnchor)
+        filterSortView.pinBottom(to: informationContainer.bottomAnchor)
     }
     
     func configureRefreshControl() {
@@ -394,8 +448,14 @@ extension ProgramViewController {
             width: tableView.bounds.width,
             height: UIView.layoutFittingCompressedSize.height
         )
-        let fittingSize = informationContainer.systemLayoutSizeFitting(targetSize)
+        let fittingSize = informationContainer.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        
         informationContainer.frame.size.height = fittingSize.height
+        
         tableView.tableHeaderView = informationContainer
         
         tableView.tableHeaderView = informationContainer
@@ -437,11 +497,9 @@ extension ProgramViewController {
     
     @objc private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let programID = self?.programId else { return }
-            let request = BenefitsByOlympiads.Load.Request(programID: programID)
-            
-            self?.interactor?.loadOlympiads(with: request)
-            self?.refreshControl.endRefreshing()
+            guard let self else { return }
+            loadOlympiads()
+            self.refreshControl.endRefreshing()
         }
     }
     
@@ -462,7 +520,7 @@ extension ProgramViewController: UITableViewDataSource {
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        benefits.count != 0 ? benefits.count : 10
+        /*benefits.count != 0 ?*/ benefits.count /*: 10*/
     }
     
     func tableView(
@@ -554,11 +612,63 @@ extension ProgramViewController : ProgramDisplayLogic {
             requiredSubjects: viewModel.program.requiredSubjects,
             optionalSubjects: viewModel.program.optionalSubjects ?? []
         )
+        
+        informationContainer.setNeedsLayout()
+        informationContainer.layoutIfNeeded()
+        
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let fittingSize = informationContainer.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        
+        informationContainer.frame.size.height = fittingSize.height
+        tableView.setNeedsLayout()
+        tableView.layoutIfNeeded()
         configureFavoriteButton()
     }
     
     func displayToggleFavoriteResult(viewModel: Program.Favorite.ViewModel) {
         
+    }
+}
+
+extension ProgramViewController : OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ indices: Set<Int>,
+        _ optionsNames: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        guard let paramType = paramType else { return }
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
+        for option in optionsNames {
+            if let param = Param(paramType: paramType, option: option) {
+                filterItems[index].selectedParams.add(param)
+            }
+        }
+        
+        selectedParams[paramType]?.clear()
+        selectedParams[paramType] = filterItems[index].selectedParams
+        
+        loadOlympiads()
+    }
+}
+
+// MARK: - Filterble
+extension ProgramViewController : Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        
+        loadOlympiads()
     }
 }
 

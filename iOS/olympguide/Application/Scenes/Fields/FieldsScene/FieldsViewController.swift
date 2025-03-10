@@ -37,37 +37,29 @@ fileprivate enum Constants {
     }
 }
 
-class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButton {
+class FieldsViewController: UIViewController, WithSearchButton {
     
     // MARK: - VIP
     var interactor: (FieldsDataStore & FieldsBusinessLogic)?
     var router: FieldsRoutingLogic?
     
+    var filterItems: [FilterItem] = []
+    private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
+    
     // MARK: - Variables
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private lazy var filterSortView: FilterSortView = {
-        let view = FilterSortView(
-            filteringOptions: ["Формат обучения"]
-        )
-        view.delegate = self
-        return view
-    }()
+    lazy var filterSortView: FilterSortView = FilterSortView()
     
     private var fields: [GroupOfFieldsViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        configureNavigationBar()
-        configureRefreshControl()
-        configureTableView()
-        
-        interactor?.loadFields(
-            Fields.Load.Request(searchQuery: nil, degree: nil)
-        )
+        setupFilterItems()
+        configureUI()
+        loadFields()
         
         let backItem = UIBarButtonItem(
             title: Constants.Strings.backButtonTitle,
@@ -82,17 +74,44 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButt
         }
     }
     
-    // MARK: - Methods (FieldsDisplayLogic)
-    func displayFields(viewModel: Fields.Load.ViewModel) {
-        fields = viewModel.groupsOfFields
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-            self.refreshControl.endRefreshing()
+    private func loadFields() {
+        let request = Fields.Load.Request(params: selectedParams)
+        interactor?.loadFields(request)
+    }
+    
+    private func setupFilterItems() {
+        let regionFilterItem = FilterItem(
+            paramType: .degree,
+            title: "Формат обучения",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "Бакалавриат"),
+                OptionViewModel(id: 2, name: "Специалитет")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        filterItems = [
+            regionFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
     }
     
     func displayError(message: String) {
         print("Error: \(message)")
+    }
+}
+
+// MARK: - UI Configuration
+extension FieldsViewController {
+    
+    private func configureUI() {
+        configureNavigationBar()
+        configureRefreshControl()
+        setupFilterSortView()
+        configureTableView()
     }
     
     private func configureNavigationBar() {
@@ -110,17 +129,17 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButt
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
     }
     
-    private func configureFilterSortView() {
-        view.addSubview(filterSortView)
-        filterSortView.pinLeft(to: view.leadingAnchor)
-        filterSortView.pinRight(to: view.trailingAnchor)
-    }
     
     private func configureTableView() {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+        tableView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: 50,
+            right: 0
+        )
         
         tableView.register(
             FieldTableViewCell.self,
@@ -167,16 +186,15 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButt
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.interactor?.loadFields(
-                Fields.Load.Request(searchQuery: nil, degree: nil)
-            )
-            self.refreshControl.endRefreshing()
+            [weak self] in
+            self?.loadFields()
+            self?.refreshControl.endRefreshing()
         }
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
-extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
+// MARK: - UITableViewDataSource
+extension FieldsViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return fields.count
@@ -205,6 +223,10 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         cell.configure(with: fieldViewModel)
         return cell
     }
+}
+
+// MARK: - UITableViewDelegate
+extension FieldsViewController: UITableViewDelegate {
     
     func tableView(
         _ tableView: UITableView,
@@ -257,22 +279,59 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-// MARK: - FilterSortViewDelegate
-extension FieldsViewController: FilterSortViewDelegate {
-    
-    func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-    }
-    
-    func filterSortView(_ view: FilterSortView,
-                        didTapFilterWith title: String) {
-       
-    }
-}
-
-
 class ReusableHeader: UITableViewHeaderFooterView {
     override func prepareForReuse() {
         super.prepareForReuse()
         print("Header is about to be reused!")
+    }
+}
+
+
+// MARK: - FieldsDisplayLogic
+extension FieldsViewController : FieldsDisplayLogic {
+    func displayFields(viewModel: Fields.Load.ViewModel) {
+        fields = viewModel.groupsOfFields
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
+        }
+    }
+}
+
+
+extension FieldsViewController : Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        
+        loadFields()
+    }
+}
+
+extension FieldsViewController : OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ indices: Set<Int>,
+        _ optionsNames: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        guard let paramType = paramType else { return }
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
+        for option in optionsNames {
+            if let param = Param(paramType: paramType, option: option) {
+                filterItems[index].selectedParams.add(param)
+            }
+        }
+        
+        selectedParams[paramType]?.clear()
+        for param in filterItems[index].selectedParams.array {
+            selectedParams[paramType]?.add(param)
+        }
+        
+        let request = Fields.Load.Request(params: selectedParams)
+        interactor?.loadFields(request)
     }
 }
