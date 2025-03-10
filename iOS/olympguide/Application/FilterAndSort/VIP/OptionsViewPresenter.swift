@@ -23,7 +23,15 @@ final class OptionViewPresenter : OptionsPresentationLogic {
     }
     
     func presentFetchOptions(response: Options.FetchOptions.Response) {
-        let viewModels = response.options.map { option in
+        if let error = response.error {
+            let viewModel = Options.FetchOptions.ViewModel(error: error)
+            viewController?.displayFetchOptions(viewModel: viewModel)
+            return
+        }
+        
+        guard let options = response.options else { return }
+        
+        let viewModels = options.map { option in
             OptionViewModel(
                 id: option.id,
                 name: option.name

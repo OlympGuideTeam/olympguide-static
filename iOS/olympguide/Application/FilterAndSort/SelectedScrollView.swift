@@ -95,6 +95,7 @@ final class SelectedScrollView: UIView {
         button.isSelectedItem.toggle()
         button.tintColor = .black
         button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+        button.crossButton.isEnabled = false
         return button
     }
     
