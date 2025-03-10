@@ -11,9 +11,11 @@ struct ProgramWithBenefitsModel : Codable {
         let name: String
         let field: String
         let university: String
+        let universityID: Int
         
         enum CodingKeys: String, CodingKey {
             case programID = "program_id"
+            case universityID = "university_id"
             case name, field, university
         }
     }

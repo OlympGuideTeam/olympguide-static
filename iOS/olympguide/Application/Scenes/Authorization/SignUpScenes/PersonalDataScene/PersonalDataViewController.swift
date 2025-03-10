@@ -62,7 +62,6 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .white
         title = "Личные данные"
         
@@ -107,7 +106,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
             navigationController?.popToRootViewController(animated: true)
         }
     }
-    
+        
     
     // MARK: - Настройка UI
     
