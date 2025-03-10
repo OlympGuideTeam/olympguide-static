@@ -10,7 +10,7 @@ enum BenefitsByOlympiads {
     enum Load {
         struct Request {
             let programID: Int
-            var params: [Param] = []
+            let params: [ParamType: SingleOrMultipleArray<Param>]
         }
         
         struct Response {

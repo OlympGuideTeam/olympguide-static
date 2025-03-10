@@ -103,14 +103,23 @@ final class TabBarViewController: UITabBarController {
     }(UIStackView())
     
     private lazy var action = UIAction { [weak self] sender in
-        guard let sender = sender.sender as? UIButton,
-              let self = self
-        else {
-            return
-        }
+        guard let button = sender.sender as? UIButton, let self = self else { return }
         
-        self.selectedIndex = sender.tag
-        self.setIcons(tag: sender.tag)
+        if self.selectedIndex == button.tag {
+            if let navController = self.viewControllers?[button.tag] as? UINavigationController {
+                if navController.viewControllers.count > 1 {
+                    navController.popToRootViewController(animated: true)
+                } else {
+                    if let scrollView = navController.view.findScrollView() {
+                        let topOffset = CGPoint(x: 0, y: -scrollView.adjustedContentInset.top)
+                        scrollView.setContentOffset(topOffset, animated: true)
+                    }
+                }
+            }
+        } else {
+            self.selectedIndex = button.tag
+            self.setIcons(tag: button.tag)
+        }
     }
     
     // MARK: - Lifecycle
@@ -170,7 +179,7 @@ final class TabBarViewController: UITabBarController {
     private func setupDoubleTapRecognizers() {
         customTabBar.arrangedSubviews.forEach { view in
             let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
-            doubleTap.numberOfTapsRequired = 2
+            doubleTap.numberOfTapsRequired = 1
             doubleTap.cancelsTouchesInView = false
             doubleTap.delaysTouchesBegan = false
             doubleTap.delaysTouchesEnded = false

@@ -8,7 +8,7 @@
 enum Programs {
     enum Load {
         struct Request {
-            let params: [Param]
+            let params: [ParamType: SingleOrMultipleArray<Param>]
             let university: UniversityModel?
             var groups: Groups = .fields
         }

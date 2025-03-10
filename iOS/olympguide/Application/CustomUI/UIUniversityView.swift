@@ -21,6 +21,8 @@ final class UIUniversityView: UIView {
         }
     }
     
+    var favoriteButtonIsHidden: Bool = true
+    
     var isExpanded: Bool = false {
         didSet {
             arrowImageView.image = isExpanded ?
@@ -119,7 +121,7 @@ final class UIUniversityView: UIView {
 //        } else {
 //            favoriteButton.isHidden = !AuthManager.shared.isAuthenticated
 //        }
-        favoriteButton.isHidden = true
+        favoriteButton.isHidden = favoriteButtonIsHidden
         favoriteButton.tag = viewModel.universityID
     }
     
@@ -131,7 +133,10 @@ final class UIUniversityView: UIView {
                 if !arrowIsHidden {
                     favoriteButton.isHidden = true
                 } else {
-                    favoriteButton.isHidden = !isAuth
+//                    print(favoriteButtonIsHidden || !isAuth)
+//                    print(favoriteButtonIsHidden)
+//                    print(!isAuth)
+                    favoriteButton.isHidden = favoriteButtonIsHidden || !isAuth
                 }
             }
     }

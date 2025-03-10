@@ -67,8 +67,11 @@ extension UniversityInteractor : UniversityBusinessLogic {
 extension UniversityInteractor : ProgramsBusinessLogic {
     func loadPrograms(with request: Programs.Load.Request) {
         guard let university = request.university else {return}
+        let params: [Param] = request.params.flatMap { key, value in
+            value.array
+        }
         worker.loadPrograms(
-            with: request.params,
+            with: params,
             for: university.universityID,
             by: request.groups
         ) { [weak self] result in

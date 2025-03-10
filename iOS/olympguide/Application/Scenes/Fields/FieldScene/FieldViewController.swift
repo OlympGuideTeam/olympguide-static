@@ -11,6 +11,10 @@ final class FieldViewController: UIViewController {
     var interactor: FieldBusinessLogic?
     var router: FieldRoutingLogic?
     
+    var filterSortView: FilterSortView = FilterSortView()
+    var filterItems: [FilterItem] = []
+    var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
+    
     private let field: GroupOfFieldsModel.FieldModel
     
     private let informationStackView: UIStackView = UIStackView()
@@ -31,12 +35,43 @@ final class FieldViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        setupFilterItems()
+        setupFilterSortView()
         configureUI()
-        let request = Field.LoadPrograms.Request(fieldID: field.fieldId)
-        interactor?.loadPrograms(with: request)
+        loadPrograms()
     }
     
+    private func setupFilterItems() {
+        let regionFilterItem = FilterItem(
+            paramType: .degree,
+            title: "Формат обучения",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "Бакалавриат"),
+                OptionViewModel(id: 2, name: "Специалитет")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        filterItems = [
+            regionFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
+        }
+    }
+    
+    func loadPrograms() {
+        let request = Field.LoadPrograms.Request(
+            fieldID: field.fieldId,
+            params: selectedParams
+        )
+        interactor?.loadPrograms(with: request)
+    }
+}
+
+// MARK: - UI Configurations
+extension FieldViewController {
     private func configureUI() {
         view.backgroundColor = .white
         configureNavigationBar()
@@ -44,8 +79,11 @@ final class FieldViewController: UIViewController {
         configureNameLabel()
         configureDegreeLabel()
         configureProgramsTitleLabel()
+        configureFilterSortView()
+        configureLastSpace()
         configureRefreshControl()
         configureTableView()
+        configureLastSpace()
     }
     
     private func configureNavigationBar() {
@@ -61,12 +99,9 @@ final class FieldViewController: UIViewController {
     }
     
     private func configureInformationStackView() {
-        view.addSubview(informationStackView)
         informationStackView.axis = .vertical
-        informationStackView.spacing = 17
+        informationStackView.alignment = .fill
         informationStackView.distribution = .fill
-        informationStackView.alignment = .leading
-        
         informationStackView.isLayoutMarginsRelativeArrangement = true
         informationStackView.layoutMargins = UIEdgeInsets(
             top: 10,
@@ -89,30 +124,33 @@ final class FieldViewController: UIViewController {
     }
     
     private func configureDegreeLabel() {
+        informationStackView.pinToPrevious(17)
         let degreeLabel = UILabel()
         degreeLabel.textColor = .black
         degreeLabel.font = FontManager.shared.font(for: .additionalInformation)
         degreeLabel.text = "Степень: \(field.degree)"
-        
+        degreeLabel.calculateHeight(with: view.frame.width - 20 - 20)
         informationStackView.addArrangedSubview(degreeLabel)
     }
     
     private func configureProgramsTitleLabel() {
+        informationStackView.pinToPrevious(17)
         let programsTitleLabel: UILabel = UILabel()
         programsTitleLabel.text = "Программы"
         programsTitleLabel.font = FontManager.shared.font(for: .tableTitle)
         programsTitleLabel.textColor = .black
+        programsTitleLabel.calculateHeight(with: view.frame.width - 20 - 20)
         informationStackView.addArrangedSubview(programsTitleLabel)
         
-        let searchButton = getSearchButton()
-        
-        searchButton.action = { [weak self] in
-            guard let self else { return }
-            self.router?.routeToSearch(fieldId: self.field.fieldId)
-        }
-        informationStackView.addSubview(searchButton)
-        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
-        searchButton.pinCenterY(to: programsTitleLabel)
+//        let searchButton = getSearchButton()
+//        
+//        searchButton.action = { [weak self] in
+//            guard let self else { return }
+//            self.router?.routeToSearch(fieldId: self.field.fieldId)
+//        }
+//        informationStackView.addSubview(searchButton)
+//        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
+//        searchButton.pinCenterY(to: programsTitleLabel)
     }
     
     private func getSearchButton() -> UIClosureButton {
@@ -130,7 +168,21 @@ final class FieldViewController: UIViewController {
         return searchButton
     }
     
-    func configureRefreshControl() {
+    private func configureFilterSortView() {
+        informationStackView.pinToPrevious(13)
+        
+        informationStackView.addArrangedSubview(filterSortView)
+        filterSortView.pinLeft(to: informationStackView.leadingAnchor)
+    }
+    
+    private func configureLastSpace() {
+        let spaceView = UIView()
+        spaceView.setHeight(5)
+        
+        informationStackView.addArrangedSubview(spaceView)
+    }
+    
+    private func configureRefreshControl() {
         refreshControl.tintColor = .systemCyan
         refreshControl.addTarget(
             self,
@@ -169,8 +221,14 @@ final class FieldViewController: UIViewController {
             width: tableView.bounds.width,
             height: UIView.layoutFittingCompressedSize.height
         )
-        let fittingSize = informationStackView.systemLayoutSizeFitting(targetSize)
+        let fittingSize = informationStackView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        
         informationStackView.frame.size.height = fittingSize.height
+        
         tableView.tableHeaderView = informationStackView
         
         if #available(iOS 15.0, *) {
@@ -183,14 +241,13 @@ final class FieldViewController: UIViewController {
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
-            let request = Field.LoadPrograms.Request(fieldID: self.field.fieldId)
-            self.interactor?.loadPrograms(with: request)
+            loadPrograms()
             self.refreshControl.endRefreshing()
         }
     }
 }
 
-
+// MARK: - UITableViewDataSource
 extension FieldViewController : UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return programs.count
@@ -217,6 +274,7 @@ extension FieldViewController : UITableViewDataSource {
     }
 }
 
+// MARK: - UITableViewDelegate
 extension FieldViewController : UITableViewDelegate {
     func tableView(
         _ tableView: UITableView,
@@ -261,6 +319,7 @@ extension FieldViewController : UITableViewDelegate {
     }
 }
 
+// MARK: - FieldDisplayLogic
 extension FieldViewController : FieldDisplayLogic {
     func displayLoadProgramsResult(with viewModel: Field.LoadPrograms.ViewModel) {
         programs = viewModel.programs
@@ -269,5 +328,41 @@ extension FieldViewController : FieldDisplayLogic {
             self?.tableView.reloadData()
             self?.refreshControl.endRefreshing()
         }
+    }
+}
+
+extension FieldViewController: OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ indices: Set<Int>,
+        _ options: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        guard let paramType = paramType else { return }
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
+        for option in options {
+            if let param = Param(paramType: paramType, option: option) {
+                filterItems[index].selectedParams.add(param)
+            }
+        }
+        
+        selectedParams[paramType]?.clear()
+        for param in filterItems[index].selectedParams.array {
+            selectedParams[paramType]?.add(param)
+        }
+        
+        loadPrograms()
+    }
+}
+
+
+extension FieldViewController : Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        loadPrograms()
     }
 }

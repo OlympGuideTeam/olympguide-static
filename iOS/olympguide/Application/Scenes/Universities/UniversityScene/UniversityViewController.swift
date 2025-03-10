@@ -37,34 +37,41 @@ protocol WithBookMarkButton { }
 
 // MARK: - UniversityViewController
 final class UniversityViewController: UIViewController, WithBookMarkButton {
+    var filterItems: [FilterItem] = []
+    private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
+    
     var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic & ProgramsDataStore)?
     var router: ProgramsRoutingLogic?
     
     private var cancellables = Set<AnyCancellable>()
     
-    private let informationContainer: UIView = UIView()
-    private let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
+    private let informationStackView: UIStackView = UIStackView()
+    
     private let universityID: Int
     private var startIsFavorite: Bool
     private var isFavorite: Bool
-    private let nameLabel: UILabel = UILabel()
-    private let regionLabel: UILabel = UILabel()
-    private let logo: String
     private let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
     private let emailButton: UIInformationButton = UIInformationButton(type: .email)
     private let university: UniversityModel
-    private let programsLabel: UILabel = UILabel()
     private let segmentedControl: UISegmentedControl = UISegmentedControl()
-    private let filterSortView: FilterSortView = FilterSortView()
+    let filterSortView: FilterSortView = FilterSortView()
     
     private var groupOfProgramsViewModel : [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
     
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     private let tableView = UITableView(frame: .zero, style: .plain)
     
+    private let searchButton: UIClosureButton = {
+        let button = UIClosureButton()
+        button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        button.tintColor = .black
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        return button
+    }()
+    
     init(for university: UniversityModel) {
-        self.logoImageView.contentMode = .scaleAspectFit
-        self.logo = university.logo
         self.universityID = university.universityID
         self.isFavorite = FavoritesManager.shared.isUniversityFavorited(
             universityID: universityID,
@@ -75,8 +82,6 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         
         super.init(nibName: nil, bundle: nil)
         
-        self.nameLabel.text = university.name
-        self.regionLabel.text = university.region
         self.title = university.shortName
     }
     
@@ -87,25 +92,17 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupFilterItems()
         configureUI()
         
-        logoImageView.startShimmer()
         webSiteButton.startShimmer()
-        ImageLoader.shared.loadImage(from: logo) { [weak self] (image: UIImage?) in
-            guard let self = self, let image = image else { return }
-            self.logoImageView.stopShimmer()
-            self.logoImageView.image = image
-        }
         
         interactor?.loadUniversity(with: University.Load.Request(universityID: universityID))
-        let request = Programs.Load.Request(
-            params: [],
-            university: university
-        )
         
         setupUniversityBindings()
         setupProgramsBindings()
-        interactor?.loadPrograms(with: request)
+        
+        loadPrograms()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -120,10 +117,42 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
             sender.setImage(UIImage(systemName: newImageName), for: .normal)
             
             if self.isFavorite {
-                FavoritesManager.shared.addUniversityToFavorites(model: university)
+                FavoritesManager.shared.addUniversityToFavorites(model: self.university)
             } else {
                 FavoritesManager.shared.removeUniversityFromFavorites(universityID: self.universityID)
             }
+        }
+    }
+    
+    private func loadPrograms() {
+        var request = Programs.Load.Request(
+            params: selectedParams,
+            university: university
+        )
+        if self.segmentedControl.selectedSegmentIndex == 1 {
+            request.groups = .faculties
+        }
+        
+        self.interactor?.loadPrograms(with: request)
+    }
+    
+    private func setupFilterItems() {
+        let regionFilterItem = FilterItem(
+            paramType: .degree,
+            title: "Формат обучения",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "Бакалавриат"),
+                OptionViewModel(id: 2, name: "Специалитет")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        filterItems = [
+            regionFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
     }
 }
@@ -133,21 +162,19 @@ extension UniversityViewController {
     private func configureUI() {
         view.backgroundColor = .white
         configureNavigationBar()
-        configureLogoImageView()
-        configureRegionLabel()
-        configureNameLabel()
+        
+        configureInformationStack()
+        configureUniversityView()
         configureWebSiteButton()
         configureEmailButton()
-        configureProgramsLabel()
-        configureSearchButton()
+        configureProgramLabel()
         configureSegmentedControl()
+        configureFilterSortView()
+        configureLastSpace()
+        setupFilterSortView()
         
         configureRefreshControl()
         configureTableView()
-        
-        logoImageView.startShimmer()
-        webSiteButton.startShimmer()
-        emailButton.startShimmer()
     }
     
     private func configureNavigationBar() {
@@ -162,122 +189,106 @@ extension UniversityViewController {
         navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
     
-    private func configureLogoImageView() {
-        informationContainer.addSubview(logoImageView)
-        
-        logoImageView.contentMode = .scaleAspectFit
-        
-        regionLabel.font = Constants.Fonts.regionLabelFont
-        regionLabel.textColor = Constants.Colors.regionTextColor
-        
-        logoImageView.pinLeft(to: informationContainer.leadingAnchor, Constants.Dimensions.logoLeftMargin)
-        logoImageView.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
-        logoImageView.setWidth(Constants.Dimensions.logoSize)
-        logoImageView.setHeight(Constants.Dimensions.logoSize)
+    private func configureInformationStack() {
+        informationStackView.axis = .vertical
+        informationStackView.alignment = .fill
+        informationStackView.distribution = .fill
+        informationStackView.isLayoutMarginsRelativeArrangement = true
+        informationStackView.layoutMargins = UIEdgeInsets(top: 30, left: 20, bottom: 0, right: 20)
     }
     
-    private func configureRegionLabel() {
-        informationContainer.addSubview(regionLabel)
+    private func configureUniversityView() {
+        let universityView = UIUniversityView()
+        universityView.configure(with: university.toViewModel(), 20, 20)
+        universityView.favoriteButtonIsHidden = true
         
-        regionLabel.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
-        regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-    }
-    
-    private func configureNameLabel() {
-        informationContainer.addSubview(nameLabel)
-        
-        nameLabel.font = Constants.Fonts.nameLabelFont
-        nameLabel.numberOfLines = 0
-        nameLabel.lineBreakMode = .byWordWrapping
-        
-        nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
-        nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        nameLabel.pinRight(to: informationContainer.trailingAnchor, Constants.Dimensions.interItemSpacing)
+        informationStackView.addArrangedSubview(universityView)
     }
     
     private func configureWebSiteButton() {
-        informationContainer.addSubview(webSiteButton)
+        informationStackView.pinToPrevious(30)
         
-        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30)
-        //        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
-        //        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30, .grOE)
-        //        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
-        
-        webSiteButton.pinLeft(to: informationContainer.leadingAnchor, 20)
-        webSiteButton.pinRight(to: informationContainer.centerXAnchor)
+        informationStackView.addArrangedSubview(webSiteButton)
         webSiteButton.addTarget(self, action: #selector(openWebPage), for: .touchUpInside)
     }
     
     private func configureEmailButton() {
-        informationContainer.addSubview(emailButton)
+        informationStackView.pinToPrevious(20)
         
-        emailButton.pinTop(to: webSiteButton.bottomAnchor, 20)
-        emailButton.pinLeft(to: informationContainer.leadingAnchor, 20)
-        emailButton.pinRight(to: informationContainer.centerXAnchor)
+        informationStackView.addArrangedSubview(emailButton)
         emailButton.addTarget(self, action: #selector(openMailCompose), for: .touchUpInside)
     }
     
-    private func configureProgramsLabel() {
-        let text = "Программы"
-        let font = FontManager.shared.font(for: .tableTitle)
-        programsLabel.text = text
-        programsLabel.font = font
+    private func configureProgramLabel() {
+        informationStackView.pinToPrevious(20)
+        let programsLabel = UILabel()
+        programsLabel.text = "Программы"
+        programsLabel.font = FontManager.shared.font(for: .tableTitle)
         
-        informationContainer.addSubview(programsLabel)
-        programsLabel.pinTop(to: emailButton.bottomAnchor, 20)
-        programsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
+        let horizontalStack = UIStackView()
+        horizontalStack.axis = .horizontal
+        horizontalStack.alignment = .center
+        horizontalStack.distribution = .fill
         
-        //        let textSize = text.size(withAttributes: [.font: font])
-        //
-        //        programsLabel.setHeight(textSize.height)
-    }
-    
-    private func configureSegmentedControl() {
-        segmentedControl.insertSegment(withTitle: "По направлениям", at: 0, animated: false)
-        segmentedControl.insertSegment(withTitle: "По факультетам", at: 1, animated: false)
-        segmentedControl.selectedSegmentIndex = 0
+        horizontalStack.addArrangedSubview(programsLabel)
         
-        let customFont = FontManager.shared.font(for: .commonInformation)
-        let customAttributes: [NSAttributedString.Key: Any] = [.font: customFont]
-        
-        segmentedControl.setTitleTextAttributes(customAttributes, for: .normal)
-        segmentedControl.setTitleTextAttributes(customAttributes, for: .selected)
-        
-        
-        informationContainer.addSubview(segmentedControl)
-        
-        segmentedControl.pinTop(to: programsLabel.bottomAnchor, 13)
-        segmentedControl.pinLeft(to: informationContainer.leadingAnchor, 20)
-        segmentedControl.pinRight(to: informationContainer.trailingAnchor, 20)
-        segmentedControl.pinBottom(to: informationContainer.bottomAnchor, 17)
-        segmentedControl.setHeight(35)
-        
-        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-    }
-    
-    private func configureSearchButton() {
-        let searchButton = UIClosureButton()
-        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        searchButton.tintColor = .black
-        searchButton.contentHorizontalAlignment = .fill
-        searchButton.contentVerticalAlignment = .fill
-        searchButton.imageView?.contentMode = .scaleAspectFit
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        horizontalStack.addArrangedSubview(spacer)
         
         searchButton.action = { [weak self] in
             self?.router?.routeToSearch()
         }
+        searchButton.widthAnchor.constraint(equalToConstant: 28).isActive = true
+        searchButton.heightAnchor.constraint(equalToConstant: 28).isActive = true
         
-        informationContainer.addSubview(searchButton)
+        horizontalStack.addArrangedSubview(searchButton)
         
-        searchButton.pinRight(to: informationContainer.trailingAnchor, 20)
-        searchButton.pinCenterY(to: programsLabel.centerYAnchor)
-        
-        searchButton.setWidth(28)
-        searchButton.setHeight(28)
+        informationStackView.addArrangedSubview(horizontalStack)
     }
     
     private func configureFilterSortView() {
-        filterSortView.configure(filteringOptions: ["Формат обучения"])
+        informationStackView.pinToPrevious(13)
+        
+        informationStackView.addArrangedSubview(filterSortView)
+        //        filterSortView.pinRight(to: informationStackView.trailingAnchor)
+        filterSortView.pinLeft(to: informationStackView.leadingAnchor)
+    }
+    
+    private func configureSegmentedControl() {
+        informationStackView.pinToPrevious(13)
+        
+        segmentedControl.insertSegment(
+            withTitle: "По направлениям",
+            at: 0,
+            animated: false
+        )
+        segmentedControl.insertSegment(
+            withTitle: "По факультетам",
+            at: 1,
+            animated: false
+        )
+        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.setHeight(35)
+        
+        let customFont = FontManager.shared.font(for: .commonInformation)
+        let customAttributes: [NSAttributedString.Key: Any] = [.font: customFont]
+        segmentedControl.setTitleTextAttributes(customAttributes, for: .normal)
+        segmentedControl.setTitleTextAttributes(customAttributes, for: .selected)
+        segmentedControl.addTarget(
+            self,
+            action: #selector(segmentChanged),
+            for: .valueChanged
+        )
+        
+        informationStackView.addArrangedSubview(segmentedControl)
+    }
+    
+    private func configureLastSpace() {
+        let spaceView = UIView()
+        spaceView.setHeight(17)
+        
+        informationStackView.addArrangedSubview(spaceView)
     }
     
     func configureRefreshControl() {
@@ -287,7 +298,6 @@ extension UniversityViewController {
     
     private func configureTableView() {
         view.addSubview(tableView)
-        
         tableView.frame = view.bounds
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
@@ -308,18 +318,22 @@ extension UniversityViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
-        informationContainer.setNeedsLayout()
-        informationContainer.layoutIfNeeded()
+        informationStackView.setNeedsLayout()
+        informationStackView.layoutIfNeeded()
         
         let targetSize = CGSize(
             width: tableView.bounds.width,
             height: UIView.layoutFittingCompressedSize.height
         )
-        let fittingSize = informationContainer.systemLayoutSizeFitting(targetSize)
-        informationContainer.frame.size.height = fittingSize.height
-        tableView.tableHeaderView = informationContainer
+        let fittingSize = informationStackView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
         
-        tableView.tableHeaderView = informationContainer
+        informationStackView.frame.size.height = fittingSize.height
+        
+        tableView.tableHeaderView = informationStackView
     }
     
     @objc func openWebPage(sender: UIButton) {
@@ -330,15 +344,7 @@ extension UniversityViewController {
     }
     
     @objc func segmentChanged() {
-        var request = Programs.Load.Request(
-            params: [],
-            university: university
-        )
-        if segmentedControl.selectedSegmentIndex == 1 {
-            request.groups = .faculties
-        }
-        
-        interactor?.loadPrograms(with: request)
+        loadPrograms()
     }
 }
 
@@ -486,16 +492,9 @@ extension UniversityViewController : UITableViewDataSource {
     
     @objc private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            var request = Programs.Load.Request(
-                params: [],
-                university: self?.university
-            )
-            if self?.segmentedControl.selectedSegmentIndex == 1 {
-                request.groups = .faculties
-            }
-            
-            self?.interactor?.loadPrograms(with: request)
-            self?.refreshControl.endRefreshing()
+            guard let self else { return }
+            loadPrograms()
+            self.refreshControl.endRefreshing()
         }
     }
 }
@@ -508,6 +507,43 @@ extension UniversityViewController : UITableViewDelegate {
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
         router?.routeToProgram(with: indexPath)
+    }
+}
+
+// MARK: - OptionsViewControllerDelegate
+extension UniversityViewController: OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ indices: Set<Int>,
+        _ options: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        guard let paramType = paramType else { return }
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
+        for option in options {
+            if let param = Param(paramType: paramType, option: option) {
+                filterItems[index].selectedParams.add(param)
+            }
+        }
+        
+        selectedParams[paramType]?.clear()
+        for param in filterItems[index].selectedParams.array {
+            selectedParams[paramType]?.add(param)
+        }
+        
+        loadPrograms()
+    }
+}
+
+// MARK: - Filterble
+extension UniversityViewController: Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        loadPrograms()
     }
 }
 
@@ -547,7 +583,7 @@ extension UniversityViewController {
             .sink { [weak self] event in
                 guard let self = self else { return }
                 switch event {
-                case .added(let university, let program):
+                case .added(_, let program):
                     if let groupIndex = groupOfProgramsViewModel.firstIndex(where: { group in
                         group.programs.contains(where: { $0.programID == program.programID })
                     }) {

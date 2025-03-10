@@ -11,7 +11,7 @@ enum Universities {
     // MARK: - Use Cases
     enum Load {
         struct Request {
-            let params: Dictionary<String, Set<String>>
+            let params: Dictionary<ParamType, SingleOrMultipleArray<Param>>
         }
         
         struct Response {

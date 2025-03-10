@@ -12,6 +12,10 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     var interactor: (OlympiadBusinessLogic & BenefitsByProgramsBusinessLogic)?
     var router: OlympiadRoutingLogic?
     
+    var filterSortView: FilterSortView = FilterSortView()
+    var filterItems: [FilterItem] = []
+    var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
+    
     private var cancellables = Set<AnyCancellable>()
     
     private let olympiad: OlympiadModel
@@ -44,6 +48,7 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupFilterItems()
         configureUI()
         let request = Olympiad.LoadUniversities.Request(olympiadID: olympiad.olympiadID)
         interactor?.loadUniversities(with: request)
@@ -67,6 +72,48 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
             }
         }
     }
+    
+    private func setupFilterItems() {
+        let benefitFilterItem = FilterItem(
+            paramType: .benefit,
+            title: "Льгота",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "БВИ"),
+                OptionViewModel(id: 2, name: "100 баллов")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        let minDiplomaLevelFilterItem = FilterItem(
+            paramType: .minClass,
+            title: "Минимальный класс диплома",
+            initMethod: .models([
+                OptionViewModel(id: 10, name: "10 класс"),
+                OptionViewModel(id: 11, name: "11 класс")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        let diplomaLevelFilterItem = FilterItem(
+            paramType: .minDiplomaLevel,
+            title: "Степень диплома",
+            initMethod: .models([
+                OptionViewModel(id: 1, name: "Победитель"),
+                OptionViewModel(id: 3, name: "Призёр")
+            ]),
+            isMultipleChoice: true
+        )
+        
+        filterItems = [
+            benefitFilterItem,
+            minDiplomaLevelFilterItem,
+            diplomaLevelFilterItem
+        ]
+        
+        for item in filterItems {
+            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
+        }
+    }
 }
 
 // MARK: - UI Configuration
@@ -82,6 +129,8 @@ extension OlympiadViewController {
         configureOlympiadNameLabel()
         configureOlympiadInformation()
         configureProgramsLabel()
+        setupFilterSortView()
+        configureFilterSortView()
         
         configureTableView()
         
@@ -116,7 +165,9 @@ extension OlympiadViewController {
         olympiadInformationStack.axis = .vertical
         olympiadInformationStack.spacing = 7
         olympiadInformationStack.distribution = .fill
-        olympiadInformationStack.alignment = .leading
+        olympiadInformationStack.alignment = .fill
+        
+        
         
         olympiadInformationStack.addArrangedSubview(configureLevelLabel())
         olympiadInformationStack.addArrangedSubview(configureProfileLabel())
@@ -126,7 +177,7 @@ extension OlympiadViewController {
     
     private func configureOlympiadNameLabel() {
         let olympiadNameLabel: UILabel = UILabel()
-        //        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
+//        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
         olympiadNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
         olympiadNameLabel.numberOfLines = 0
         olympiadNameLabel.lineBreakMode = .byWordWrapping
@@ -166,15 +217,25 @@ extension OlympiadViewController {
         programsLabel.text = "Программы"
         informationStackView.addArrangedSubview(programsLabel)
         
-        //        let searchButton = getSearchButton()
-        //
-        //        searchButton.action = { [weak self] in
-        //            guard let self = self else { return }
-        //            self.router?.routeToSearch(olympiadId: olympiad.olympiadID)
-        //        }
-        //        informationStackView.addSubview(searchButton)
-        //        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
-        //        searchButton.pinCenterY(to: programsLabel)
+        let searchButton = getSearchButton()
+        
+        searchButton.action = { [weak self] in
+            guard let self = self else { return }
+            self.router?.routeToSearch(olympiadId: olympiad.olympiadID)
+        }
+        informationStackView.addSubview(searchButton)
+        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
+        searchButton.pinCenterY(to: programsLabel)
+    }
+    
+    private func configureFilterSortView() {
+        informationStackView.pinToPrevious(13 + 31 + 5)
+        informationStackView.addArrangedSubview(UIView())
+        
+        informationStackView.addSubview(filterSortView)
+        filterSortView.pinLeft(to: informationStackView.leadingAnchor)
+        filterSortView.pinRight(to: informationStackView.trailingAnchor)
+        filterSortView.pinBottom(to: informationStackView.bottomAnchor, 5)
     }
     
     private func getSearchButton() -> UIClosureButton {
@@ -223,8 +284,14 @@ extension OlympiadViewController {
             width: tableView.bounds.width,
             height: UIView.layoutFittingCompressedSize.height
         )
-        let fittingSize = informationStackView.systemLayoutSizeFitting(targetSize)
+        let fittingSize = informationStackView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        
         informationStackView.frame.size.height = fittingSize.height
+        
         tableView.tableHeaderView = informationStackView
         
         if #available(iOS 15.0, *) {
@@ -301,7 +368,8 @@ extension OlympiadViewController : UITableViewDelegate {
                 let request = BenefitsByPrograms.Load.Request(
                     olympiadID: olympiad.olympiadID,
                     universityID: universities[section].universityID,
-                    section: section
+                    section: section,
+                    params: selectedParams
                 )
                 interactor?.loadBenefits(with: request)
             } else {
@@ -338,7 +406,7 @@ extension OlympiadViewController : UITableViewDelegate {
     
 }
 
-
+// MARK: - OlympiadDisplayLogic
 extension OlympiadViewController : OlympiadDisplayLogic {
     func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel) {
         universities = viewModel.universities
@@ -351,6 +419,7 @@ extension OlympiadViewController : OlympiadDisplayLogic {
     }
 }
 
+// MARK: - BenefitsByProgramsDisplayLogic
 extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
     func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel) {
         programs[viewModel.section] = viewModel.benefits
@@ -371,6 +440,62 @@ extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
         let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
         currentOffset.y += deltaY
         tableView.setContentOffset(currentOffset, animated: false)
+    }
+}
+
+extension OlympiadViewController : OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ indices: Set<Int>,
+        _ optionsNames: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        guard let paramType = paramType else { return }
+        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
+        
+        filterItems[index].selectedIndices = indices
+        
+        filterItems[index].selectedParams.clear()
+        for option in optionsNames {
+            if let param = Param(paramType: paramType, option: option) {
+                filterItems[index].selectedParams.add(param)
+            }
+        }
+        
+        selectedParams[paramType]?.clear()
+        for param in filterItems[index].selectedParams.array {
+            selectedParams[paramType]?.add(param)
+        }
+        
+        for (section, expand) in self.isExpanded.enumerated() {
+            if expand {
+                let request = BenefitsByPrograms.Load.Request(
+                    olympiadID: olympiad.olympiadID,
+                    universityID: universities[section].universityID,
+                    section: section,
+                    params: selectedParams
+                )
+                interactor?.loadBenefits(with: request)
+            }
+        }
+    }
+}
+
+extension OlympiadViewController : Filterble {
+    func deleteFilter(forItemAt index: Int) {
+        let item = filterItems[index]
+        selectedParams[item.paramType]?.clear()
+        
+        for (section, expand) in self.isExpanded.enumerated() {
+            if expand {
+                let request = BenefitsByPrograms.Load.Request(
+                    olympiadID: olympiad.olympiadID,
+                    universityID: universities[section].universityID,
+                    section: section,
+                    params: selectedParams
+                )
+                interactor?.loadBenefits(with: request)
+            }
+        }
     }
 }
 

@@ -81,7 +81,7 @@ extension ProgramWorker : BenefitsByOlympiadsWorkerLogic {
         networkService.request(
             endpoint: "/program/\(progrmaId)/benefits",
             method: .get,
-            queryItems: nil,
+            queryItems: queryItems,
             body: nil
         ) { (result: Result<[OlympiadWithBenefitsModel]?, NetworkError>) in
             switch result {

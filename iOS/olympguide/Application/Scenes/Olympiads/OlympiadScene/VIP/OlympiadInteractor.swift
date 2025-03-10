@@ -47,15 +47,18 @@ extension OlympiadInteractor : OlympiadBusinessLogic {
 
 extension OlympiadInteractor : BenefitsByProgramsBusinessLogic {
     func loadBenefits(with request: BenefitsByPrograms.Load.Request) {
+        let params: [Param] = request.params.flatMap { key, value in
+            value.array
+        }
         worker?.fetchBenefits(
             for: request.olympiadID,
             and: request.universityID,
-            with: request.params
+            with: params
         ) { [weak self] result in
             switch result {
             case .success(let programs):
                 self?.programs?[request.section] = programs ?? []
-                let response = BenefitsByPrograms.Load.Response(programs: programs, section: request.section)
+                let response = BenefitsByPrograms.Load.Response(programs: programs ?? [], section: request.section)
                 self?.presenter?.presentLoadBenefits(with: response)
             case .failure(let error):
                 let response = BenefitsByPrograms.Load.Response(error: error)
