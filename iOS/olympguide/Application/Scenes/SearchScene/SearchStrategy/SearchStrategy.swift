@@ -7,6 +7,11 @@
 
 import UIKit
 
+enum PresentMethod {
+    case present
+    case push
+}
+
 protocol SearchStrategy {
     init()
     
@@ -31,6 +36,6 @@ protocol SearchStrategy {
     func titleForItem(_ model: ModelType) -> String
     func responseTypeToModel(_ response: [ResponseType]) -> [ModelType]
     
-    static func modelToViewModel(_ model: [ModelType]) -> [ViewModelType]
-    static func build(with model: ModelType) -> UIViewController
+    func modelToViewModel(_ model: [ModelType]) -> [ViewModelType]
+    func build(with model: ModelType) -> (UIViewController?, PresentMethod?)
 }

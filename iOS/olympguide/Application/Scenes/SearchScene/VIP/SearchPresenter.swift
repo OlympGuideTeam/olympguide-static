@@ -10,6 +10,11 @@ import Foundation
 final class SearchPresenter<Strategy: SearchStrategy>: SearchPresentationLogic {
     
     weak var viewController: SearchDisplayLogic?
+    var strartegy: Strategy
+    
+    init(strategy: Strategy) {
+        self.strartegy = strategy
+    }
     
     func presentTextDidChange<ResponseModel>(response: Search.TextDidChange.Response<ResponseModel>) {
         
@@ -19,7 +24,7 @@ final class SearchPresenter<Strategy: SearchStrategy>: SearchPresentationLogic {
             return
         }
         
-        let viewItems = Strategy.modelToViewModel(items)
+        let viewItems = strartegy.modelToViewModel(items)
         let viewModel = Search.TextDidChange.ViewModel(items: viewItems)
         viewController?.displayTextDidChange(viewModel: viewModel)
     }

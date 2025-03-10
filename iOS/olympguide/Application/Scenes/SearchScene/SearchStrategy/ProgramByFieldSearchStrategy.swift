@@ -8,9 +8,11 @@
 import UIKit
 
 final class ProgramByFieldSearchStrategy : SearchStrategy {
-    typealias ModelType = ProgramsByUniversityModel
+    typealias ModelType = ProgramShortModel
     typealias ViewModelType = ProgramViewModel
     typealias ResponseType = ProgramsByUniversityModel
+    
+    var response: [ResponseType]?
     
     static var searchTitle: String = "Поиск по программам"
     
@@ -49,19 +51,32 @@ final class ProgramByFieldSearchStrategy : SearchStrategy {
         return cell
     }
     
-    func titleForItem(_ model: ProgramsByUniversityModel) -> String {
-        model.univer.name
+    func titleForItem(_ model: ProgramShortModel) -> String {
+        model.name
     }
     
-    func responseTypeToModel(_ response: [ProgramsByUniversityModel]) -> [ProgramsByUniversityModel] {
-        response
+    func responseTypeToModel(_ response: [ProgramsByUniversityModel]) -> [ProgramShortModel] {
+        self.response = response
+        return response.flatMap { $0.programs }
     }
     
-    static func modelToViewModel(_ model: [ProgramsByUniversityModel]) -> [ProgramViewModel] {
-        model.flatMap { $0.toViewModel().programs }
+    func modelToViewModel(_ model: [ProgramShortModel]) -> [ProgramViewModel] {
+        model.map { $0.toViewModel() }
     }
     
-    static func build(with model: ProgramsByUniversityModel) -> UIViewController {
-        UIViewController()
+    func build(with model: ProgramShortModel) -> (UIViewController?, PresentMethod?) {
+        guard let response = self.response else {
+            return (nil, nil)
+        }
+        for university in response {
+            if university.programs.firstIndex(of: model) != nil {
+                let programVC = ProgramAssembly.build(
+                    for: model,
+                    by: university.univer
+                )
+                return (programVC, .push)
+            }
+        }
+        return (nil, nil)
     }
 }

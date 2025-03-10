@@ -8,9 +8,6 @@
 import Foundation
 import Combine
 
-import Foundation
-import Combine
-
 class AuthManager {
     static let shared = AuthManager(networkService: NetworkService())
 

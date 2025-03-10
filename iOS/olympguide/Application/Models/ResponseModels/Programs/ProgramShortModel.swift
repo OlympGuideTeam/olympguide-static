@@ -40,3 +40,9 @@ struct ProgramShortModel : Codable {
         )
     }
 }
+
+extension ProgramShortModel : Equatable {
+    static func == (lhs: ProgramShortModel, rhs: ProgramShortModel) -> Bool {
+        lhs.programID == rhs.programID
+    }
+}

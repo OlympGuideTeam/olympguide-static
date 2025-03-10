@@ -38,16 +38,16 @@ final class UniversitySearchStrategy: SearchStrategy {
         return model.name
     }
     
-    static func modelToViewModel(
+    func modelToViewModel(
         _ model: [UniversityModel]
     ) -> [UniversityViewModel] {
         model.map { $0.toViewModel() }
     }
     
-    static func build(
+    func build(
         with model: UniversityModel
-    ) -> UIViewController {
-        UniversityAssembly.build(for: model)
+    ) -> (UIViewController?, PresentMethod?) {
+        (UniversityAssembly.build(for: model), .push)
     }
     
     func endpoint() -> String {
