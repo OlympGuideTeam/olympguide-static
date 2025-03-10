@@ -521,6 +521,7 @@ extension ProgramViewController: UITableViewDataSource {
         if benefits.count != 0 {
             let benefitModel = benefits[indexPath.row]
             cell.configure(with: benefitModel)
+            cell.hideSeparator(indexPath.row == benefits.count - 1)
         } else {
             cell.configureShimmer()
         }
@@ -544,7 +545,6 @@ extension ProgramViewController: UITableViewDataSource {
 
         informationContainer.frame.size.height = fittingSize.height
         
-        // Ключевой момент — пересетить headerView
         tableView.tableHeaderView = informationContainer
     }
 }

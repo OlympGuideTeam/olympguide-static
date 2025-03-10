@@ -270,6 +270,7 @@ extension FieldViewController : UITableViewDataSource {
         else { return UITableViewCell() }
         
         cell.configure(with: programs[indexPath.section].programs[indexPath.row])
+        cell.hideSeparator(indexPath.row == programs[indexPath.section].programs.count - 1)
         return cell
     }
 }

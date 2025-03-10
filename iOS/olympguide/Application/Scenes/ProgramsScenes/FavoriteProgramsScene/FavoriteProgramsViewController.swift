@@ -135,8 +135,9 @@ extension FavoriteProgramsViewController : UITableViewDataSource {
             if !isFavorite {
                 FavoritesManager.shared.removeProgramFromFavorites(programID: sender.tag)
             }
-            
         }
+        
+        cell.hideSeparator(indexPath.row == programs[indexPath.section].programs.count - 1)
         return cell
     }
 }
@@ -224,6 +225,12 @@ extension FavoriteProgramsViewController {
                         }
                         tableView.endUpdates()
                         self.tableView.backgroundView = self.getEmptyLabel()
+                        if index.row != 0 && index.row == self.programs[index.section].programs.count {
+                            let indexPath = IndexPath(row: index.row - 1, section: index.section)
+                            if let cell = tableView.cellForRow(at: indexPath) as? ProgramTableViewCell {
+                                cell.hideSeparator(true)
+                            }
+                        }
                     }
                 case .error(let programID):
                     interactor?.handleBatchError(programID: programID)

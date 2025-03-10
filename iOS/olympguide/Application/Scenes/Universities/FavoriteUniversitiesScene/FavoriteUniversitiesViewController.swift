@@ -128,11 +128,17 @@ class FavoriteUniversitiesViewController: UIViewController {
 
 // MARK: - UITableViewDataSource
 extension FavoriteUniversitiesViewController : UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         return universities.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: UniversityTableViewCell.identifier,
             for: indexPath
@@ -149,13 +155,18 @@ extension FavoriteUniversitiesViewController : UITableViewDataSource {
             }
         }
         
+        cell.hideSeparator(indexPath.row == (universities.count - 1))
+        
         return cell
     }
 }
 
 // MARK: - UITableViewDelegate
 extension FavoriteUniversitiesViewController : UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard let universityModel = interactor?.universities[indexPath.row] else { return }
         router?.routeToDetails(for: universityModel)
@@ -222,6 +233,12 @@ extension FavoriteUniversitiesViewController {
                         self.interactor?.dislikeUniversity(at: index)
                         self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
                         self.tableView.backgroundView = self.getEmptyLabel()
+                        if index == self.universities.count && index != 0 {
+                            let indexPath = IndexPath(row: index - 1, section: 0)
+                            if let cell = tableView.cellForRow(at: indexPath) as? UniversityTableViewCell {
+                                cell.hideSeparator(true)
+                            }
+                        }
                     }
                 case .error(let universityID):
                     interactor?.handleBatchError(universityID: universityID)

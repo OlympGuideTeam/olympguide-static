@@ -336,6 +336,7 @@ extension OlympiadViewController : UITableViewDataSource {
             }
         }
         
+        cell.hideSeparator(indexPath.row == programs[indexPath.section].count - 1)
         return cell
     }
 }

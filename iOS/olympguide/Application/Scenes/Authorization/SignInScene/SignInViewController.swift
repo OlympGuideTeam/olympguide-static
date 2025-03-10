@@ -38,6 +38,11 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
         subscribeToKeyboardNotifications()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        emailTextField.didTapSearchBar()
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeFromKeyboardNotifications()

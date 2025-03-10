@@ -48,19 +48,8 @@ final class ProgramWithBenefitsSearchStrategy: SearchStrategy {
         }
         cell.configure(with: viewMmodel, indexPath: indexPath)
         
-//        for view in cell.benefitsStack.arrangedSubviews {
-//            guard let subview = view as? BenefitStackView else { continue }
-//            subview.createPreviewVC = { [weak self] indexPath, index in
-//                guard let self = self else { return nil }
-//                let program = self.programs[indexPath.section][indexPath.row]
-//                let previewVC = BenefitViewController(with: program, index: index)
-//                return previewVC
-//            }
-//        }
-        
         for view in cell.benefitsStack.arrangedSubviews {
             guard let subview = view as? BenefitStackView else { continue }
-//            guard let currentVC = subview.findViewController() else { continue }
             subview.createPreviewVC = { [weak self] indexPath, index in
                 guard let self = self else { return nil }
                 guard let program = self.viewModels?[indexPath.row] else { return nil }
@@ -68,6 +57,8 @@ final class ProgramWithBenefitsSearchStrategy: SearchStrategy {
                 return previewVC
             }
         }
+        
+        cell.hideSeparator(isSeparatorHidden)
         return cell
     }
     
