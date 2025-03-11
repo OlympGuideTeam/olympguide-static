@@ -11,7 +11,7 @@ import Combine
 class AuthManager {
     static let shared = AuthManager(networkService: NetworkService())
 
-    private let networkService: NetworkServiceProtocol
+    private let networkService: NetworkService
     @Published private(set) var isAuthenticated: Bool = false
     
     private let baseURL: String
@@ -22,7 +22,7 @@ class AuthManager {
             fatalError("BASE_URL is not set in Info.plist!")
         }
         self.baseURL = baseURLString
-        self.networkService = networkService
+        self.networkService = NetworkService()
     }
     
     func login(
@@ -57,7 +57,8 @@ class AuthManager {
             endpoint: "/auth/check-session",
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: false
         ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success:
@@ -73,7 +74,8 @@ class AuthManager {
             endpoint: "/auth/logout",
             method: .post,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: false
         ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let response):

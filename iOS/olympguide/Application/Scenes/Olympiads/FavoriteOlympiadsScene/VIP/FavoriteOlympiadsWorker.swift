@@ -22,7 +22,8 @@ final class FavoriteOlympiadsWorker : OlympiadsWorkerLogic {
             endpoint: "/user/favourite/olympiads",
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: false
         ) { (result: Result<[OlympiadModel]?, NetworkError>) in
             switch result {
             case .success(let olympiads):

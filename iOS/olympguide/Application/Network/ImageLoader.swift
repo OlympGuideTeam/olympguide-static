@@ -10,12 +10,12 @@ import UIKit
 
 class ImageLoader {
     static let shared = ImageLoader()
-    private let cache = NSCache<NSString, UIImage>()
+    private var cache: [String: UIImage] = [:]
 
     private init() {}
 
     func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-        if let cachedImage = cache.object(forKey: urlString as NSString) {
+        if let cachedImage = cache[urlString] {
             completion(cachedImage)
             return
         }
@@ -26,14 +26,19 @@ class ImageLoader {
         }
         
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self, let data = data, error == nil, let image = UIImage(data: data) else {
+            guard
+                let self = self,
+                let data = data,
+                error == nil,
+                let image = UIImage(data: data)
+            else {
                 DispatchQueue.main.async {
                     completion(nil)
                 }
                 return
             }
             
-            self.cache.setObject(image, forKey: urlString as NSString)
+            self.cache[urlString] = image
             
             DispatchQueue.main.async {
                 completion(image)
