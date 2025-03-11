@@ -13,15 +13,23 @@ final class UIUniversityView: UIView {
     private let nameLabel = UILabel()
     private let regionLabel = UILabel()
     private var authCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
+    
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     
     var arrowIsHidden: Bool = true  {
         didSet {
             arrowImageView.isHidden = arrowIsHidden
-            favoriteButton.isHidden = !arrowIsHidden
+            favoriteButtonIsHidden = true
         }
     }
     
-    var favoriteButtonIsHidden: Bool = true
+    var favoriteButtonIsHidden: Bool = false {
+        didSet {
+            favoriteButton.isHidden = favoriteButtonIsHidden
+        }
+    }
     
     var isExpanded: Bool = false {
         didSet {
@@ -116,28 +124,25 @@ final class UIUniversityView: UIView {
             self.logoImageView.image = image
         }
         nameLabel.calculateHeight(with: UIScreen.main.bounds.width - left - right - 80 - 37 - 15)
-//        if !arrowIsHidden {
-//            favoriteButton.isHidden = true
-//        } else {
-//            favoriteButton.isHidden = !AuthManager.shared.isAuthenticated
-//        }
-        favoriteButton.isHidden = favoriteButtonIsHidden
+        if !arrowIsHidden {
+            favoriteButton.isHidden = true
+        } else {
+            favoriteButton.isHidden = !authManager.isAuthenticated || favoriteButtonIsHidden
+        }
         favoriteButton.tag = viewModel.universityID
     }
     
     func setupBindings() {
-        authCancellable = AuthManager.shared.$isAuthenticated
+        authManager.isAuthenticatedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isAuth in
                 guard let self else { return }
                 if !arrowIsHidden {
                     favoriteButton.isHidden = true
                 } else {
-//                    print(favoriteButtonIsHidden || !isAuth)
-//                    print(favoriteButtonIsHidden)
-//                    print(!isAuth)
                     favoriteButton.isHidden = favoriteButtonIsHidden || !isAuth
                 }
             }
+            .store(in: &cancellables)
     }
 }

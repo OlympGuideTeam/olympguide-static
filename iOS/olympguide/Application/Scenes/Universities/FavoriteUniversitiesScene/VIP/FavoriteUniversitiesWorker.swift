@@ -8,11 +8,11 @@
 import Foundation
 
 final class FavoriteUniversitiesWorker : UniversitiesWorkerLogic {
-    private let networkService: NetworkServiceProtocol
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
     
-    init(networkService: NetworkServiceProtocol = NetworkService()) {
-        self.networkService = networkService
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
 
     func fetchUniversities(
         with params: [Param],
@@ -34,7 +34,7 @@ final class FavoriteUniversitiesWorker : UniversitiesWorkerLogic {
             switch result {
             case .success(let universities):
                 if let universities = universities {
-                    let resultUniversities = universities.map { university in
+                    _ = universities.map { university in
                         var modifiedUniversity = university
                         modifiedUniversity.like = isFavorite(
                             univesityID: university.universityID,
@@ -51,7 +51,7 @@ final class FavoriteUniversitiesWorker : UniversitiesWorkerLogic {
         
         
         func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
-            FavoritesManager.shared.isUniversityFavorited(
+            favoritesManager.isUniversityFavorited(
                 universityID: univesityID,
                 serverValue: serverValue
             )

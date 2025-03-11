@@ -12,3 +12,13 @@ struct UniversityViewModel {
     let region: String
     var like: Bool
 }
+
+extension UniversityModel : Equatable {
+    static func == (lhs: UniversityModel, rhs: UniversityModel) -> Bool {
+        lhs.universityID == rhs.universityID
+    }
+    
+    static func == (lhs: UniversityModel, rhs: UniversityViewModel) -> Bool {
+        lhs.universityID == rhs.universityID
+    }
+}

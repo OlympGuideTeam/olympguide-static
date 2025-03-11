@@ -45,6 +45,7 @@ struct OlympiadSearchStrategy: SearchStrategy {
         ) as? OlympiadTableViewCell
             ?? OlympiadTableViewCell(style: .default, reuseIdentifier: identifier)
         
+        cell.isFavoriteButtonHidden = true
         cell.configure(with: viewMmodel)
         cell.hideSeparator(isSeparatorHidden)
         return cell

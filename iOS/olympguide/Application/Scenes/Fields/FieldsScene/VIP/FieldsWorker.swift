@@ -9,11 +9,8 @@ import Foundation
 
 class FieldsWorker {
     
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func fetchFields(
         with params: [Param],
@@ -29,7 +26,8 @@ class FieldsWorker {
             endpoint: "/fields",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[GroupOfFieldsModel], NetworkError>) in
             switch result {
             case .success(let groupsOfFieldsModel):

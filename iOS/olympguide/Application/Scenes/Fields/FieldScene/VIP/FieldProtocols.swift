@@ -10,6 +10,11 @@ import Foundation
 // MARK: - Business Logic
 protocol FieldBusinessLogic {
     func loadPrograms(with request: Field.LoadPrograms.Request)
+    func restoreFavorite(at indexPath: IndexPath) -> Bool
+    func setFavorite(to programId: Int, isFavorite: Bool)
+    func getIndexPath(to programId: Int) -> IndexPath?
+    func getProgram(at indexPath: IndexPath) -> ProgramShortModel?
+    func getUniversity(at index: Int) -> UniversityModel?
 }
 
 // MARK: - Data Store

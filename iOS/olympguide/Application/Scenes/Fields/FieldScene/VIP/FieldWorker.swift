@@ -17,11 +17,8 @@ protocol FieldWorkerLogic {
 
 class FieldWorker : FieldWorkerLogic {
     
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func fetchPrograms(
         for fieldId: Int,
@@ -36,7 +33,8 @@ class FieldWorker : FieldWorkerLogic {
             endpoint: "/field/\(fieldId)/programs",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[ProgramsByUniversityModel]?, NetworkError>) in
             switch result {
             case .success(let programs):

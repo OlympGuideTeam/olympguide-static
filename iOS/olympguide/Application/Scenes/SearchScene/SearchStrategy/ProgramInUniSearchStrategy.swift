@@ -44,7 +44,7 @@ final class ProgramInUniSearchStrategy : SearchStrategy {
         else {
             return UITableViewCell()
         }
-        
+        cell.isFavoriteButtonHidden = true
         cell.configure(with: viewMmodel)
         cell.hideSeparator(isSeparatorHidden)
         return cell

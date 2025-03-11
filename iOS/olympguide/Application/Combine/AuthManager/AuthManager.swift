@@ -8,21 +8,43 @@
 import Foundation
 import Combine
 
-class AuthManager {
-    static let shared = AuthManager(networkService: NetworkService())
+protocol AuthManagerProtocol {
+    var isAuthenticatedPublisher: AnyPublisher<Bool, Never> { get }
+    var isAuthenticated: Bool { get }
+    
+    func login(
+        email: String,
+        password: String,
+        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+    )
+    
+    func checkSession()
+    
+    func logout(completion: ((Result<BaseServerResponse, NetworkError>) -> Void)?)
+}
 
-    private let networkService: NetworkService
+class AuthManager : AuthManagerProtocol {
+    static let shared = AuthManager()
+    
+//    @InjectSingleton(defaultValue: NetworkService.shared)
+//    var networkService: NetworkServiceProtocol
+    
+    lazy var networkService: NetworkServiceProtocol = NetworkService.shared
+    
     @Published private(set) var isAuthenticated: Bool = false
+    
+    var isAuthenticatedPublisher: AnyPublisher<Bool, Never> {
+            $isAuthenticated.eraseToAnyPublisher()
+    }
     
     private let baseURL: String
     private var cancellables = Set<AnyCancellable>()
     
-    init(networkService: NetworkServiceProtocol) {
+    private init() {
         guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String else {
             fatalError("BASE_URL is not set in Info.plist!")
         }
         self.baseURL = baseURLString
-        self.networkService = NetworkService()
     }
     
     func login(
@@ -40,7 +62,7 @@ class AuthManager {
             method: .post,
             queryItems: nil,
             body: body,
-            completion: { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
+            shouldCache: false){ [weak self] (result: Result<BaseServerResponse, NetworkError>) in
                 switch result {
                 case .success(let response):
                     self?.isAuthenticated = true
@@ -49,7 +71,6 @@ class AuthManager {
                     completion(.failure(error))
                 }
             }
-        )
     }
     
     func checkSession() {

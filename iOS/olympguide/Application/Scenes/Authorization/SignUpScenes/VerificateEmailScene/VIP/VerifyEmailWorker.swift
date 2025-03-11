@@ -21,11 +21,8 @@ protocol VerifyEmailWorkerLogic {
 
 final class VerifyEmailWorker: VerifyEmailWorkerLogic {
     
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func verifyCode(code: String,
                     email: String,
@@ -40,7 +37,8 @@ final class VerifyEmailWorker: VerifyEmailWorkerLogic {
             endpoint: endpoint,
             method: .post,
             queryItems: nil,
-            body: body
+            body: body,
+            shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let baseResponse):
@@ -59,7 +57,8 @@ final class VerifyEmailWorker: VerifyEmailWorkerLogic {
             endpoint: endpoint,
             method: .post,
             queryItems: nil,
-            body: body
+            body: body,
+            shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let baseResponse):

@@ -8,11 +8,8 @@
 import Foundation
 
 final class PersonalDataWorker {
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func signUp(
         email: String,
@@ -40,7 +37,8 @@ final class PersonalDataWorker {
             endpoint: endpoint,
             method: .post,
             queryItems: nil,
-            body: body
+            body: body,
+            shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let baseResponse):

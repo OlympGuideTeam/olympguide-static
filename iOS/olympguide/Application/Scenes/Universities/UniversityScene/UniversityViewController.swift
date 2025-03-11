@@ -28,7 +28,7 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let nameLabelFont = FontManager.shared.font(for: .commonInformation) 
+        static let nameLabelFont = FontManager.shared.font(for: .commonInformation)
         static let regionLabelFont = FontManager.shared.font(for: .region)
     }
 }
@@ -37,6 +37,12 @@ protocol WithBookMarkButton { }
 
 // MARK: - UniversityViewController
 final class UniversityViewController: UIViewController, WithBookMarkButton {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     var filterItems: [FilterItem] = []
     private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
@@ -48,8 +54,8 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     private let informationStackView: UIStackView = UIStackView()
     
     private let universityID: Int
-    private var startIsFavorite: Bool
-    private var isFavorite: Bool
+    private var startIsFavorite: Bool = false
+    private var isFavorite: Bool = false
     private let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
     private let emailButton: UIInformationButton = UIInformationButton(type: .email)
     private let university: UniversityModel
@@ -73,11 +79,6 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     
     init(for university: UniversityModel) {
         self.universityID = university.universityID
-        self.isFavorite = FavoritesManager.shared.isUniversityFavorited(
-            universityID: universityID,
-            serverValue: university.like ?? false
-        )
-        self.startIsFavorite = isFavorite
         self.university = university
         
         super.init(nibName: nil, bundle: nil)
@@ -92,6 +93,11 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.isFavorite = favoritesManager.isUniversityFavorited(
+            universityID: universityID,
+            serverValue: university.like ?? false
+        )
+        self.startIsFavorite = isFavorite
         setupFilterItems()
         configureUI()
         
@@ -101,6 +107,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         
         setupUniversityBindings()
         setupProgramsBindings()
+        setupAuthBindings()
         
         loadPrograms()
     }
@@ -117,9 +124,9 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
             sender.setImage(UIImage(systemName: newImageName), for: .normal)
             
             if self.isFavorite {
-                FavoritesManager.shared.addUniversityToFavorites(model: self.university)
+                favoritesManager.addUniversityToFavorites(model: self.university)
             } else {
-                FavoritesManager.shared.removeUniversityFromFavorites(universityID: self.universityID)
+                favoritesManager.removeUniversityFromFavorites(universityID: self.universityID)
             }
         }
     }
@@ -446,10 +453,10 @@ extension UniversityViewController : UITableViewDataSource {
                 guard
                     let model = self.interactor?.program(at: indexPath)
                 else { return }
-                FavoritesManager.shared.addProgramToFavorites(university, model)
+                favoritesManager.addProgramToFavorites(university, model)
             } else {
                 self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = false
-                FavoritesManager.shared.removeProgramFromFavorites(programID: viewModel.programID)
+                favoritesManager.removeProgramFromFavorites(programID: viewModel.programID)
             }
         }
         
@@ -550,7 +557,7 @@ extension UniversityViewController: Filterble {
 // MARK: - Combine
 extension UniversityViewController {
     private func setupUniversityBindings() {
-        FavoritesManager.shared.universityEventSubject
+        favoritesManager.universityEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -578,7 +585,7 @@ extension UniversityViewController {
     }
     
     private func setupProgramsBindings() {
-        FavoritesManager.shared.programEventSubject
+        favoritesManager.programEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -649,5 +656,15 @@ extension UniversityViewController {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    private func setupAuthBindings() {
+        authManager.isAuthenticatedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                if isAuth {
+                    self?.loadPrograms()
+                }
+            }.store(in: &cancellables)
     }
 }

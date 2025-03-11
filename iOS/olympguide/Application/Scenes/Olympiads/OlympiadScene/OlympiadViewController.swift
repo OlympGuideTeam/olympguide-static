@@ -9,6 +9,12 @@ import UIKit
 import Combine
 
 final class OlympiadViewController: UIViewController, WithBookMarkButton {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     var interactor: (OlympiadBusinessLogic & BenefitsByProgramsBusinessLogic)?
     var router: OlympiadRoutingLogic?
     
@@ -27,17 +33,11 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     private var isExpanded: [Bool] = []
     private var programs: [[ProgramWithBenefitsViewModel]] = []
     
-    private var isFavorite: Bool
-    private var startIsFavorite: Bool
+    private var isFavorite: Bool = false
+    private var startIsFavorite: Bool = false
     
     init(with olympiad: OlympiadModel) {
         self.olympiad = olympiad
-        
-        self.isFavorite = FavoritesManager.shared.isOlympiadFavorite(
-            olympiadId: olympiad.olympiadID,
-            serverValue: olympiad.like
-        )
-        startIsFavorite = isFavorite
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -49,6 +49,11 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.isFavorite = favoritesManager.isOlympiadFavorite(
+            olympiadId: olympiad.olympiadID,
+            serverValue: olympiad.like
+        )
+        startIsFavorite = isFavorite
         setupFilterItems()
         configureUI()
         let request = Olympiad.LoadUniversities.Request(olympiadID: olympiad.olympiadID)
@@ -67,9 +72,23 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
             sender.setImage(UIImage(systemName: newImageName), for: .normal)
             
             if self.isFavorite {
-                FavoritesManager.shared.addOlympiadToFavorites(model: olympiad)
+                favoritesManager.addOlympiadToFavorites(model: olympiad)
             } else {
-                FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: self.olympiad.olympiadID)
+                favoritesManager.removeOlympiadFromFavorites(olympiadId: self.olympiad.olympiadID)
+            }
+        }
+    }
+    
+    private func loadPrograms() {
+        for (section, expand) in self.isExpanded.enumerated() {
+            if expand {
+                let request = BenefitsByPrograms.Load.Request(
+                    olympiadID: olympiad.olympiadID,
+                    universityID: universities[section].universityID,
+                    section: section,
+                    params: selectedParams
+                )
+                interactor?.loadBenefits(with: request)
             }
         }
     }
@@ -178,7 +197,7 @@ extension OlympiadViewController {
     
     private func configureOlympiadNameLabel() {
         let olympiadNameLabel: UILabel = UILabel()
-//        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
+        //        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
         olympiadNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
         olympiadNameLabel.numberOfLines = 0
         olympiadNameLabel.lineBreakMode = .byWordWrapping
@@ -379,18 +398,18 @@ extension OlympiadViewController : UITableViewDelegate {
         }
         
         headerView.favoriteButtonTapped = { [weak self] sender, isFavorite in
-            guard let self = self else { return }
+            guard let self  else { return }
             if isFavorite {
                 self.universities[section].like = true
                 guard
                     let model = self.interactor?.universityModel(at: section)
                 else { return }
                 
-                FavoritesManager.shared.addUniversityToFavorites(model: model)
+                favoritesManager.addUniversityToFavorites(model: model)
                 
             } else {
                 self.universities[section].like = false
-                FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
+                favoritesManager.removeUniversityFromFavorites(universityID: sender.tag)
             }
         }
         
@@ -488,24 +507,14 @@ extension OlympiadViewController : Filterble {
         let item = filterItems[index]
         selectedParams[item.paramType]?.clear()
         
-        for (section, expand) in self.isExpanded.enumerated() {
-            if expand {
-                let request = BenefitsByPrograms.Load.Request(
-                    olympiadID: olympiad.olympiadID,
-                    universityID: universities[section].universityID,
-                    section: section,
-                    params: selectedParams
-                )
-                interactor?.loadBenefits(with: request)
-            }
-        }
+        loadPrograms()
     }
 }
 
 // MARK: - Combine
 extension OlympiadViewController {
     private func setupOlympiadBindings() {
-        FavoritesManager.shared.olympiadEventSubject
+        favoritesManager.olympiadEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -533,7 +542,7 @@ extension OlympiadViewController {
     }
     
     private func setupUniversityBindings() {
-        FavoritesManager.shared.universityEventSubject
+        favoritesManager.universityEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }

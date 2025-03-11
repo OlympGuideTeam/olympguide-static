@@ -15,11 +15,8 @@ protocol EnterEmailWorkerLogic {
 }
 
 final class EnterEmailWorker: EnterEmailWorkerLogic {
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func sendCode(
         email: String,
@@ -32,7 +29,8 @@ final class EnterEmailWorker: EnterEmailWorkerLogic {
             endpoint: endpoint,
             method: .post,
             queryItems: nil,
-            body: body
+            body: body,
+            shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let baseResponse):

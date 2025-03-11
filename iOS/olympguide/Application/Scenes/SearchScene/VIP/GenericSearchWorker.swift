@@ -10,7 +10,8 @@ import Foundation
 
 final class GenericSearchWorker<Strategy: SearchStrategy> {
     typealias ResponseType = Strategy.ResponseType
-    private let networkService: NetworkService = NetworkService()
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     private let strategy: Strategy
     private let transform: ([ResponseType]) -> [Strategy.ModelType]
     private let endpoint: String
@@ -31,7 +32,8 @@ final class GenericSearchWorker<Strategy: SearchStrategy> {
                 endpoint: self.endpoint,
                 method: .get,
                 queryItems: queryItems,
-                body: nil
+                body: nil,
+                shouldCache: true
             ) { (result: Result<[ResponseType], NetworkError>) in
                 switch result {
                 case .success(let response):

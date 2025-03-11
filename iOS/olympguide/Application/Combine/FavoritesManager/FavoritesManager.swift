@@ -7,7 +7,7 @@
 
 import Combine
 
-final class FavoritesManager: ObservableObject {
+final class FavoritesManager: ObservableObject, FavoritesManagerProtocol {
     static let shared = FavoritesManager()
     
     @Published private(set) var likedUniversities: Set<Int> = []

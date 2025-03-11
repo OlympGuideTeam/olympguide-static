@@ -15,11 +15,8 @@ protocol FavoriteProgramsWorkerLogic {
 
 class FavoriteProgramsWorker : FavoriteProgramsWorkerLogic {
     
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func fetchPrograms(
         completion: @escaping (Result<[ProgramsByUniversityModel], Error>) -> Void

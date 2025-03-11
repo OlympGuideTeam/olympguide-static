@@ -80,7 +80,7 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         contentView.addSubview(shimmerLayer)
         contentView.addSubview(benefitLabel)
         
-
+        
         // Configure nameLabel
         nameLabel.font = Constants.Fonts.nameLabelFont
         nameLabel.numberOfLines = 0
@@ -102,7 +102,7 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         nameLabel.pinTop(to: levelAndProfileLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.interItemSpacing)
         nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
-//        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
+        //        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
         
         favoriteButton.pinTop(to: levelAndProfileLabel.bottomAnchor, 5)
         favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
@@ -141,12 +141,11 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         isUserInteractionEnabled = true
         let newImageName = viewModel.like ? Constants.Images.bookmarkFill : Constants.Images.bookmark
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
-        favoriteButton.isHidden = AuthManager.shared.isAuthenticated ? false : true
+        favoriteButton.isHidden = authManager.isAuthenticated ? false : true
         favoriteButton.tag = viewModel.olympiadId
         
-        if isFaforiteButtonVisible && AuthManager.shared.isAuthenticated {
-            favoriteButton.isHidden = false
-        }
+        favoriteButton.isHidden = !authManager.isAuthenticated || isFavoriteButtonHidden
+
     }
     
     func configure(
@@ -161,7 +160,7 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         shimmerLayer.isHidden = true
         shimmerLayer.stopAnimating()
         shimmerLayer.removeAllConstraints()
-
+        
         isUserInteractionEnabled = true
         
         favoriteButton.isHidden = true
@@ -183,41 +182,5 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
         favoriteButtonTapped?(sender, !isFavorite)
-    }
-}
-
-
-class UICellWithFavoriteButton: UITableViewCell {
-    private var authCancellable: AnyCancellable?
-    var isFavoriteButtonHidden: Bool = false
-    var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
-    let favoriteButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .black
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        button.setImage(UIImage(systemName: Constants.Images.bookmark), for: .normal)
-        return button
-    }()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupBindings()
-    }
-    
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func setupBindings() {
-        authCancellable = AuthManager.shared.$isAuthenticated
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isAuth in
-                guard let self else { return }
-                self.favoriteButton.isHidden = !isAuth || self.isFavoriteButtonHidden
-            }
     }
 }

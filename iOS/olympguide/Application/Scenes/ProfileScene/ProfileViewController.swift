@@ -40,18 +40,26 @@ fileprivate enum Constants {
 }
 
 class ProfileViewController: UIViewController {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     var router: ProfileRoutingLogic?
     let authLabels: [String] = [
         "Личные данные",
-        "Мои дипломы",
+//        "Мои дипломы",
         "Избранные ВУЗы",
         "Избранные программы",
         "Избранные олимпиады",
         "Тема приложения",
         "О нас"
     ]
+    
+    let nonAuthLabels: [String] = [
+        "О нас"
+    ]
+    
     private let tableView = UITableView(frame: .zero, style: .plain)
-    private var authCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,11 +76,12 @@ class ProfileViewController: UIViewController {
         
         navigationItem.backBarButtonItem = backItem
         
-        authCancellable = AuthManager.shared.$isAuthenticated
+        authManager.isAuthenticatedPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self]  _ in
                 self?.tableView.reloadData()
-            }
+            }.store(in: &cancellables)
+        
     }
     
     private func configureNavigationBar() {
@@ -90,11 +99,6 @@ class ProfileViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
-        
-//        let headerContainer = UIView()
-//        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 10)
-//        
-//        tableView.tableHeaderView = headerContainer
     }
     
     // MARK: - Actions
@@ -107,7 +111,7 @@ class ProfileViewController: UIViewController {
     }
     
     @objc private func logoutButtonTapped() {
-        AuthManager.shared.logout()
+        authManager.logout(completion: nil)
     }
 }
 
@@ -118,15 +122,15 @@ extension ProfileViewController : UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if AuthManager.shared.isAuthenticated {
-            return authLabels.count + 2
+        if authManager.isAuthenticated {
+            return authLabels.count + 1
         } else {
-            return 5
+            return nonAuthLabels.count + 2
         }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if !AuthManager.shared.isAuthenticated {
+        if !authManager.isAuthenticated {
             if indexPath.row == 0 {
                 let cell = ProfileButtonTableViewCell()
                 cell.configure(title: "Зарегистрироваться", borderColor: UIColor(hex: "#FF2D55"), textColor: .black)
@@ -139,31 +143,18 @@ extension ProfileViewController : UITableViewDataSource {
                 return cell
             } else {
                 let cell = ProfileTableViewCell()
-                switch indexPath.row {
-                case 2:
-                    cell.configure(title: "Регион", detail: "Москва")
-                case 3:
-                    cell.configure(title: "Тема приложения")
-                case 4:
-                    cell.configure(title: "О нас")
-                    cell.hideSeparator(true)
-                default:
-                    break
-                }
+                cell.configure(title: nonAuthLabels[indexPath.row - 2])
+                print(indexPath.row)
+                print(nonAuthLabels.count)
+                cell.hideSeparator(indexPath.row == nonAuthLabels.count + 2 - 1)
                 return cell
             }
         } else {
-            if indexPath.row <= authLabels.count {
+            if indexPath.row <= authLabels.count - 1 {
                 let cell = ProfileTableViewCell()
-                switch indexPath.row {
-                case 0:
-                    cell.configure(title: "Регион", detail: "Москва")
-                default:
-                    cell.configure(title: authLabels[indexPath.row - 1])
-                }
-                if indexPath.row == authLabels.count {
-                    cell.hideSeparator(true)
-                }
+                cell.configure(title: authLabels[indexPath.row])
+
+                cell.hideSeparator(indexPath.row == authLabels.count - 1)
                 return cell
             }
             else {

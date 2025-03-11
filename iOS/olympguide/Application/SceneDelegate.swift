@@ -5,11 +5,13 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
-import Foundation
+import Foundation 
 import Network
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     
     var window: UIWindow?
     
@@ -36,7 +38,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-        AuthManager.shared.checkSession()
+        authManager.checkSession()
     }
     
     func sceneWillResignActive(_ scene: UIScene) {

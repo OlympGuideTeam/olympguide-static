@@ -9,6 +9,9 @@ import UIKit
 import Combine
 
 final class FavoriteProgramsViewController: UIViewController {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
     var interactor: (FavoriteProgramsBusinessLogic & FavoriteProgramsDataStore)?
     var router: FavoriteProgramsRoutingLogic?
     
@@ -27,21 +30,6 @@ final class FavoriteProgramsViewController: UIViewController {
         
         interactor?.loadPrograms(with: .init())
     }
-    
-    //    override func viewDidDisappear(_ animated: Bool) {
-    //        super.viewDidDisappear(animated)
-    //        programs = programs.map { program in
-    //            var modifiedProgram = program
-    //            modifiedProgram.like = isFavorite(
-    //                programID: program.programID,
-    //                serverValue: program.like
-    //            )
-    //            return modifiedProgram
-    //        }.filter { $0.like }
-    //
-    //        tableView.reloadData()
-    //        tableView.backgroundView = getEmptyLabel()
-    //    }
     
     private func configureUI() {
         configureNavigationBar()
@@ -131,9 +119,9 @@ extension FavoriteProgramsViewController : UITableViewDataSource {
         
         cell.configure(with: programs[indexPath.section].programs[indexPath.row])
         
-        cell.favoriteButtonTapped = { sender, isFavorite in
+        cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
             if !isFavorite {
-                FavoritesManager.shared.removeProgramFromFavorites(programID: sender.tag)
+                self?.favoritesManager.removeProgramFromFavorites(programID: sender.tag)
             }
         }
         
@@ -205,7 +193,7 @@ extension FavoriteProgramsViewController : FavoriteProgramsDisplayLogic {
 // MARK: - Combine
 extension FavoriteProgramsViewController {
     func setupBindings() {
-        FavoritesManager.shared.programEventSubject
+        favoritesManager.programEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -241,7 +229,7 @@ extension FavoriteProgramsViewController {
     }
     
     func isFavorite(programID: Int, serverValue: Bool) -> Bool {
-        FavoritesManager.shared.isProgramFavorited(
+        favoritesManager.isProgramFavorited(
             programID: programID,
             serverValue: serverValue
         )

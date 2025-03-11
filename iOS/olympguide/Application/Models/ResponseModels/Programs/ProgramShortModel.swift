@@ -45,4 +45,8 @@ extension ProgramShortModel : Equatable {
     static func == (lhs: ProgramShortModel, rhs: ProgramShortModel) -> Bool {
         lhs.programID == rhs.programID
     }
+
+    static func == (lhs: ProgramShortModel, rhs: ProgramViewModel) -> Bool {
+        lhs.programID == rhs.programID
+    }
 }
