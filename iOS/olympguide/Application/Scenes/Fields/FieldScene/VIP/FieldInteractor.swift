@@ -5,6 +5,8 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
+import Foundation
+
 final class FieldInteractor: FieldBusinessLogic, FieldDataStore {
     var presenter: FieldPresentationLogic?
     var worker: FieldWorkerLogic?
@@ -28,6 +30,36 @@ final class FieldInteractor: FieldBusinessLogic, FieldDataStore {
                 self?.presenter?.presentLoadPrograms(with: response)
             }
         }
+    }
+    
+    func restoreFavorite(at indexPath: IndexPath) -> Bool {
+        programs?[indexPath.section].programs[indexPath.row].like ?? false
+    }
+    
+    func setFavorite(to programId: Int, isFavorite: Bool) {
+        guard
+            let indexPath = getIndexPath(to: programId)
+        else { return }
+        
+        programs?[indexPath.section].programs[indexPath.row].like = isFavorite
+    }
+    
+    func getIndexPath(to programId: Int) -> IndexPath? {
+        guard
+            let uniIndex = programs?.firstIndex(where: { group in
+                group.programs.contains(where: { $0.programID == programId })
+            }),
+            let programIndex = programs?[uniIndex].programs.firstIndex(where: { $0.programID == programId })
+        else { return nil}
+        
+        return IndexPath(row: programIndex, section: uniIndex)
+    }
+    
+    func getProgram(at indexPath: IndexPath) -> ProgramShortModel? {
+        programs?[indexPath.section].programs[indexPath.row]
+    }
+    func getUniversity(at index: Int) -> UniversityModel? {
+        programs?[index].univer
     }
 }
 

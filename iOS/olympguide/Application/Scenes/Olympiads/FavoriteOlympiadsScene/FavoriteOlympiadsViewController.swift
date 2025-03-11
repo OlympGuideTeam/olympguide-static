@@ -31,6 +31,8 @@ fileprivate enum Constants {
 }
 
 final class FavoriteOlympiadsViewController : UIViewController {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
     
     // MARK: - VIP
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic & FavoriteOlympiadsBusinessLogic)?
@@ -148,9 +150,9 @@ extension FavoriteOlympiadsViewController: UITableViewDataSource {
         
         let olympiadViewModel = olympiads[indexPath.row]
         cell.configure(with: olympiadViewModel)
-        cell.favoriteButtonTapped = { sender, isFavorite in
+        cell.favoriteButtonTapped = {[weak self] sender, isFavorite in
             if !isFavorite {
-                FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: sender.tag)
+                self?.favoritesManager.removeOlympiadFromFavorites(olympiadId: sender.tag)
             }
         }
         cell.hideSeparator(indexPath.row == olympiads.count - 1)
@@ -186,7 +188,7 @@ extension FavoriteOlympiadsViewController : OlympiadsDisplayLogic {
 // MARK: - Combine
 extension FavoriteOlympiadsViewController {
     private func setupBindings() {
-        FavoritesManager.shared.olympiadEventSubject
+        favoritesManager.olympiadEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }

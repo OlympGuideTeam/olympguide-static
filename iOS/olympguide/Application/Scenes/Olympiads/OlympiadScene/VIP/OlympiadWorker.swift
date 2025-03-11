@@ -16,11 +16,8 @@ protocol OlympiadWorkerLogic {
 
 class OlympiadWorker : OlympiadWorkerLogic {
     
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func fetchUniversities(
         for olympiadID: Int,
@@ -31,7 +28,8 @@ class OlympiadWorker : OlympiadWorkerLogic {
             endpoint: "/olympiad/\(olympiadID)/universities",
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[UniversityModel]?, NetworkError>) in
             switch result {
             case .success(let universities):
@@ -61,7 +59,8 @@ extension OlympiadWorker : BenefitsByProgramsWorkerLogic {
             endpoint: "/olympiad/\(olympiadId)/benefits",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[ProgramWithBenefitsModel]?, NetworkError>) in
             switch result {
             case .success(let programs):

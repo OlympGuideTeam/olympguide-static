@@ -36,6 +36,11 @@ fileprivate enum Constants {
 }
 
 class UniversitiesViewController: UIViewController, WithSearchButton {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     
     // MARK: - VIP
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
@@ -57,12 +62,14 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupFilterItems()
         configureNavigationBar()
         configureRefreshControl()
         setupFilterSortView()
         configureTableView()
         setupBindings()
+        setupAuthBindings()
         
         loadUniversities()
     }
@@ -194,18 +201,18 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
             let universityViewModel = universities[indexPath.row]
             cell.configure(with: universityViewModel)
             cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
-                guard let self = self else { return }
+                guard let self else { return }
                 if isFavorite {
                     self.universities[indexPath.row].like = true
                     guard
                         let model = self.interactor?.universityModel(at: indexPath.row)
                     else { return }
                     
-                    FavoritesManager.shared.addUniversityToFavorites(model: model)
+                    favoritesManager.addUniversityToFavorites(model: model)
                     
                 } else {
                     self.universities[indexPath.row].like = false
-                    FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
+                    favoritesManager.removeUniversityFromFavorites(universityID: sender.tag)
                 }
             }
             cell.hideSeparator(indexPath.row == universities.count - 1)
@@ -276,7 +283,7 @@ extension UniversitiesViewController : Filterble {
 // MARK: - Combine
 extension UniversitiesViewController {
     private func setupBindings() {
-        FavoritesManager.shared.universityEventSubject
+        favoritesManager.universityEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -319,8 +326,18 @@ extension UniversitiesViewController {
             .store(in: &cancellables)
     }
     
-    func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
-        FavoritesManager.shared.isUniversityFavorited(
+    private func setupAuthBindings() {
+        authManager.isAuthenticatedPublisher
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] isAuth in
+                    if isAuth {
+                        self?.loadUniversities()
+                    }
+                }.store(in: &cancellables)
+    }
+    
+    private func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
+        favoritesManager.isUniversityFavorited(
             universityID: univesityID,
             serverValue: serverValue
         )

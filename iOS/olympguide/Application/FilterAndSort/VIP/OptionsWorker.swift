@@ -6,11 +6,8 @@
 //
 
 final class OptionsWorker {
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func filter(
         items: [DynamicOption],
@@ -39,7 +36,8 @@ final class OptionsWorker {
             endpoint: endPoint,
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[DynamicOption], NetworkError>) in
             switch result {
             case .success(let options):

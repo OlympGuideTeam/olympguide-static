@@ -9,6 +9,8 @@ import Foundation
 
 final class SignInInteractor: SignInBusinessLogic {
     var presenter: SignInPresentationLogic?
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     
     func signIn(_ request: SignInModels.SignIn.Request) {
         let email = request.email
@@ -32,7 +34,7 @@ final class SignInInteractor: SignInBusinessLogic {
             return
         }
         
-        AuthManager.shared.login(email: email, password: password) { [weak self] result in
+        authManager.login(email: email, password: password) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success:

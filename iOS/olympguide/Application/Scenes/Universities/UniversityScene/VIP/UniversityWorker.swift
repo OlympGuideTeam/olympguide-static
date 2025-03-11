@@ -21,11 +21,8 @@ protocol UniversityWorkerLogic {
 }
 
 class UniversityWorker : UniversityWorkerLogic {
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
 
     func fetchUniverity(
         with universityID: Int,
@@ -35,7 +32,8 @@ class UniversityWorker : UniversityWorkerLogic {
             endpoint: "/university/\(universityID)",
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<UniversityModel, NetworkError>) in
             switch result {
             case .success(let olympiads):
@@ -56,7 +54,8 @@ class UniversityWorker : UniversityWorkerLogic {
             endpoint: "/user/favourite/university/\(universityID)",
             method: method,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let baseResponse):
@@ -85,7 +84,8 @@ extension UniversityWorker : ProgramsWorkerLogic {
             endpoint: "/university/\(universityId)/programs/\(groups.endpoint)",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[GroupOfProgramsModel], NetworkError>) in
             switch result {
             case .success(let groupsOfPrograms):

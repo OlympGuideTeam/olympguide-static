@@ -8,11 +8,8 @@
 import Foundation
 
 final class FavoriteOlympiadsWorker : OlympiadsWorkerLogic {
-    private let networkService: NetworkServiceProtocol
-    
-    init(networkService: NetworkServiceProtocol = NetworkService()) {
-        self.networkService = networkService
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
     
     func fetchOlympiads(
         with params: [Param] = [],

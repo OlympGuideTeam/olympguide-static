@@ -203,7 +203,7 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
         
-        favoriteButton.isHidden = !AuthManager.shared.isAuthenticated
+        favoriteButton.isHidden = !authManager.isAuthenticated || isFavoriteButtonHidden
         
         separatorLine.isHidden = false
     }

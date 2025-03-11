@@ -36,6 +36,8 @@ fileprivate enum Constants {
 }
 
 class FavoriteUniversitiesViewController: UIViewController {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
     
     // MARK: - VIP
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
@@ -149,9 +151,9 @@ extension FavoriteUniversitiesViewController : UITableViewDataSource {
         let universityViewModel = universities[indexPath.row]
         cell.configure(with: universityViewModel)
         
-        cell.favoriteButtonTapped = { sender, isFavorite in            
+        cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
             if !isFavorite {
-                FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
+                self?.favoritesManager.removeUniversityFromFavorites(universityID: sender.tag)
             }
         }
         
@@ -208,7 +210,7 @@ extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
 // MARK: - Combine
 extension FavoriteUniversitiesViewController {
     private func setupBindings() {
-        FavoritesManager.shared.universityEventSubject
+        favoritesManager.universityEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -250,7 +252,7 @@ extension FavoriteUniversitiesViewController {
     }
     
     func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
-        FavoritesManager.shared.isUniversityFavorited(
+        favoritesManager.isUniversityFavorited(
             universityID: univesityID,
             serverValue: serverValue
         )

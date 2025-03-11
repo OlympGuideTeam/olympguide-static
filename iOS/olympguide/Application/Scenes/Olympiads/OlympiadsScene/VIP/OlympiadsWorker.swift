@@ -16,11 +16,8 @@ protocol OlympiadsWorkerLogic {
 
 final class OlympiadsWorker : OlympiadsWorkerLogic {
     
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
 
     func fetchOlympiads(
         with params: [Param],
@@ -36,7 +33,8 @@ final class OlympiadsWorker : OlympiadsWorkerLogic {
             endpoint: "/olympiads",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[OlympiadModel]?, NetworkError>) in
             switch result {
             case .success(let olympiads):

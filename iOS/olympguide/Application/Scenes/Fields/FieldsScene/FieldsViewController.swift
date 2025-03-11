@@ -218,7 +218,6 @@ extension FieldsViewController: UITableViewDataSource {
 //        else {
 //            return UITableViewCell()
 //        }
-        
         let cell = FieldTableViewCell()
         let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
         cell.configure(with: fieldViewModel)
@@ -245,14 +244,14 @@ extension FieldsViewController: UITableViewDelegate {
         viewForHeaderInSection section: Int
     ) -> UIView? {
         
-        guard
-            let header = tableView.dequeueReusableHeaderFooterView(
-                withIdentifier: UIFieldHeader.identifier
-            ) as? UIFieldHeader
-        else {
-            return nil
-        }
-        
+//        guard
+//            let header = tableView.dequeueReusableHeaderFooterView(
+//                withIdentifier: UIFieldHeader.identifier
+//            ) as? UIFieldHeader
+//        else {
+//            return nil
+//        }
+        let header = UIFieldHeader()
         header.configure(
             name: fields[section].name,
             code: fields[section].code,
@@ -262,43 +261,35 @@ extension FieldsViewController: UITableViewDelegate {
         header.tag = section
         header.toggleSection = { [weak self] section in
             guard let self else { return }
-            var currentOffset = self.tableView.contentOffset
-            let headerRectBefore = self.tableView.rectForHeader(inSection: section)
-            
-            self.fields[section].isExpanded.toggle()
-            
-            UIView.performWithoutAnimation {
-                self.tableView.reloadSections(IndexSet(integer: section), with: .none)
-                self.tableView.layoutIfNeeded()
-            }
-            let headerRectAfter = self.tableView.rectForHeader(inSection: section)
-            
-            let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
-            currentOffset.y += deltaY
-            self.tableView.setContentOffset(currentOffset, animated: false)
+            toggleSection(section)
         }
         return header
     }
-
     
-    @objc
-    func toggleSection(_ sender: UIButton) {
-        let section = sender.tag
+//    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+//        return 60
+//    }
+//    
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return 80
+//    }
+    
+    func toggleSection(_ section: Int) {
+        var currentOffset = self.tableView.contentOffset
+        let headerRectBefore = self.tableView.rectForHeader(inSection: section)
         
-        var currentOffset = tableView.contentOffset
-        let headerRectBefore = tableView.rectForHeader(inSection: section)
-        
-        fields[section].isExpanded.toggle()
+        self.fields[section].isExpanded.toggle()
         
         UIView.performWithoutAnimation {
-            tableView.reloadSections(IndexSet(integer: section), with: .none)
-            tableView.layoutIfNeeded()
+            self.tableView.reloadSections(IndexSet(integer: section), with: .none)
+            self.tableView.layoutIfNeeded()
         }
-        let headerRectAfter = tableView.rectForHeader(inSection: section)
+        let headerRectAfter = self.tableView.rectForHeader(inSection: section)
         
         let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
         currentOffset.y += deltaY
-        tableView.setContentOffset(currentOffset, animated: false)
+        
+        self.tableView.setContentOffset(currentOffset, animated: true)
     }
 }
 

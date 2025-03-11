@@ -8,6 +8,9 @@
 import Foundation
 
 final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteProgramsDataStore {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
     var programs: [ProgramsByUniversityModel] = []
     var removedPrograms: [Int: (UniversityModel, ProgramShortModel)] = [:]
     
@@ -103,7 +106,7 @@ final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteP
     }
     
     func isFavorite(programID: Int, serverValue: Bool) -> Bool {
-        FavoritesManager.shared.isProgramFavorited(
+        favoritesManager.isProgramFavorited(
             programID: programID,
             serverValue: serverValue
         )

@@ -9,29 +9,16 @@ import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    var serviceLocator = ServiceLocator.shared
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        customizeDependencies()
         
         let deviceIdentifier = getDeviceIdentifier()
         if isMiniScreen(identifier: deviceIdentifier) {
             let scaleFactor: CGFloat = 0.85
             FontManager.shared.globalFontScale = scaleFactor
         }
-        
-        let titleAttributes: [NSAttributedString.Key: Any] = [
-            .font: FontManager.shared.font(for: .titleLbel),
-            .foregroundColor: UIColor.black
-        ]
-        UINavigationBar.appearance().titleTextAttributes = titleAttributes
-        
-        
-        let largeTitleAttributes: [NSAttributedString.Key: Any] = [
-            .font: FontManager.shared.font(for: .largeTitleLabel),
-            .foregroundColor: UIColor.black
-        ]
-        UINavigationBar.appearance().largeTitleTextAttributes = largeTitleAttributes
-        
-        
         
         let backButtonAttributes: [NSAttributedString.Key: Any] = [
             .font: FontManager.shared.font(for: .backButton),
@@ -42,6 +29,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         return true
+    }
+    
+    func customizeDependencies() {
+        serviceLocator.register(service: AuthManager.shared as AuthManagerProtocol)
+        serviceLocator.register(service: NetworkService.shared as NetworkServiceProtocol)
+        serviceLocator.register(service: FavoritesManager.shared as FavoritesManagerProtocol)
     }
     
     // MARK: UISceneSession Lifecycle

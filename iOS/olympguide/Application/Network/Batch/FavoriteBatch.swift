@@ -10,6 +10,13 @@ import UIKit
 final class FavoriteBatch {
     typealias EndpointFormatter = (Int, Bool) -> String
     typealias MethodForValue = (Bool) -> HTTPMethod
+
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
+    
     private let syncQueue = DispatchQueue(label: "com.olypmguide.favoriteBatcher.queue")
     
     private var changes: [Int: Bool] = [:]
@@ -58,21 +65,22 @@ final class FavoriteBatch {
                 let endpoint = self.endpointFormatter(id, isFavorite)
                 let method = self.methodForValue(isFavorite)
                 
-                NetworkService().request(
+                networkService.request(
                     endpoint: endpoint,
                     method: method,
                     queryItems: nil,
-                    body: nil
+                    body: nil,
+                    shouldCache: false
                 ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
                     guard let self = self else { return }
                     switch result {
-                    case .success(_):
+                    case .success:
                         DispatchQueue.main.async {
-                            FavoritesManager.shared.handleBatchSuccess(for: id, isFavorite: isFavorite, subject: self.subject)
+                            self.favoritesManager.handleBatchSuccess(for: id, isFavorite: isFavorite, subject: self.subject)
                         }
-                    case .failure(_):
+                    case .failure:
                         DispatchQueue.main.async {
-                            FavoritesManager.shared.handleBatchError(for: id, subject: self.subject)
+                            self.favoritesManager.handleBatchError(for: id, subject: self.subject)
                         }
                     }
                 }

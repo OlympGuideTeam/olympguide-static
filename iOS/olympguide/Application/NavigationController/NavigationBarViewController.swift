@@ -30,9 +30,12 @@ fileprivate enum Constants {
 }
 
 class NavigationBarViewController: UINavigationController {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     var searchButtonPressed: ((_: UIButton) -> Void)?
     var bookMarkButtonPressed: ((_: UIButton) -> Void)?
-    private var authCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
     
     private let searchButton: UIButton = {
         let button = UIButton()
@@ -136,7 +139,7 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
         willShow viewController: UIViewController,
         animated: Bool
     ) {
-        let isAuthenticated = AuthManager.shared.isAuthenticated
+        let isAuthenticated = authManager.isAuthenticated
         let shouldShowBookMark = (viewController is WithBookMarkButton) && isAuthenticated
         
         guard let coordinator = navigationController.transitionCoordinator else {
@@ -170,7 +173,7 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
     }
     
     func setupBindings() {
-        authCancellable = AuthManager.shared.$isAuthenticated
+        authManager.isAuthenticatedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isAuth in
                 guard
@@ -181,5 +184,6 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
                 self.bookMarkButton.alpha = shouldShowBookMark ? 1.0 : 0.0
                 self.bookMarkButton.isHidden = !shouldShowBookMark
             }
+            .store(in: &cancellables)
     }
 }

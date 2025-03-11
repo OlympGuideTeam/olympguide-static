@@ -14,11 +14,8 @@ protocol ProgramWorkerLogic {
 }
 
 final class ProgramWorker : ProgramWorkerLogic {
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+        var networkService: NetworkServiceProtocol
     
     func fetchProgram(
         with programId: Int,
@@ -28,7 +25,8 @@ final class ProgramWorker : ProgramWorkerLogic {
             endpoint: "/program/\(programId)",
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<ProgramModel, NetworkError>) in
             switch result {
             case .success(let program):

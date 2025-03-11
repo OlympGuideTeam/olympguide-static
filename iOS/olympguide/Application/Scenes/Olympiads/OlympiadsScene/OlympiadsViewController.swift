@@ -35,6 +35,12 @@ fileprivate enum Constants {
 }
 
 final class OlympiadsViewController: UIViewController, WithSearchButton {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     // MARK: - VIP
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
     var router: OlympiadsRoutingLogic?
@@ -61,6 +67,7 @@ final class OlympiadsViewController: UIViewController, WithSearchButton {
         loadOlympiads()
         
         setupBindings()
+        setupAuthBindings()
     }
     
     private func loadOlympiads() {
@@ -235,10 +242,10 @@ extension OlympiadsViewController: UITableViewDataSource {
                         let model = self.interactor?.olympiadModel(at: indexPath.row)
                     else { return }
                     
-                    FavoritesManager.shared.addOlympiadToFavorites(model: model)
+                    favoritesManager.addOlympiadToFavorites(model: model)
                 } else {
                     self.olympiads[indexPath.row].like = false
-                    FavoritesManager.shared.removeOlympiadFromFavorites(olympiadId: sender.tag)
+                    favoritesManager.removeOlympiadFromFavorites(olympiadId: sender.tag)
                 }
             }
             
@@ -315,7 +322,7 @@ extension OlympiadsViewController: Filterble {
 // MARK: - Combine
 extension OlympiadsViewController {
     private func setupBindings() {
-        FavoritesManager.shared.olympiadEventSubject
+        favoritesManager.olympiadEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
@@ -349,6 +356,16 @@ extension OlympiadsViewController {
                     }
                 }
                 
+            }.store(in: &cancellables)
+    }
+    
+    private func setupAuthBindings() {
+        authManager.isAuthenticatedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                if isAuth {
+                    self?.loadOlympiads()
+                }
             }.store(in: &cancellables)
     }
 }

@@ -15,11 +15,8 @@ protocol UniversitiesWorkerLogic {
 }
 
 final class UniversitiesWorker : UniversitiesWorkerLogic {
-    private let networkService: NetworkService
-    
-    init() {
-        self.networkService = NetworkService()
-    }
+    @InjectSingleton
+    var networkService: NetworkServiceProtocol
 
     func fetchUniversities(
         with params: [Param],
@@ -35,7 +32,8 @@ final class UniversitiesWorker : UniversitiesWorkerLogic {
             endpoint: "/universities",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[UniversityModel]?, NetworkError>) in
             switch result {
             case .success(let universities):

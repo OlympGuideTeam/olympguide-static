@@ -6,8 +6,17 @@
 //
 
 import UIKit
+import Combine
 
 final class FieldViewController: UIViewController {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     var interactor: FieldBusinessLogic?
     var router: FieldRoutingLogic?
     
@@ -160,7 +169,7 @@ extension FieldViewController {
         searchButton.contentHorizontalAlignment = .fill
         searchButton.contentVerticalAlignment = .fill
         searchButton.imageView?.contentMode = .scaleAspectFit
-
+        
         
         searchButton.setWidth(28)
         searchButton.setHeight(28)
@@ -206,7 +215,7 @@ extension FieldViewController {
             UIUniversityHeader.self,
             forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
         )
-
+        
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = .white
@@ -270,6 +279,18 @@ extension FieldViewController : UITableViewDataSource {
         else { return UITableViewCell() }
         
         cell.configure(with: programs[indexPath.section].programs[indexPath.row])
+        cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
+            if !isFavorite {
+                self?.favoritesManager.removeProgramFromFavorites(programID: sender.tag)
+            } else {
+                guard
+                    let self,
+                    let university = self.interactor?.getUniversity(at: indexPath.row),
+                    let program = self.interactor?.getProgram(at: indexPath)
+                else { return }
+                favoritesManager.addProgramToFavorites(university, program)
+            }
+        }
         cell.hideSeparator(indexPath.row == programs[indexPath.section].programs.count - 1)
         return cell
     }
@@ -368,5 +389,59 @@ extension FieldViewController : Filterble {
         let item = filterItems[index]
         selectedParams[item.paramType]?.clear()
         loadPrograms()
+    }
+}
+
+// MARK: - Combine
+extension FieldViewController {
+    private func setupAuthBindings() {
+        authManager.isAuthenticatedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                if isAuth {
+                    self?.loadPrograms()
+                }
+            }.store(in: &cancellables)
+    }
+    
+    private func setupProgramsBindings() {
+        favoritesManager.programEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self else { return }
+                switch event {
+                case .added(_, let program):
+                    guard
+                        let indexPath = interactor?.getIndexPath(to: program.programID)
+                    else { return }
+                    if programs[indexPath.section].programs[indexPath.row].like == true { return }
+                    programs[indexPath.section].programs[indexPath.row].like = true
+        
+                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    
+                case .removed(let programId):
+                    guard
+                        let indexPath = interactor?.getIndexPath(to: programId)
+                    else { return }
+                    
+                    if programs[indexPath.section].programs[indexPath.row].like == false { return }
+                    programs[indexPath.section].programs[indexPath.row].like = false
+        
+                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                case .error(let programId):
+                    guard
+                        let indexPath = interactor?.getIndexPath(to: programId)
+                    else { return }
+
+                    if programs[indexPath.section].programs[indexPath.row].like == interactor?.restoreFavorite(at: indexPath) {
+                        return
+                    }
+                    programs[indexPath.section].programs[indexPath.row].like = interactor?.restoreFavorite(at: indexPath) ?? false
+                    
+                    
+                case .access(let programId, let isFavorite):
+                    interactor?.setFavorite(to: programId, isFavorite: isFavorite)
+                }
+            }.store(in: &cancellables)
     }
 }

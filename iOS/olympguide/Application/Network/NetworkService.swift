@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 enum HTTPMethod: String {
     case get    = "GET"
@@ -25,16 +26,22 @@ protocol NetworkServiceProtocol {
 }
 
 final class NetworkService: NetworkServiceProtocol {
-//    static let shared = NetworkService()
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
+    private var cancellables = Set<AnyCancellable>()
+
+    static let shared = NetworkService()
     
     private let baseURL: String
     private let cache = NSCache<NSString, NSData>()
     
-    init() {
+    private init() {
         guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String else {
             fatalError("BASE_URL is not set in Info.plist!")
         }
         self.baseURL = baseURLString
+        setupAuthBindings()
     }
     
     func request<T: Decodable>(
@@ -126,5 +133,15 @@ final class NetworkService: NetworkServiceProtocol {
             }
         }
         .resume()
+    }
+    
+    private func setupAuthBindings() {
+        authManager.isAuthenticatedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                if isAuth {
+                    self?.cache.removeAllObjects()
+                }
+            }.store(in: &cancellables)
     }
 }

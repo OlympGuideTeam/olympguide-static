@@ -33,6 +33,9 @@ fileprivate enum Constants {
 }
 
 final class ProgramViewController : UIViewController, WithBookMarkButton {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
     var interactor: (ProgramBusinessLogic & BenefitsByOlympiadsBusinessLogic)?
     var router: (ProgramRoutingLogic /*& BenefitsByOlympiadsRoutingLogic*/)?
     
@@ -252,9 +255,9 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             
             
             if isFavorite {
-                FavoritesManager.shared.addProgramToFavorites(self.university, program)
+                favoritesManager.addProgramToFavorites(self.university, program)
             } else {
-                FavoritesManager.shared.removeProgramFromFavorites(programID: program.programID)
+                favoritesManager.removeProgramFromFavorites(programID: program.programID)
             }
         }
     }
@@ -660,7 +663,7 @@ extension ProgramViewController : Filterble {
 // MARK: - Combine
 extension ProgramViewController {
     private func setupBindings() {
-        FavoritesManager.shared.programEventSubject
+        favoritesManager.programEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self = self else { return }
