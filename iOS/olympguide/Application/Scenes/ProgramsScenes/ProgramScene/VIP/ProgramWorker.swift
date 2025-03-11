@@ -7,11 +7,6 @@
 import Foundation
 
 protocol ProgramWorkerLogic {
-    func fetch(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<[OlympiadWithBenefitsModel], Error>) -> Void
-    )
-    
     func fetchProgram(
         with programId: Int,
         completion: @escaping (Result<ProgramModel, Error>) -> Void
@@ -19,31 +14,10 @@ protocol ProgramWorkerLogic {
 }
 
 final class ProgramWorker : ProgramWorkerLogic {
-    private let networkService: NetworkServiceProtocol
+    private let networkService: NetworkService
     
-    init(networkService: NetworkServiceProtocol = NetworkService()) {
-        self.networkService = networkService
-    }
-    
-    func fetch(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<[OlympiadWithBenefitsModel], Error>) -> Void
-    ) {
-//        var queryItems = [URLQueryItem]()
-//        
-//        networkService.request(
-//            endpoint: "",
-//            method: .get,
-//            queryItems: queryItems,
-//            body: nil
-//        ) { (result: Result<[OlymiadWithBenefitsModel], NetworkError>) in
-//            switch result {
-//            case .success(let olympiads):
-//                completion(.success(olympiads))
-//            case .failure(let error):
-//                completion(.failure(error))
-//            }
-//        }
+    init() {
+        self.networkService = NetworkService()
     }
     
     func fetchProgram(
@@ -82,7 +56,8 @@ extension ProgramWorker : BenefitsByOlympiadsWorkerLogic {
             endpoint: "/program/\(progrmaId)/benefits",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: true
         ) { (result: Result<[OlympiadWithBenefitsModel]?, NetworkError>) in
             switch result {
             case .success(let olympiads):

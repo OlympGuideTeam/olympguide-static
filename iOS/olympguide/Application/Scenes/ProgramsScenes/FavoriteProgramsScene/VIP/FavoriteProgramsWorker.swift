@@ -15,10 +15,10 @@ protocol FavoriteProgramsWorkerLogic {
 
 class FavoriteProgramsWorker : FavoriteProgramsWorkerLogic {
     
-    private let networkService: NetworkServiceProtocol
+    private let networkService: NetworkService
     
-    init(networkService: NetworkServiceProtocol = NetworkService()) {
-        self.networkService = networkService
+    init() {
+        self.networkService = NetworkService()
     }
     
     func fetchPrograms(
@@ -28,7 +28,8 @@ class FavoriteProgramsWorker : FavoriteProgramsWorkerLogic {
             endpoint: "/user/favourite/programs",
             method: .get,
             queryItems: nil,
-            body: nil
+            body: nil,
+            shouldCache: false
         ) { (result: Result<[ProgramsByUniversityModel]?, NetworkError>) in
             switch result {
             case .success(let programs):

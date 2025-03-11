@@ -8,8 +8,8 @@
 import Foundation
 
 enum HTTPMethod: String {
-    case get  = "GET"
-    case post = "POST"
+    case get    = "GET"
+    case post   = "POST"
     case delete = "DELETE"
 }
 
@@ -19,14 +19,16 @@ protocol NetworkServiceProtocol {
         method: HTTPMethod,
         queryItems: [URLQueryItem]?,
         body: [String: Any]?,
+        shouldCache: Bool,
         completion: @escaping (Result<T, NetworkError>) -> Void
     )
 }
 
 final class NetworkService: NetworkServiceProtocol {
+//    static let shared = NetworkService()
     
     private let baseURL: String
-//    private let cache = NSCache<NSString, NSData>()
+    private let cache = NSCache<NSString, NSData>()
     
     init() {
         guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String else {
@@ -40,6 +42,7 @@ final class NetworkService: NetworkServiceProtocol {
         method: HTTPMethod,
         queryItems: [URLQueryItem]?,
         body: [String: Any]?,
+        shouldCache: Bool = true,
         completion: @escaping (Result<T, NetworkError>) -> Void
     ) {
         var urlComponents = URLComponents(string: baseURL + endpoint)
@@ -49,16 +52,16 @@ final class NetworkService: NetworkServiceProtocol {
             return
         }
         
-//        let cacheKey = url.absoluteString as NSString
-//        if method == .get, let cachedData = cache.object(forKey: cacheKey) {
-//            do {
-//                let decodedData = try JSONDecoder().decode(T.self, from: cachedData as Data)
-//                completion(.success(decodedData))
-//            } catch {
-//                completion(.failure(.decodingError))
-//            }
-//            return
-//        }
+        let cacheKey = url.absoluteString as NSString
+        if method == .get && shouldCache, let cachedData = cache.object(forKey: cacheKey) {
+            do {
+                let decodedData = try JSONDecoder().decode(T.self, from: cachedData as Data)
+                completion(.success(decodedData))
+            } catch {
+                completion(.failure(.decodingError))
+            }
+            return
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
@@ -91,9 +94,9 @@ final class NetworkService: NetworkServiceProtocol {
                     return
                 }
                 
-//                if method == .get, (200...299).contains(httpResponse.statusCode) {
-//                    self.cache.setObject(data as NSData, forKey: cacheKey)
-//                }
+                if method == .get && shouldCache && (200...299).contains(httpResponse.statusCode) {
+                    self.cache.setObject(data as NSData, forKey: cacheKey)
+                }
                 
                 do {
                     let decodedData = try JSONDecoder().decode(T.self, from: data)

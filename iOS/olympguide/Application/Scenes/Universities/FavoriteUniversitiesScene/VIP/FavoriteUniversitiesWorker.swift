@@ -28,7 +28,8 @@ final class FavoriteUniversitiesWorker : UniversitiesWorkerLogic {
             endpoint: "/user/favourite/universities",
             method: .get,
             queryItems: queryItems,
-            body: nil
+            body: nil,
+            shouldCache: false
         ) { (result: Result<[UniversityModel]?, NetworkError>) in
             switch result {
             case .success(let universities):

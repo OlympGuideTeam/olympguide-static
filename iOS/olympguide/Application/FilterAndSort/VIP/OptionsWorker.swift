@@ -6,10 +6,10 @@
 //
 
 final class OptionsWorker {
-    private let networkService: NetworkServiceProtocol
+    private let networkService: NetworkService
     
-    init(networkService: NetworkServiceProtocol = NetworkService()) {
-        self.networkService = networkService
+    init() {
+        self.networkService = NetworkService()
     }
     
     func filter(
