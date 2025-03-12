@@ -38,12 +38,27 @@ fileprivate enum Constants {
 }
 
 class FieldsViewController: UIViewController, WithSearchButton {
-    
     // MARK: - VIP
     var interactor: (FieldsDataStore & FieldsBusinessLogic)?
     var router: FieldsRoutingLogic?
     
     var filterItems: [FilterItem] = []
+    
+    var fieldItems: [FieldItem] {
+        var result: [FieldItem] = []
+        for (groupIndex, group) in fields.enumerated() {
+            result.append(.header(group))
+            if group.isExpanded {
+                for (fieldIndex, dubField) in group.fields.enumerated() {
+                    autoreleasepool {
+                        let indexPath = IndexPath(row: fieldIndex, section: groupIndex)
+                        result.append(.field(dubField, indexPath))
+                    }
+                }
+            }
+        }
+        return result
+    }
     private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
     // MARK: - Variables
@@ -145,10 +160,9 @@ extension FieldsViewController {
             FieldTableViewCell.self,
             forCellReuseIdentifier: FieldTableViewCell.identifier
         )
-        
         tableView.register(
-            UIFieldHeader.self,
-            forHeaderFooterViewReuseIdentifier: UIFieldHeader.identifier
+            UIFieldHeaderCell.self,
+            forCellReuseIdentifier: UIFieldHeaderCell.identifier
         )
         
         tableView.dataSource = self
@@ -195,33 +209,48 @@ extension FieldsViewController {
 
 // MARK: - UITableViewDataSource
 extension FieldsViewController: UITableViewDataSource {
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return fields.count
-    }
-    
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        return fields[section].isExpanded ? fields[section].fields.count : 0
+        return fieldItems.count
     }
     
     func tableView(
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-//        guard let cell = tableView.dequeueReusableCell(
-//            withIdentifier: FieldTableViewCell.identifier,
-//            for: indexPath
-//        ) as? FieldTableViewCell
-//        else {
-//            return UITableViewCell()
-//        }
-        let cell = FieldTableViewCell()
-        let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
-        cell.configure(with: fieldViewModel)
-        return cell
+        
+        let item = fieldItems[indexPath.row]
+        
+        switch item {
+        case .header(let group):
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: UIFieldHeaderCell.identifier,
+                for: indexPath
+            ) as? UIFieldHeaderCell
+            else {
+                return UITableViewCell()
+            }
+            
+            cell.configure(
+                with: group.mainField,
+                isExpanded: group.isExpanded
+            )
+            
+            return cell
+        case .field(let field, _):
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: FieldTableViewCell.identifier,
+                for: indexPath
+            ) as? FieldTableViewCell
+            else {
+                return UITableViewCell()
+            }
+            
+            cell.configure(with: field)
+            return cell
+        }
     }
 }
 
@@ -232,64 +261,51 @@ extension FieldsViewController: UITableViewDelegate {
         _ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath
     ) {
+        let item = fieldItems[indexPath.row]
+
+        switch item {
+            case .header(let group):
+                toggleSection(at: indexPath, group: group, in: tableView)
+            case .field(_, let realIndexPath):
+            tableView.deselectRow(at: indexPath, animated: true)
+            router?.routeToField(for: realIndexPath)
+        }
+    }
+    
+    func toggleSection(
+        at indexPath: IndexPath,
+        group: GroupOfFieldsViewModel,
+        in tableView: UITableView
+    ) {
+        let toggleIndex = indexPath.row
+        let fieldsCount = group.fields.count
+        
+        tableView.beginUpdates()
+        
+        if group.isExpanded {
+            group.isExpanded = false
+            var indexPathsToDelete: [IndexPath] = []
+            
+            for i in 1...fieldsCount {
+                indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
+            }
+            
+            tableView.deleteRows(at: indexPathsToDelete, with: .fade)
+        }
+        else {
+            group.isExpanded = true
+
+            var indexPathsToInsert: [IndexPath] = []
+            for i in 1...fieldsCount {
+                indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
+            }
+            tableView.insertRows(at: indexPathsToInsert, with: .fade)
+        }
+        
+        tableView.reloadRows(at: [indexPath], with: .none)
+        tableView.endUpdates()
+        
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
-            return
-        }
-        router?.routeToDetails(for: fieldModel)
-    }
-    
-    func tableView(
-        _ tableView: UITableView,
-        viewForHeaderInSection section: Int
-    ) -> UIView? {
-        
-//        guard
-//            let header = tableView.dequeueReusableHeaderFooterView(
-//                withIdentifier: UIFieldHeader.identifier
-//            ) as? UIFieldHeader
-//        else {
-//            return nil
-//        }
-        let header = UIFieldHeader()
-        header.configure(
-            name: fields[section].name,
-            code: fields[section].code,
-            isExpanded: fields[section].isExpanded
-        )
-        
-        header.tag = section
-        header.toggleSection = { [weak self] section in
-            guard let self else { return }
-            toggleSection(section)
-        }
-        return header
-    }
-    
-//    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-//        return 60
-//    }
-//    
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return 80
-//    }
-    
-    func toggleSection(_ section: Int) {
-        var currentOffset = self.tableView.contentOffset
-        let headerRectBefore = self.tableView.rectForHeader(inSection: section)
-        
-        self.fields[section].isExpanded.toggle()
-        
-        UIView.performWithoutAnimation {
-            self.tableView.reloadSections(IndexSet(integer: section), with: .none)
-            self.tableView.layoutIfNeeded()
-        }
-        let headerRectAfter = self.tableView.rectForHeader(inSection: section)
-        
-        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
-        currentOffset.y += deltaY
-        
-        self.tableView.setContentOffset(currentOffset, animated: true)
     }
 }
 
@@ -305,6 +321,7 @@ class ReusableHeader: UITableViewHeaderFooterView {
 extension FieldsViewController : FieldsDisplayLogic {
     func displayFields(viewModel: Fields.Load.ViewModel) {
         fields = viewModel.groupsOfFields
+        
         DispatchQueue.main.async {
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
