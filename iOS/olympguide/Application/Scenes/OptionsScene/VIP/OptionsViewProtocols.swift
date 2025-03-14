@@ -14,19 +14,19 @@ protocol OptionsDataStore {
 
 // MARK: - ViewController → Interactor
 protocol OptionsBusinessLogic {
-    func textDidChange(request: Options.TextDidChange.Request)
-    func loadOptions(request: Options.FetchOptions.Request)
+    func textDidChange(with request: Options.TextDidChange.Request)
+    func loadOptions(with request: Options.FetchOptions.Request)
 }
 
 // MARK: - Presenter → ViewController
 protocol OptionsDisplayLogic: UIViewController {
-    func displayTextDidChange(viewModel: Options.TextDidChange.ViewModel)
-    func displayFetchOptions(viewModel: Options.FetchOptions.ViewModel)
+    func displayTextDidChange(with viewModel: Options.TextDidChange.ViewModel)
+    func displayFetchOptions(with viewModel: Options.FetchOptions.ViewModel)
 }
 
 // MARK: - Interactor → Presenter
 protocol OptionsPresentationLogic {
-    func presentTextDidChange(response: Options.TextDidChange.Response)
-    func presentFetchOptions(response: Options.FetchOptions.Response)
+    func presentTextDidChange(with response: Options.TextDidChange.Response)
+    func presentFetchOptions(with response: Options.FetchOptions.Response)
     func presentError(message: String)
 }

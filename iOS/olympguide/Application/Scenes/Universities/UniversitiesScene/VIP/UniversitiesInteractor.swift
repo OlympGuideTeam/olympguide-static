@@ -5,15 +5,30 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
+import Foundation
+import Combine
+
 // MARK: - Universitiesnteractor
-final class UniversitiesInteractor: UniversitiesBusinessLogic, UniversitiesDataStore {
+final class UniversitiesInteractor : UniversitiesDataStore {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     var presenter: UniversitiesPresentationLogic?
     var worker: UniversitiesWorkerLogic?
     var universities: [UniversityModel] = []
     var params: Dictionary<ParamType, SingleOrMultipleArray<Param>> = [:]
     var removeUniversities: [Int: UniversityModel] = [:]
     
-    func loadUniversities(_ request: Universities.Load.Request) {
+    init() {
+        setupBindings()
+    }
+}
+
+// MARK: - UniversitiesBusinessLogic
+extension UniversitiesInteractor : UniversitiesBusinessLogic {
+    func loadUniversities(with request: Universities.Load.Request) {
         params = request.params
         let params: [Param] = request.params.flatMap { key, value in
             value.array
@@ -25,48 +40,43 @@ final class UniversitiesInteractor: UniversitiesBusinessLogic, UniversitiesDataS
             case .success(let universities):
                 self?.universities = universities ?? []
                 let response = Universities.Load.Response(universities: universities ?? [])
-                self?.presenter?.presentUniversities(response: response)
+                self?.presenter?.presentUniversities(with: response)
             case .failure(let error):
-                self?.presenter?.presentError(message: error.localizedDescription)
+                let response = Universities.Load.Response(error: error)
+                self?.presenter?.presentUniversities(with: response)
             }
         }
-    }
-    
-    func handleBatchError(universityID: Int) {
-        if let university = removeUniversities[universityID] {
-            let insetrIndex = universities.firstIndex { $0.universityID > university.universityID} ?? universities.count
-            universities.insert(university, at: insetrIndex)
-        } else {
-            if let removeIndex = universities.firstIndex(where: { $0.universityID == universityID }) {
-                universities.remove(at: removeIndex)
-            }
-        }
-        
-        let response = Universities.Load.Response(universities: universities)
-        presenter?.presentUniversities(response: response)
-    }
-    
-    func handleBatchSuccess(universityID: Int, isFavorite: Bool) {
-        if !isFavorite {
-            removeUniversities[universityID] = nil
-        }
-    }
-    
-    func dislikeUniversity(at index: Int) {
-        let university = universities.remove(at: index)
-        removeUniversities[university.universityID] = university
-    }
-    
-    func likeUniversity(_ university: UniversityModel, at insertIndex: Int) {
-        universities.insert(university, at: insertIndex)
-        removeUniversities[university.universityID] = nil
     }
     
     func universityModel(at index: Int) -> UniversityModel {
         universities[index]
     }
     
-    func restoreFavorite(at index: Int) -> Bool {
-        universities[index].like ?? false
+}
+
+extension UniversitiesInteractor {
+    private func setupBindings() {
+        favoritesManager.universityEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                guard let index = getIndex(for: event.id) else { return }
+                switch event {
+                case .added:
+                    presenter?.presentSetFavorite(at: index, isFavorite: true)
+                case .removed:
+                    presenter?.presentSetFavorite(at: index, isFavorite: false)
+                case .error:
+                    let isFavorite: Bool = universities[index].like ?? false
+                    presenter?.presentSetFavorite(at: index, isFavorite: isFavorite)
+                case .access(_, let isFavorite):
+                    universities[index].like = isFavorite
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func getIndex(for universityId: Int) -> Int? {
+        self.universities.firstIndex(where: {$0.universityID == universityId})
     }
 }

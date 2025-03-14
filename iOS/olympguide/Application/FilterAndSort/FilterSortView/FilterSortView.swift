@@ -7,31 +7,13 @@
 
 import UIKit
 
-// MARK: - Constants
-fileprivate enum Constants {
-    enum Images {
-        static let sortIcon = "arrow.up.arrow.down"
-    }
-    
-    enum Colors {
-        static let tintColor = UIColor.black
-    }
-    
-    enum Dimensions {
-        static let stackViewSpacing: CGFloat = 5
-        static let scrollViewInset: CGFloat = 8
-        static let spaceWidth: CGFloat = 7
-        static let sortButtonSize: CGFloat = 28
-    }
-}
-
 protocol FilterSortViewDelegate: AnyObject {
     func filterSortViewDidTapSortButton(_ view: FilterSortView)
     func filterSortView(_ view: FilterSortView, didTapFilterWith title: String)
 }
 
 final class FilterSortView: UIView {
-    
+    typealias Constants = AllConstants.FilterSortView
     // MARK: - Variables
     weak var delegate: FilterSortViewDelegate?
     
@@ -57,13 +39,11 @@ final class FilterSortView: UIView {
     init(sortingOptions: [String], filteringOptions: [String]) {
         super.init(frame: .zero)
         setupUI()
-//        configure(sortingOptions: sortingOptions, filteringOptions: filteringOptions)
     }
     
     init (filteringOptions: [String]) {
         super.init(frame: .zero)
         setupUI()
-//        configure(filteringOptions: filteringOptions)
     }
     
     init() {
@@ -147,20 +127,13 @@ final class FilterSortView: UIView {
     
     private func createFilterButton(with title: String, tag: Int) -> UIButton {
         let button = FilterButton(title: title)
-        //        button.isSelectedItem.toggle()
         button.tag = tag
         button.crossButton.tag = tag
         button.tintColor = .black
         button.crossButton.addTarget(self, action: #selector(crossButtonTapped(_:)), for: .touchUpInside)
         button.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
         return button
-//        UIButton(type: .system)
     }
-    
-    // MARK: - Objc funcs
-//    @objc private func sortButtonTapped() {
-//        delegate?.filterSortViewDidTapSortButton(self)
-//    }
     
     @objc private func filterButtonTapped(_ sender: UIButton) {
         guard let filterButton = sender as? FilterButton else { return }

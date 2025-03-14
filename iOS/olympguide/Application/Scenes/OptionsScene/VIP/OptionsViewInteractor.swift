@@ -12,16 +12,16 @@ final class OptionsViewInteractor : OptionsDataStore, OptionsBusinessLogic {
     
     private let worker = OptionsWorker()
     
-    func textDidChange(request: Options.TextDidChange.Request) {
+    func textDidChange(with request: Options.TextDidChange.Request) {
         let results: [Options.TextDidChange.Response.Dependencies] = worker.filter(
             items: options,
             with: request.query
         )
         
-        presenter?.presentTextDidChange(response: Options.TextDidChange.Response(options: results))
+        presenter?.presentTextDidChange(with: Options.TextDidChange.Response(options: results))
     }
     
-    func loadOptions(request: Options.FetchOptions.Request) {
+    func loadOptions(with request: Options.FetchOptions.Request) {
         worker.fetchOptions(
             endPoint: request.endPoint
         ) { [weak self] result in
@@ -29,10 +29,10 @@ final class OptionsViewInteractor : OptionsDataStore, OptionsBusinessLogic {
             case .success(let options):
                 self?.options = options
                 let response = Options.FetchOptions.Response(options: options)
-                self?.presenter?.presentFetchOptions(response: response)
+                self?.presenter?.presentFetchOptions(with: response)
             case .failure(let error):
                 let response =  Options.FetchOptions.Response(error: error)
-                self?.presenter?.presentFetchOptions(response: response)
+                self?.presenter?.presentFetchOptions(with: response)
             }
         }
     }

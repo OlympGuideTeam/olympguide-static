@@ -7,26 +7,8 @@
 
 import UIKit
 
-// MARK: - Constants
-fileprivate enum Constants {
-    enum Images {
-        static let sortIcon = "arrow.up.arrow.down"
-    }
-    
-    enum Colors {
-        static let tintColor = UIColor.black
-    }
-    
-    enum Dimensions {
-        static let stackViewSpacing: CGFloat = 5
-        static let scrollViewInset: CGFloat = 8
-        static let spaceWidth: CGFloat = 7
-        static let sortButtonSize: CGFloat = 28
-    }
-}
-
 final class SelectedScrollView: UIView {
-    
+    typealias Constants = AllConstants.SelectedScrollView
     // MARK: - Variables
     weak var delegate: SelectedBarDelegate?
     

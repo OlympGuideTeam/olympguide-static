@@ -12,86 +12,6 @@ enum InitMethod {
     case models([OptionViewModel])
 }
 
-// MARK: - Constants
-fileprivate enum Constants {
-    // MARK: - Colors
-    enum Colors {
-        static let dimmingViewColor = UIColor.black
-        static let peakColor = UIColor(hex: "#D9D9D9")
-        static let cancelButtonBackgroundColor = UIColor(hex: "#E7E7E7")
-        static let saveButtonBackgroundColor = UIColor(hex: "#E0E8FE")
-        static let titleLabelTextColor = UIColor.black
-        static let cancelButtonTextColor = UIColor.black
-        static let saveButtonTextColor = UIColor.black
-        static let containerBackgroundColor = UIColor.white
-    }
-    
-    // MARK: - Fonts
-    enum Fonts {
-        static let titleLabelFont = FontManager.shared.font(for: .optionsVCTitle)
-        static let buttonFont = FontManager.shared.font(for: .bigButton)
-    }
-    
-    // MARK: - Dimensions
-    enum Dimensions {
-        static let peakCornerRadius: CGFloat = 1.0
-        static let containerCornerRadius: CGFloat = 25.0
-        static let peakWidth: CGFloat = 45.0
-        static let peakHeight: CGFloat = 3.0
-        static let peakTopMargin: CGFloat = 6.0
-        static let titleLabelTopMargin: CGFloat = 21.0
-        static let titleLabelLeftMargin: CGFloat = 20.0
-        static let buttonHeight: CGFloat = 48.0
-        static let buttonBottomMargin: CGFloat = 37.0
-        static let buttonLeftRightMargin: CGFloat = 20.0
-        static let buttonSpacing: CGFloat = 2.5
-        static let tableViewTopMargin: CGFloat = 5.0
-        static let animateDuration: TimeInterval = 0.3
-        static let containerX: CGFloat = 0.0
-        static let containerCornerRadiusValue: CGFloat = 25.0
-        static let sheetHeightOffset: CGFloat = 100.0
-        static let sheetHeightSmall: CGFloat = 157.0
-        static let rowHeight: CGFloat = 46.0
-        static let buttonCornerRadius: CGFloat = 14.0
-    }
-    
-    // MARK: - Alphas
-    enum Alphas {
-        static let dimmingViewInitialAlpha: CGFloat = 0.0
-        static let dimmingViewFinalAlpha: CGFloat = 0.5
-    }
-    
-    // MARK: - Numbers
-    enum Numbers {
-        static let rowsLimit: Int = 6
-    }
-    
-    // MARK: - Velocities
-    enum Velocities {
-        static let maxPanVelocity: CGFloat = 600.0
-    }
-    
-    // MARK: - Fractions
-    enum Fractions {
-        static let dismissThreshold: CGFloat = 0.5
-    }
-    
-    // MARK: - Images
-    enum Images {
-        static let filledSquare = "inset.filled.square"
-        static let square = "square"
-        static let filledCircle = "inset.filled.circle"
-        static let circle = "circle"
-    }
-    
-    // MARK: - Strings
-    enum Strings {
-        static let cancel = "Отменить"
-        static let apply = "Применить"
-    }
-}
-
-
 protocol OptionsViewControllerDelegate: AnyObject {
     func didSelectOption(_ indices: Set<Int>, _ options: [OptionViewModel], paramType: ParamType?)
     func didCancle()
@@ -107,7 +27,7 @@ protocol OptionsViewControllerButtonDelegate {
 
 // MARK: - OptionsViewController
 final class OptionsViewController: UIViewController {
-    
+    typealias Constants = AllConstants.OptionsViewController
     // MARK: - Properties
     weak var delegate: OptionsViewControllerDelegate?
     var buttonDelegate: OptionsViewControllerButtonDelegate?
@@ -128,6 +48,7 @@ final class OptionsViewController: UIViewController {
     private var currentToAll: [Int: Int] = [:]
     private var allToCurrent: [Int: Int] = [:]
     
+    
     private let titleLabel: UILabel = UILabel()
     private let cancelButton: UIButton = UIButton()
     private let saveButton: UIButton = UIButton()
@@ -145,17 +66,12 @@ final class OptionsViewController: UIViewController {
         $0.clipsToBounds = true
         return $0
     }(UIView())
+    
+    private let coordinator: OptionsCoordinator = OptionsCoordinator()
+    
     private var containerHeightConstraint: NSLayoutConstraint?
     
     private let selectedScrollView: SelectedScrollView = SelectedScrollView(selectedOptions: [])
-    
-    // MARK: - Initializers
-    init(items: [String], title: String, isMultipleChoice: Bool) {
-        self.titleLabel.text = title
-        self.isMultipleChoice = isMultipleChoice
-        super.init(nibName: nil, bundle: nil)
-        self.currentSelectedIndices = self.selectedIndices
-    }
     
     init(
         title: String,
@@ -183,9 +99,7 @@ final class OptionsViewController: UIViewController {
             currentToAll[i] = i
         }
         currentCount = self.options.count
-        
-        setup()
-        
+    
         animateShowSafely()
     }
     
@@ -193,11 +107,9 @@ final class OptionsViewController: UIViewController {
         title: String,
         isMultipleChoice: Bool,
         selectedIndices: Set<Int>,
-//        count: Int,
         endPoint: String,
         paramType: ParamType? = nil
     ) {
-//        self.count = count
         self.paramType = paramType
         self.endPoint = endPoint
         self.titleLabel.text = title
@@ -206,8 +118,6 @@ final class OptionsViewController: UIViewController {
         
         self.selectedIndices = selectedIndices
         self.currentSelectedIndices = self.selectedIndices
-        
-        setup()
     }
     
     @available(*, unavailable)
@@ -220,37 +130,21 @@ final class OptionsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.modalPresentationStyle = .overFullScreen
-        configureGesture()
-//        configureUI()
+        
+        configureCoordinator()
+        //        configureGesture()
         
         guard let endPoint else { return }
         
         let request = Options.FetchOptions.Request(endPoint: endPoint)
-        interactor?.loadOptions(request: request)
-    }
-    
-    // MARK: - Setup
-    
-    func setup() {
-        let viewController = self
-        let interactor = OptionsViewInteractor()
-        let presenter = OptionViewPresenter()
-        
-        viewController.interactor = interactor
-        interactor.presenter = presenter
-        presenter.viewController = viewController
-    }
-    
-    // MARK: - Gesture Configuration
-    private func configureGesture() {
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
-        containerView.addGestureRecognizer(panGesture)
+        interactor?.loadOptions(with: request)
     }
     
     // MARK: - UI Configuration
     private func configureUI() {
-        configureDimmingView()
-        configureContainerView()
+        coordinator.configureDimmingView()
+        coordinator.configureContainerView(count: count)
+//        configureContainerView()
         configurePeak()
         configureTitleLabel()
         configureCancelButton()
@@ -260,35 +154,6 @@ final class OptionsViewController: UIViewController {
             configureSelectedScrollContainer()
         }
         configureTableView()
-    }
-    
-    private func configureDimmingView() {
-        dimmingView.frame = view.bounds
-        dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewInitialAlpha)
-        view.addSubview(dimmingView)
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapDimmingView))
-        dimmingView.addGestureRecognizer(tapGesture)
-    }
-    
-    private func configureContainerView() {
-        let sheetHeight: CGFloat = count > Constants.Numbers.rowsLimit
-        ? view.bounds.height - Constants.Dimensions.sheetHeightOffset
-        : Constants.Dimensions.sheetHeightSmall + Constants.Dimensions.rowHeight * CGFloat(count)
-        
-        containerView.frame = CGRect(
-            x: Constants.Dimensions.containerX,
-            y: view.bounds.height,
-            width: view.bounds.width,
-            height: sheetHeight
-        )
-        containerView.backgroundColor = Constants.Colors.containerBackgroundColor
-        containerView.layer.cornerRadius = Constants.Dimensions.containerCornerRadius
-        containerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        containerView.clipsToBounds = true
-        view.addSubview(containerView)
-        
-        finalY = view.bounds.height - sheetHeight
     }
     
     private func configurePeak() {
@@ -308,10 +173,14 @@ final class OptionsViewController: UIViewController {
     private func configureTitleLabel() {
         titleLabel.font = Constants.Fonts.titleLabelFont
         titleLabel.textColor = Constants.Colors.titleLabelTextColor
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 0.5
+        titleLabel.numberOfLines = 1
         
         containerView.addSubview(titleLabel)
         titleLabel.pinTop(to: containerView.topAnchor, Constants.Dimensions.titleLabelTopMargin)
-        titleLabel.pinLeft(to: containerView.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
+        titleLabel.pinLeft(to: containerView.leadingAnchor, Constants.Dimensions.titleLabelHorizontalMargin)
+        titleLabel.pinRight(to: containerView.trailingAnchor, Constants.Dimensions.titleLabelHorizontalMargin)
     }
     
     private func configureCancelButton() {
@@ -382,7 +251,6 @@ final class OptionsViewController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.isScrollEnabled = count >= Constants.Numbers.rowsLimit
         
         containerView.backgroundColor = Constants.Colors.containerBackgroundColor
     }
@@ -391,21 +259,21 @@ final class OptionsViewController: UIViewController {
         containerView.addSubview(searchBar)
         searchBar.delegate = self
         searchBar.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
-        searchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
+        searchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelHorizontalMargin)
     }
     
-    // MARK: - Animation
-    func animateShow() {
-        configureUI()
-        UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
-            self.containerView.frame.origin.y = self.finalY
-            self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewFinalAlpha)
-        }
+    private func configureCoordinator() {
+        coordinator.dimmingView = dimmingView
+        coordinator.containerView = containerView
+        coordinator.presentingView = self
+        
+        coordinator.configureGesture()
     }
     
     func animateShowSafely() {
         if view.window != nil {
-            animateShow()
+            configureUI()
+            coordinator.animateShow()
         } else {
             DispatchQueue.main.async {
                 self.animateShowSafely()
@@ -413,68 +281,11 @@ final class OptionsViewController: UIViewController {
         }
     }
     
-    func animateDismiss(completion: (() -> Void)? = nil) {
-        UIView.animate(withDuration: Constants.Dimensions.animateDuration, animations: {
-            self.containerView.frame.origin.y = self.view.bounds.height
-            self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewInitialAlpha)
-        }, completion: { _ in
-            completion?()
-        })
-    }
-    
-    private func closeSheet() {
-        animateDismiss {
+    func closeSheet() {
+        coordinator.animateDismiss {
             self.dismiss(animated: false)
         }
         delegate?.didCancle()
-    }
-    
-    // MARK: - Actions
-    @objc
-    private func didTapDimmingView() {
-        closeSheet()
-    }
-    
-    // MARK: - Pan Gesture Handling
-    @objc
-    private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        let velocity = gesture.velocity(in: view)
-        
-        switch gesture.state {
-        case .changed:
-            let newY = containerView.frame.origin.y + translation.y
-            if newY >= finalY {
-                containerView.frame.origin.y = newY
-                gesture.setTranslation(.zero, in: view)
-                
-                let totalDistance = view.bounds.height - finalY
-                let currentDistance = containerView.frame.origin.y - finalY
-                let progress = currentDistance / totalDistance
-                let newAlpha = Constants.Alphas.dimmingViewFinalAlpha * (1 - progress)
-                dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(newAlpha)
-            }
-            
-        case .ended, .cancelled:
-            if velocity.y > Constants.Velocities.maxPanVelocity {
-                closeSheet()
-            } else {
-                let distanceMoved = containerView.frame.origin.y - finalY
-                let totalDistance = view.bounds.height - finalY
-                
-                if distanceMoved > totalDistance * Constants.Fractions.dismissThreshold {
-                    closeSheet()
-                } else {
-                    UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
-                        self.containerView.frame.origin.y = self.finalY
-                        self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewFinalAlpha)
-                    }
-                }
-            }
-            
-        default:
-            break
-        }
     }
 }
 
@@ -501,10 +312,10 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
         
         if isMultipleChoice {
             let imageName = currentSelectedIndices.contains(indexPath.row) ? Constants.Images.filledSquare : Constants.Images.square
-            cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
+            cell.actionButton.image = UIImage(systemName: imageName)
         } else {
             let imageName = currentSelectedIndices.contains(indexPath.row) ? Constants.Images.filledCircle : Constants.Images.circle
-            cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
+            cell.actionButton.image = UIImage(systemName: imageName)
         }
         
         cell.buttonAction = { [weak self] in
@@ -591,7 +402,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         delegate?.didSelectOption(selectedIndices, names, paramType: self.paramType)
         buttonDelegate?.setButtonView(names)
-        animateDismiss {
+        coordinator.animateDismiss {
             self.dismiss(animated: false)
         }
     }
@@ -601,13 +412,13 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
 extension OptionsViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
         let request = Options.TextDidChange.Request(query: text)
-        interactor?.textDidChange(request: request)
+        interactor?.textDidChange(with: request)
     }
 }
 
 // MARK: - OptionsDisplayLogic
 extension OptionsViewController: OptionsDisplayLogic {
-    func displayTextDidChange(viewModel: Options.TextDidChange.ViewModel) {
+    func displayTextDidChange(with viewModel: Options.TextDidChange.ViewModel) {
         currentToAll.removeAll()
         allToCurrent.removeAll()
         currentSelectedIndices.removeAll()
@@ -628,7 +439,7 @@ extension OptionsViewController: OptionsDisplayLogic {
         }
     }
     
-    func displayFetchOptions(viewModel: Options.FetchOptions.ViewModel) {
+    func displayFetchOptions(with viewModel: Options.FetchOptions.ViewModel) {
         if let error = viewModel.error {
             let presentingVC = presentingViewController
             

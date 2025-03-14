@@ -5,32 +5,30 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
-import UIKit
-
 protocol UniversitiesBusinessLogic {
-    func loadUniversities(_ request: Universities.Load.Request)
-    func handleBatchError(universityID: Int)
-    func handleBatchSuccess(universityID: Int, isFavorite: Bool)
-    func dislikeUniversity(at index: Int)
-    func likeUniversity(_ university: UniversityModel, at insertIndex: Int)
+    func loadUniversities(with request: Universities.Load.Request)
     func universityModel(at index: Int) -> UniversityModel
 }
 
 protocol UniversitiesPresentationLogic {
-    func presentUniversities(response: Universities.Load.Response)
-    func presentError(message: String)
+    func presentUniversities(with response: Universities.Load.Response)
+    func presentSetFavorite(at index: Int, isFavorite: Bool)
 }
 
 protocol UniversitiesDisplayLogic: AnyObject {
-    func displayUniversities(viewModel: Universities.Load.ViewModel)
-    func displayError(message: String)
+    func displayUniversities(with viewModel: Universities.Load.ViewModel)
+    func displaySetFavorite(at index: Int, isFavorite: Bool)
 }
 
 protocol UniversitiesRoutingLogic {
-    func routeToDetails(for university: UniversityModel)
+    func routeToUniversity(for index: Int)
     func routeToSearch()
 }
 
 protocol UniversitiesDataStore {
     var universities: [UniversityModel] { get set }
+}
+
+protocol UniversitiesDataPassing {
+    var dataStore: UniversitiesDataStore? { get }
 }

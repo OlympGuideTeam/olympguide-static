@@ -15,7 +15,8 @@ enum Universities {
         }
         
         struct Response {
-            let universities: [UniversityModel]
+            var universities: [UniversityModel]? = nil
+            var error: Error? = nil
         }
         
         struct ViewModel {
@@ -36,11 +37,5 @@ enum Universities {
         struct ViewModel {
             let errorMessage: String?
         }
-    }
-    
-    // MARK: - Sorting options
-    enum SortOption: String {
-        case name
-        case popularity
     }
 }

@@ -10,7 +10,7 @@ import Foundation
 final class OptionViewPresenter : OptionsPresentationLogic {
     weak var viewController: OptionsDisplayLogic?
     
-    func presentTextDidChange(response: Options.TextDidChange.Response) {
+    func presentTextDidChange(with response: Options.TextDidChange.Response) {
         let viewModels = response.options.map { option in
             Options.TextDidChange.ViewModel.DependenciesViewModel(
                 realIndex: option.realIndex,
@@ -19,13 +19,13 @@ final class OptionViewPresenter : OptionsPresentationLogic {
         }
         
         let viewModel = Options.TextDidChange.ViewModel(dependencies: viewModels)
-        viewController?.displayTextDidChange(viewModel: viewModel)
+        viewController?.displayTextDidChange(with: viewModel)
     }
     
-    func presentFetchOptions(response: Options.FetchOptions.Response) {
+    func presentFetchOptions(with response: Options.FetchOptions.Response) {
         if let error = response.error {
             let viewModel = Options.FetchOptions.ViewModel(error: error)
-            viewController?.displayFetchOptions(viewModel: viewModel)
+            viewController?.displayFetchOptions(with: viewModel)
             return
         }
         
@@ -39,7 +39,7 @@ final class OptionViewPresenter : OptionsPresentationLogic {
         }
         
         let viewModel = Options.FetchOptions.ViewModel(options: viewModels)
-        viewController?.displayFetchOptions(viewModel: viewModel)
+        viewController?.displayFetchOptions(with: viewModel)
     }
     
     func presentError(message: String) {

@@ -8,25 +8,22 @@
 import UIKit
 
 final class UniversitiesPresenter: UniversitiesPresentationLogic {
-    
-    weak var viewController: UniversitiesDisplayLogic?
+    weak var viewController: (UniversitiesDisplayLogic & UIViewController)?
 
-    func presentUniversities(response: Universities.Load.Response) {
-        let viewModels = response.universities.map { university in
-            UniversityViewModel(
-                universityID: university.universityID,
-                name: university.name,
-                logoURL: university.logo,
-                region: university.region,
-                like: university.like ?? false
-            )
+    func presentUniversities(with response: Universities.Load.Response) {
+        if let error = response.error {
+            viewController?.showAlert(with: error.localizedDescription)
+            return
         }
         
+        guard let universities = response.universities else { return }
+        let viewModels = universities.map { $0.toViewModel() }
+        
         let viewModel = Universities.Load.ViewModel(universities: viewModels)
-        viewController?.displayUniversities(viewModel: viewModel)
+        viewController?.displayUniversities(with: viewModel)
     }
 
-    func presentError(message: String) {
-        viewController?.displayError(message: message)
+    func presentSetFavorite(at index: Int, isFavorite: Bool) {
+        viewController?.displaySetFavorite(at: index, isFavorite: isFavorite)
     }
 }

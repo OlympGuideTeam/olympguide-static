@@ -7,12 +7,16 @@
 
 import UIKit
 
-final class UniversitiesRouter: UniversitiesRoutingLogic {
+final class UniversitiesRouter: UniversitiesRoutingLogic, UniversitiesDataPassing {
     weak var viewController: UIViewController?
+    var dataStore: UniversitiesDataStore?
 
-    func routeToDetails(for university: UniversityModel) {
+    func routeToUniversity(for index: Int) {
+        guard
+            let university = dataStore?.universities[index]
+        else { return }
+        
         let universityVC = UniversityAssembly.build(for: university)
-//        detailsViewController.university = university
         viewController?.navigationController?.pushViewController(universityVC, animated: true)
     }
     

@@ -35,7 +35,7 @@ fileprivate enum Constants {
     }
 }
 
-class UniversitiesViewController: UIViewController, WithSearchButton {
+class UniversitiesViewController : UIViewController, WithSearchButton {
     @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
@@ -50,13 +50,15 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
     // MARK: - Variables
-    private let tableView = UITableView()
-    private let titleLabel: UILabel = UILabel()
+    private let tableView: UICustomTbleView = UICustomTbleView()
+    private lazy var dataSource: UniversitiesDataSource = UniversitiesDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
+    
+    private let titleLabel: UILabel = UILabel()
     
     lazy var filterSortView: FilterSortView = FilterSortView()
     
-    private var universities: [UniversityViewModel] = []
+    var universities: [UniversityViewModel] = []
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
@@ -64,19 +66,29 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         super.viewDidLoad()
         
         setupFilterItems()
+        setupDataSource()
         configureNavigationBar()
         configureRefreshControl()
         setupFilterSortView()
         configureTableView()
-        setupBindings()
         setupAuthBindings()
         
         loadUniversities()
     }
     
     func loadUniversities() {
+        dataSource.isShimmering = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            guard
+                let self,
+                dataSource.isShimmering == true
+            else
+            { return }
+            tableView.reloadData()
+        }
+        
         let request = Universities.Load.Request(params: selectedParams)
-        interactor?.loadUniversities(request)
+        interactor?.loadUniversities(with: request)
     }
     
     private func setupFilterItems() {
@@ -95,16 +107,10 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
     }
-    
-    // MARK: - Methods
-    func displayError(message: String) {
-        print("Error: \(message)")
-    }
 }
 
 // MARK: - UI Configuration
 extension UniversitiesViewController {
-    
     private func configureNavigationBar() {
         let backItem = UIBarButtonItem(
             title: Constants.Strings.backButtonTitle,
@@ -133,43 +139,14 @@ extension UniversitiesViewController {
         
         tableView.frame = view.bounds
         
-        tableView.register(
-            UniversityTableViewCell.self,
-            forCellReuseIdentifier: UniversityTableViewCell.identifier
-        )
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.backgroundColor = Constants.Colors.tableViewBackground
-        tableView.separatorStyle = .none
+        dataSource.register(in: tableView)
+        
         tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
         
-        let headerContainer = UIView()
-        headerContainer.backgroundColor = .clear
-        
-        headerContainer.addSubview(filterSortView)
-        
-        filterSortView.pinTop(to: headerContainer.topAnchor, 13)
-        filterSortView.pinLeft(to: headerContainer.leadingAnchor)
-        filterSortView.pinRight(to: headerContainer.trailingAnchor)
-        filterSortView.pinBottom(to: headerContainer.bottomAnchor)
-        
-        headerContainer.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
+        tableView.addFilterSortView(
+            filterSortView,
+            bottom: 0
         )
-        let height = headerContainer.systemLayoutSizeFitting(targetSize).height
-        
-        headerContainer.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: tableView.bounds.width,
-            height: height
-        )
-        
-        tableView.tableHeaderView = headerContainer
     }
     
     @objc
@@ -183,65 +160,59 @@ extension UniversitiesViewController {
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
-extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return (universities.count != 0) ? universities.count : 10
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: "UniversityTableViewCell",
-            for: indexPath
-        ) as? UniversityTableViewCell
-        else {
-            fatalError("Could not dequeue cell")
+extension UniversitiesViewController {
+    private func setupDataSource() {
+        dataSource.viewController = self
+        
+        dataSource.onFavoriteUniversityTapped = { [weak self] indexPath, isFavorite in
+            self?.favoriteUniversityTapped(indexPath, isFavorite)
         }
         
-        if universities.count != 0 {
-            let universityViewModel = universities[indexPath.row]
-            cell.configure(with: universityViewModel)
-            cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
-                guard let self else { return }
-                if isFavorite {
-                    self.universities[indexPath.row].like = true
-                    guard
-                        let model = self.interactor?.universityModel(at: indexPath.row)
-                    else { return }
-                    
-                    favoritesManager.addUniversityToFavorites(model: model)
-                    
-                } else {
-                    self.universities[indexPath.row].like = false
-                    favoritesManager.removeUniversityFromFavorites(universityID: sender.tag)
-                }
-            }
-            cell.hideSeparator(indexPath.row == universities.count - 1)
+        dataSource.onUniversitySelect = { [weak self] index in
+            self?.router?.routeToUniversity(for: index)
+        }
+    }
+    
+    func favoriteUniversityTapped(_ indexPath: IndexPath, _ isFavorite: Bool) {
+        if isFavorite {
+            self.universities[indexPath.row].like = true
+            guard
+                let model = self.interactor?.universityModel(at: indexPath.row)
+            else { return }
+            favoritesManager.addUniversityToFavorites(model: model)
         } else {
-            cell.configureShimmer()
+            self.universities[indexPath.row].like = false
+            let id = self.universities[indexPath.row].universityID
+            favoritesManager.removeUniversityFromFavorites(universityID: id)
         }
-        
-        return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        guard let universityModel = interactor?.universities[indexPath.row] else { return }
-        router?.routeToDetails(for: universityModel)
-    }
 }
 
 extension UniversitiesViewController : UniversitiesDisplayLogic {
-    func displayUniversities(viewModel: Universities.Load.ViewModel) {
+    func displayUniversities(with viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
         for i in 0..<universities.count {
             let universityID = universities[i].universityID
             let like = universities[i].like
             universities[i].like = isFavorite(univesityID: universityID, serverValue: like)
         }
+        
+        dataSource.isShimmering = false
+        
         DispatchQueue.main.async {
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+    
+    func displaySetFavorite(at index: Int, isFavorite: Bool) {
+        if self.universities[index].like == isFavorite { return }
+        self.universities[index].like = isFavorite
+        self.tableView.reloadRows(
+            at: [IndexPath(row: index, section: 0)],
+            with: .automatic
+        )
     }
 }
 
@@ -282,50 +253,6 @@ extension UniversitiesViewController : Filterble {
 
 // MARK: - Combine
 extension UniversitiesViewController {
-    private func setupBindings() {
-        favoritesManager.universityEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self = self else { return }
-                switch event {
-                case .added(let updatedUniversity):
-                    if let index = self.universities.firstIndex(where: {
-                        $0.universityID == updatedUniversity.universityID
-                    }) {
-                        if self.universities[index].like == true { break }
-                        self.universities[index].like = true
-                        self.tableView.reloadRows(
-                            at: [IndexPath(row: index, section: 0)],
-                            with: .automatic
-                        )
-                    }
-                case .removed(let universityID):
-                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        if self.universities[index].like == false { break }
-                        self.universities[index].like = false
-                        self.tableView.reloadRows(
-                            at: [IndexPath(row: index, section: 0)],
-                            with: .automatic
-                        )
-                    }
-                case .error(let universityID):
-                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        if self.universities[index].like == self.interactor?.universities[index].like { break }
-                        self.universities[index].like = self.interactor?.universities[index].like ?? false
-                        self.tableView.reloadRows(
-                            at: [IndexPath(row: index, section: 0)],
-                            with: .automatic
-                        )
-                    }
-                case .access(let universityID, let isFavorite):
-                    if let index = self.interactor?.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        self.universities[index].like = isFavorite
-                    }
-                }
-            }
-            .store(in: &cancellables)
-    }
-    
     private func setupAuthBindings() {
         authManager.isAuthenticatedPublisher
                 .receive(on: DispatchQueue.main)
