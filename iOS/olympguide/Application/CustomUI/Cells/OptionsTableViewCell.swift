@@ -7,73 +7,24 @@
 
 import UIKit
 
-// MARK: - Constants
-fileprivate enum Constants {
-    enum Colors {
-        static let separatorColor = UIColor(hex: "#E7E7E7")
-    }
-    
-    enum Fonts {
-        static let titleFont = FontManager.shared.font(for: .commonInformation)
-    }
-    
-    enum Dimensions {
-        static let titleLeftMargin: CGFloat = 20
-        static let actionButtonRightMargin: CGFloat = 20
-        static let titleRightMargin: CGFloat = 8
-        static let actionButtonSize: CGFloat = 24
-        static let separatorHeight: CGFloat = 1
-        static let separatorLeftMargin: CGFloat = 20
-        static let separatorRightMargin: CGFloat = 20
-    }
-    
-    enum Images {
-        static let buttonImageName = "square"
-    }
-    
-    enum Strings {
-        static let identifier = "CustomTableViewCell"
-    }
-}
-
 class OptionsTableViewCell: UITableViewCell {
+    typealias Constants = AllConstants.OptionsTableViewCell
+    typealias Common = AllConstants.Common
     
     // MARK: - Variables
-    static let identifier = Constants.Strings.identifier
+    static let identifier = "CustomTableViewCell"
     
-    let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = Constants.Fonts.titleFont
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    let titleLabel: UILabel = UILabel()
+    let actionButton: UIImageView = UIImageView()
     
-    let actionButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .black
-        button.setImage(UIImage(systemName: Constants.Images.buttonImageName), for: .normal)
-        return button
-    }()
-    
-    private let separatorLine: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = Constants.Colors.separatorColor
-        return view
-    }()
-    
+    private let separatorLine: UIView = UIView()
     var buttonAction: (() -> Void)?
     
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(actionButton)
-        contentView.addSubview(separatorLine)
-        setupConstraints()
-        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        configureUI()
     }
     
     @available(*, unavailable)
@@ -87,21 +38,46 @@ class OptionsTableViewCell: UITableViewCell {
     }
     
     // MARK: - Private funcs
-    private func setupConstraints() {
-        titleLabel.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.titleLeftMargin)
-        titleLabel.pinCenterY(to: contentView)
+    private func configureUI() {
+        configureTitleLabel()
+        configureActionButton()
+        configureSeparatorLine()
+    }
+    
+    private func configureTitleLabel() {
+        titleLabel.font = FontManager.shared.font(for: .commonInformation)
         
-        actionButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.actionButtonRightMargin)
+        contentView.addSubview(titleLabel)
+        
+        titleLabel.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        titleLabel.pinCenterY(to: contentView)
+    }
+    
+    private func configureActionButton() {
+        actionButton.tintColor = .black
+        actionButton.image = Constants.Images.multiply
+        
+        contentView.addSubview(actionButton)
+//        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        
+//        actionButton.isEnabled = false
+        actionButton.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
         actionButton.pinCenterY(to: contentView)
-        actionButton.setHeight(Constants.Dimensions.actionButtonSize)
-        actionButton.setWidth(Constants.Dimensions.actionButtonSize)
+        actionButton.setHeight(Constants.Dimensions.buttonSize)
+        actionButton.setWidth(Constants.Dimensions.buttonSize)
         
         titleLabel.pinRight(to: actionButton.leadingAnchor, Constants.Dimensions.titleRightMargin, .lsOE)
+    }
+    
+    private func configureSeparatorLine() {
+        separatorLine.backgroundColor = Common.Colors.separator
         
-        separatorLine.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.separatorLeftMargin)
-        separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorRightMargin)
+        contentView.addSubview(separatorLine)
+
+        separatorLine.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        separatorLine.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
-        separatorLine.setHeight(Constants.Dimensions.separatorHeight)
+        separatorLine.setHeight(Common.Dimensions.separatorHeight)
     }
     
     // MARK: - Objc funcs

@@ -121,3 +121,18 @@ extension AllConstants {
         }
     }
 }
+
+extension AllConstants {
+    enum OptionsTableViewCell {
+        enum Images {
+            static let multiply: UIImage? = UIImage(systemName: "square")
+        }
+        
+        enum Dimensions {
+            static let titleRightMargin: CGFloat = 8.0
+            
+            static let buttonSize: CGFloat = 24.0
+        }
+    }
+}
+
