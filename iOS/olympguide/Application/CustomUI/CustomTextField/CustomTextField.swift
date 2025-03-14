@@ -7,37 +7,6 @@
 
 import UIKit
 
-// MARK: - Constants
-
-fileprivate enum Constants {
-    
-    enum Fonts {
-        static let titleFont = FontManager.shared.font(for: .commonInformation)
-        static let textFieldFont = FontManager.shared.font(for: .textField)
-    }
-    
-    enum Colors {
-        static let titleTextColor = UIColor(hex: "#4F4F4F")
-        static let backgroundColor = UIColor(hex: "#E7E7E7")
-        static let activeBackgroundColor = UIColor.white
-        static let borderColor = UIColor.black
-    }
-    
-    enum Dimensions {
-        static let cornerRadius: CGFloat = 13
-        static let padding: CGFloat = 10
-        static let searchBarHeight: CGFloat = 48
-        static let textFieldHeight: CGFloat = 24
-        static let titleScale: CGFloat = 0.5
-        static let titleTranslateY: CGFloat = -8
-    }
-    
-    enum Strings {
-        static let closeButtonTitle = "Закрыть"
-        static let deleteButtonImage = "xmark.circle.fill"
-    }
-}
-
 // MARK: - Protocol
 protocol CustomTextFieldDelegate: AnyObject {
     func action(_ searchBar: CustomTextField, textDidChange text: String)
@@ -45,6 +14,8 @@ protocol CustomTextFieldDelegate: AnyObject {
 
 // MARK: - CustomTextField
 class CustomTextField: UIView {
+    typealias Constants = AllConstants.CustomTextField
+    typealias Common = AllConstants.Common
     
     // MARK: - Properties
     weak var delegate: (any CustomTextFieldDelegate)?
@@ -80,14 +51,14 @@ class CustomTextField: UIView {
     }
     
     private func configureTitleLabel() {
-        titleLabel.font = Constants.Fonts.titleFont
+        titleLabel.font = FontManager.shared.font(for: .commonInformation)
         titleLabel.textColor = Constants.Colors.titleTextColor
         titleLabel.textAlignment = .left
         addSubview(titleLabel)
     }
     
     private func configureTextField() {
-        textField.font = Constants.Fonts.textFieldFont
+        textField.font = FontManager.shared.font(for: .textField)
         textField.textColor = .black
         textField.alpha = 0
         textField.isHidden = true
@@ -168,7 +139,10 @@ class CustomTextField: UIView {
     }
     
     override var intrinsicContentSize: CGSize {
-        return CGSize(width: UIScreen.main.bounds.width - 40, height: Constants.Dimensions.searchBarHeight)
+        return CGSize(
+            width: UIScreen.main.bounds.width - 2 * Common.Dimensions.horizontalMargin,
+            height: Constants.Dimensions.searchBarHeight
+        )
     }
     
     override var frame: CGRect {
@@ -198,13 +172,14 @@ class CustomTextField: UIView {
     }
     
     func updateAppereance() {
-        UIView.animate(withDuration: 0.3, animations: {
+        UIView.animate(withDuration: Constants.Dimensions.animationDuration, animations: {
+            typealias constants = Constants.Dimensions
             self.setNeedsLayout()
             self.layoutIfNeeded()
             self.backgroundColor = self.isActive ? Constants.Colors.activeBackgroundColor : Constants.Colors.backgroundColor
-            self.layer.borderWidth = self.isActive ? 1 : 0
+            self.layer.borderWidth = self.isActive ? constants.activeBorderWidth : constants.activeBorderWidth
             self.layer.borderColor = self.isActive ? Constants.Colors.borderColor.cgColor : UIColor.clear.cgColor
-            self.textField.alpha = self.isActive ? 1 : 0
+            self.textField.alpha = self.isActive ? constants.activeBorderWidth : constants.activeBorderWidth
         }, completion: { _ in
             self.textField.isHidden = !self.isActive
         })

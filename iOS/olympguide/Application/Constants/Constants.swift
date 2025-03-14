@@ -256,3 +256,32 @@ extension AllConstants {
         }
     }
 }
+
+extension AllConstants {
+    enum CustomTextField {
+        enum Colors {
+            static let titleTextColor = UIColor(hex: "#4F4F4F")
+            static let backgroundColor = UIColor(hex: "#E7E7E7")
+            static let activeBackgroundColor = UIColor.white
+            static let borderColor = UIColor.black
+        }
+        
+        enum Dimensions {
+            static let cornerRadius: CGFloat = 13
+            static let padding: CGFloat = 10
+            static let searchBarHeight: CGFloat = 48
+            static let textFieldHeight: CGFloat = 24
+            static let titleScale: CGFloat = 0.5
+            static let titleTranslateY: CGFloat = -8
+            static let animationDuration: TimeInterval = 0.3
+            static let activeBorderWidth: CGFloat = 1
+            static let inactiveBorderWidth: CGFloat = 0
+        }
+        
+        enum Strings {
+            static let closeButtonTitle = "Закрыть"
+            static let deleteButtonImage = "xmark.circle.fill"
+        }
+    }
+}
+
