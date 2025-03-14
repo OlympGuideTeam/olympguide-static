@@ -9,6 +9,8 @@ import UIKit
 
 // MARK: - CustomSearchBar
 final class CustomInputDataField : CustomTextField, HighlightableField {
+    typealias Constants = AllConstants.CustomInputDataField.Dimensions
+    
     var isWrong: Bool = false
     
     override func textFieldDidChange(_ textField: UITextField) {
@@ -16,7 +18,7 @@ final class CustomInputDataField : CustomTextField, HighlightableField {
         
         if isWrong {
             isWrong = false
-            UIView.animate(withDuration: 0.2) {
+            UIView.animate(withDuration: Constants.animationDuration) {
                 self.backgroundColor = .white
             }
         }
