@@ -17,7 +17,7 @@ struct BenefitModel : Codable {
     let confirmationSubjects: [ConfirmationSubject]?
     let fullScoreSubjects: [String]?
     
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys : String, CodingKey {
         case minClass = "min_class"
         case minDiplomaLevel = "min_diploma_level"
         case isBVI = "is_bvi"

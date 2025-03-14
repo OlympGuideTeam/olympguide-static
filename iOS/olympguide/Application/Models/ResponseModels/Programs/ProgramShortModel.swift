@@ -17,7 +17,7 @@ struct ProgramShortModel : Codable {
     var like: Bool
     let link: String
     
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys : String, CodingKey {
         case programID = "program_id"
         case budgetPlaces = "budget_places"
         case paidPlaces = "paid_places"
