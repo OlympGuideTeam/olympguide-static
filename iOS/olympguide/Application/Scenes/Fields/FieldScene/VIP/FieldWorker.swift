@@ -16,7 +16,6 @@ protocol FieldWorkerLogic {
 }
 
 class FieldWorker : FieldWorkerLogic {
-    
     @InjectSingleton
     var networkService: NetworkServiceProtocol
     
@@ -26,9 +25,11 @@ class FieldWorker : FieldWorkerLogic {
         completion: @escaping (Result<[ProgramsByUniversityModel]?, Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
+        
         for param in params {
             queryItems.append(param.urlValue)
         }
+        
         networkService.request(
             endpoint: "/field/\(fieldId)/programs",
             method: .get,

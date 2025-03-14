@@ -21,4 +21,8 @@ final class FieldPresenter : FieldPresentationLogic {
         let viewModel = Field.LoadPrograms.ViewModel(programs: programs.map { $0.toViewModel()} )
         viewController?.displayLoadProgramsResult(with: viewModel)
     }
+    
+    func presentSetFavorite(at indexPath: IndexPath, _ isFavorite: Bool) {
+        viewController?.displaySetFavoriteResult(at: indexPath, isFavorite)
+    }
 }
