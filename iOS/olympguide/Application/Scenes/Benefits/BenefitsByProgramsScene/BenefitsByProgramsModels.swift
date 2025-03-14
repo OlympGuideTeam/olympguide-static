@@ -5,8 +5,6 @@
 //  Created by Tom Tim on 05.03.2025.
 //
 
-import Foundation
-
 enum BenefitsByPrograms {
     enum Load {
         struct Request {
