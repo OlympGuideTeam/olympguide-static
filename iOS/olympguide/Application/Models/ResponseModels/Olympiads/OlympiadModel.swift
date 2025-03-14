@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 06.03.2025.
 //
 
-struct OlympiadModel: Codable {
+struct OlympiadModel : Codable {
     let olympiadID: Int
     let name: String
     let level: Int
