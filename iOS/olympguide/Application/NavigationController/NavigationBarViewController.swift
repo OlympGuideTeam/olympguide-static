@@ -9,6 +9,7 @@ import UIKit
 import Combine
 
 protocol NonTabBarVC { }
+protocol WithBookMarkButton { }
 
 fileprivate enum Constants {
     enum Colors {
@@ -29,7 +30,7 @@ fileprivate enum Constants {
     }
 }
 
-class NavigationBarViewController: UINavigationController {
+class NavigationBarViewController : UINavigationController {
     @InjectSingleton
     var authManager: AuthManagerProtocol
     
@@ -133,7 +134,7 @@ class NavigationBarViewController: UINavigationController {
     }
 }
 
-extension NavigationBarViewController: UINavigationControllerDelegate {
+extension NavigationBarViewController : UINavigationControllerDelegate {
     func navigationController(
         _ navigationController: UINavigationController,
         willShow viewController: UIViewController,
