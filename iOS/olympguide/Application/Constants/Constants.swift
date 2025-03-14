@@ -285,3 +285,11 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum RegionTextField {
+        enum Strings {
+            static let optionVCTitle = "Регион"
+        }
+    }
+}
+
