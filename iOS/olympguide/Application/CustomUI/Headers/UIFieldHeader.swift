@@ -7,8 +7,11 @@
 
 import UIKit
 
-final class UIFieldHeader : UITableViewHeaderFooterView {
-    static let identifier = "UIFieldHeader"
+final class UIFieldHeaderCell : UITableViewCell {
+    typealias Constants = AllConstants.UIFieldHeaderCell
+    typealias Common = AllConstants.Common
+    
+    static let identifier = "UIFieldHeaderCell"
     
     var toggleSection: ((_: Int) -> Void)?
     
@@ -18,15 +21,14 @@ final class UIFieldHeader : UITableViewHeaderFooterView {
     
     private var isExpanded: Bool = false
     
-    override init(reuseIdentifier: String?) {
-        super.init(reuseIdentifier: reuseIdentifier)
+    // MARK: - Lifecycle
+    override init(
+        style: UITableViewCell.CellStyle,
+        reuseIdentifier: String?
+    ) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureLayouts()
-        
-        let tapGesture = UITapGestureRecognizer(
-            target: self,
-            action: #selector(headerTapped)
-        )
-        contentView.addGestureRecognizer(tapGesture)
+        selectionStyle = .none
     }
     
     @available(*, unavailable)
@@ -47,20 +49,20 @@ final class UIFieldHeader : UITableViewHeaderFooterView {
         background.isUserInteractionEnabled = false
         
         background.backgroundColor = .white
-        background.layer.cornerRadius = 13
+        background.layer.cornerRadius = Constants.Dimensions.backroundRadius
         background.pinTop(to: contentView.topAnchor)
         background.pinBottom(to: contentView.bottomAnchor)
-        background.pinLeft(to: contentView.leadingAnchor, 15)
-        background.pinRight(to: contentView.trailingAnchor, 15)
-        background.backgroundColor = UIColor(hex: "#E0E8FE")
+        background.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.backgroundVerticalMargin)
+        background.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.backgroundVerticalMargin)
+        background.backgroundColor = Common.Colors.accient
     }
     
     private func configureFieldStackView() {
         contentView.addSubview(fieldStackView)
-        fieldStackView.pinTop(to: contentView.topAnchor, 5)
-        fieldStackView.pinLeft(to: contentView.leadingAnchor, 40)
-        fieldStackView.pinBottom(to: contentView.bottomAnchor, 5)
-        fieldStackView.pinRight(to: contentView.trailingAnchor, 20)
+        fieldStackView.pinTop(to: contentView.topAnchor, Constants.Dimensions.fieldStackVerticalMargin)
+        fieldStackView.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.leftMargin)
+        fieldStackView.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.fieldStackVerticalMargin)
+        fieldStackView.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
     }
     
     private func configureArrowImageView() {
@@ -69,43 +71,45 @@ final class UIFieldHeader : UITableViewHeaderFooterView {
         arrowImageView.isUserInteractionEnabled = false
         arrowImageView.contentMode = .scaleAspectFit
         arrowImageView.tintColor = .black
-        arrowImageView.setWidth(17)
+        arrowImageView.setWidth(Constants.Dimensions.arrowSize)
         
-        arrowImageView.pinTop(to: contentView.topAnchor, 3)
-        arrowImageView.pinLeft(to: contentView.leadingAnchor, 20)
+        arrowImageView.pinTop(to: contentView.topAnchor, Constants.Dimensions.arrowTopMargin)
+        arrowImageView.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
     }
     
     private func updateApperance() {
         arrowImageView.image = isExpanded
-        ? UIImage(systemName: "chevron.up")
-        : UIImage(systemName: "chevron.down")
+        ? Common.Images.openedSection
+        : Common.Images.closedSection
         
         background.backgroundColor = isExpanded
-        ? UIColor(hex: "#E0E8FE")
+        ? Common.Colors.accient
         : .clear
     }
     
     func configure(
-        name: String,
-        code: String,
+        with field: FieldViewModel,
         isExpanded: Bool = false
     ) {
         self.isExpanded = isExpanded
-        let capitalizeName = capitalizeFirstLetter(name)
-        fieldStackView.configure(with: code, and: capitalizeName)
+        let capitalizeName = capitalizeFirstLetter(field.name)
+        if field.code.isEmpty {
+            fieldStackView.configure(
+                with: field.code,
+                and: capitalizeName,
+                width: nil
+            )
+        } else {
+            fieldStackView.configure(
+                with: field.code,
+                and: capitalizeName
+            )
+        }
         updateApperance()
     }
     
     private func capitalizeFirstLetter(_ input: String) -> String {
         guard let firstChar = input.first else { return "" }
         return firstChar.uppercased() + input.dropFirst().lowercased()
-    }
-    
-    @objc func headerTapped() {
-        isExpanded.toggle()
-        
-        updateApperance()
-        
-        toggleSection?(self.tag)
     }
 }

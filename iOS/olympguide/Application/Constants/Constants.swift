@@ -293,3 +293,22 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum UIFieldHeaderCell {
+        enum Dimensions {
+            static let backgroundVerticalMargin: CGFloat = 15.0
+            static let backroundRadius: CGFloat = 13.0
+            
+            static let fieldStackVerticalMargin: CGFloat = 5.0
+            
+            static let leftMargin: CGFloat = 40.0
+            
+            static let arrowTopMargin: CGFloat = 3.0
+            static let arrowSize: CGFloat = 17.0
+        }
+        
+        enum Strings {
+            static let optionVCTitle = "Регион"
+        }
+    }
+}
