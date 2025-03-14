@@ -248,3 +248,11 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum CustomPasswordField {
+        enum Images {
+            static let show: UIImage? = UIImage(systemName: "eye")
+            static let hide: UIImage? = UIImage(systemName: "eye.slash")
+        }
+    }
+}
