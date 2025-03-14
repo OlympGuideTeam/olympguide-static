@@ -50,3 +50,10 @@ enum AllConstants {
     }
 }
 
+extension AllConstants {
+    enum AuthManager {
+        static let loginEndpoint: String = "/auth/login"
+        static let logoutEndpoint: String = "/auth/logout"
+        static let checkEndpoint: String = "/auth/check-session"
+    }
+}

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 class AuthManager : AuthManagerProtocol {
-    static let shared = AuthManager()
+    typealias Constants = AllConstants.AuthManager
     
 //    @InjectSingleton(defaultValue: NetworkService.shared)
 //    var networkService: NetworkServiceProtocol
@@ -43,7 +43,7 @@ class AuthManager : AuthManagerProtocol {
         ]
         
         networkService.request(
-            endpoint: "/auth/login",
+            endpoint: Constants.loginEndpoint,
             method: .post,
             queryItems: nil,
             body: body,
@@ -60,7 +60,7 @@ class AuthManager : AuthManagerProtocol {
     
     func checkSession() {
         networkService.request(
-            endpoint: "/auth/check-session",
+            endpoint: Constants.checkEndpoint,
             method: .get,
             queryItems: nil,
             body: nil,
@@ -77,7 +77,7 @@ class AuthManager : AuthManagerProtocol {
     
     func logout(completion: ((Result<BaseServerResponse, NetworkError>) -> Void)? = nil) {
         networkService.request(
-            endpoint: "/auth/logout",
+            endpoint: Constants.logoutEndpoint,
             method: .post,
             queryItems: nil,
             body: nil,
