@@ -136,3 +136,19 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum ProfileButtonTableViewCell {
+        enum Dimensions {
+            // actionButton
+            static let buttonRadius: CGFloat = 13.0
+            static let buttonBorderWidth: CGFloat = 2.0
+            static let buttonVerticalMargin: CGFloat = 8.0
+            static let buttonHeight: CGFloat = 54.0
+            
+            static let animationDuration: TimeInterval = 0.1
+            
+            static let buttonScale: CGFloat = 0.95
+        }
+    }
+}
+
