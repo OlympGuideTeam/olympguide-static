@@ -13,6 +13,7 @@ protocol OlympiadBusinessLogic {
     func setFavoriteStatus(_ status: Bool, to universityId: Int)
     func favoriteStatusAt(index: Int) -> Bool
     func universityModel(at index: Int) -> UniversityModel?
+    var isFavorite: Bool? { get set }
 }
 
 // MARK: - Data Store
@@ -25,11 +26,13 @@ protocol OlympiadDataStore {
 // MARK: - Presentation Logic
 protocol OlympiadPresentationLogic {
     func presentLoadUniversities(with response: Olympiad.LoadUniversities.Response)
+    func presentSetFavorite(to isFavorite: Bool)
 }
 
 // MARK: - Display Logic
 protocol OlympiadDisplayLogic: AnyObject {
     func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel)
+    func displaySetFavorite(to isFavorite: Bool)
 }
 
 // MARK: - Routing Logic

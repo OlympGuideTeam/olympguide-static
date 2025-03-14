@@ -5,16 +5,31 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
+import Foundation
+import Combine
+
 final class OlympiadInteractor : OlympiadDataStore {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     var presenter: (OlympiadPresentationLogic & BenefitsByProgramsPresentationLogic)?
     var worker: (OlympiadWorkerLogic & BenefitsByProgramsWorkerLogic)?
     var universities: [UniversityModel]?
     var allUniversities: [UniversityModel]?
     var programs: [[ProgramWithBenefitsModel]]?
+    var olympiadId: Int?
+    var isFavorite: Bool?
+    
+    init() {
+        setupOlympiadBindings()
+    }
 }
 
 extension OlympiadInteractor : OlympiadBusinessLogic {
     func loadUniversities(with request: Olympiad.LoadUniversities.Request) {
+        self.olympiadId = request.olympiadID
         worker?.fetchUniversities(
             for: request.olympiadID
         ) { [weak self] result in
@@ -69,6 +84,29 @@ extension OlympiadInteractor : BenefitsByProgramsBusinessLogic {
                 self?.presenter?.presentLoadBenefits(with: response)
             }
         }
+    }
+}
+
+extension OlympiadInteractor {
+    private func setupOlympiadBindings() {
+        favoritesManager.olympiadEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                guard olympiadId == event.id else { return }
+                switch event {
+                case .added:
+                    presenter?.presentSetFavorite(to: true)
+                case .removed:
+                    presenter?.presentSetFavorite(to: false)
+                case .error:
+                    guard let isFavorite = isFavorite else { return }
+                    presenter?.presentSetFavorite(to: isFavorite)
+                case .access(_, let isFavorite):
+                    self.isFavorite = isFavorite
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

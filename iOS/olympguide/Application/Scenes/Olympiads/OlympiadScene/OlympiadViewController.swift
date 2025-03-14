@@ -25,16 +25,17 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     private var cancellables = Set<AnyCancellable>()
     
     private let olympiad: OlympiadModel
-    private let informationStackView: UIStackView = UIStackView()
-    private let searchButton = UIClosureButton()
-    private let tableView: UITableView = UITableView()
+    private let informationStackView: InformationAboutOlympStack = InformationAboutOlympStack()
     
-    private var universities: [UniversityViewModel] = []
-    private var isExpanded: [Bool] = []
-    private var programs: [[ProgramWithBenefitsViewModel]] = []
+    private let tableView: UICustomTbleView = UICustomTbleView()
+    private let dataSource: OlympiadDataSource = OlympiadDataSource()
+    private let refreshControl: UIRefreshControl = UIRefreshControl()
+    
+    var universities: [UniversityViewModel] = []
+    var isExpanded: [Bool] = []
+    var programs: [[ProgramWithBenefitsViewModel]] = []
     
     private var isFavorite: Bool = false
-    private var startIsFavorite: Bool = false
     
     init(with olympiad: OlympiadModel) {
         self.olympiad = olympiad
@@ -53,7 +54,8 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
             olympiadId: olympiad.olympiadID,
             serverValue: olympiad.like
         )
-        startIsFavorite = isFavorite
+        interactor?.isFavorite = isFavorite
+        setupDataSource()
         setupFilterItems()
         configureUI()
         let request = Olympiad.LoadUniversities.Request(olympiadID: olympiad.olympiadID)
@@ -142,29 +144,20 @@ extension OlympiadViewController {
         view.backgroundColor = .white
         
         configureNavigationBar()
-        setupOlympiadBindings()
-        setupUniversityBindings()
         
-        configureInformatonStack()
-        configureOlympiadNameLabel()
-        configureOlympiadInformation()
-        configureProgramsLabel()
         setupFilterSortView()
-        configureFilterSortView()
+        configureInformatonStack()
         
+        configureRefreshControl()
         configureTableView()
-        
     }
     
     private func configureInformatonStack() {
-        view.addSubview(informationStackView)
-        informationStackView.axis = .vertical
-        informationStackView.spacing = 17
-        informationStackView.distribution = .fill
-        informationStackView.alignment = .leading
-        
-        informationStackView.isLayoutMarginsRelativeArrangement = true
-        informationStackView.layoutMargins = UIEdgeInsets(top: 15, left: 20, bottom: 0, right: 20)
+        informationStackView.configure(olympiad, filterSortView)
+        informationStackView.searchButtonAction = { [weak self] in
+            guard let self else { return }
+            router?.routeToSearch(olympiadId: olympiad.olympiadID)
+        }
     }
     
     private func configureNavigationBar() {
@@ -179,105 +172,11 @@ extension OlympiadViewController {
         navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
     
-    private func configureOlympiadInformation() {
-        let olympiadInformationStack = UIStackView()
-        
-        olympiadInformationStack.axis = .vertical
-        olympiadInformationStack.spacing = 7
-        olympiadInformationStack.distribution = .fill
-        olympiadInformationStack.alignment = .fill
-        
-        
-        
-        olympiadInformationStack.addArrangedSubview(configureLevelLabel())
-        olympiadInformationStack.addArrangedSubview(configureProfileLabel())
-        
-        informationStackView.addArrangedSubview(olympiadInformationStack)
-    }
-    
-    private func configureOlympiadNameLabel() {
-        let olympiadNameLabel: UILabel = UILabel()
-        //        olympiadNameLabel.font = FontManager.shared.font(for: .commonInformation)
-        olympiadNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
-        olympiadNameLabel.numberOfLines = 0
-        olympiadNameLabel.lineBreakMode = .byWordWrapping
-        olympiadNameLabel.text = olympiad.name
-        
-        let labelWight = view.frame.width - 40
-        olympiadNameLabel.calculateHeight(with: labelWight)
-        informationStackView.addArrangedSubview(olympiadNameLabel)
-    }
-    
-    private func configureLevelLabel() -> UILabel {
-        let levelLabel: UILabel = UILabel()
-        levelLabel.font = FontManager.shared.font(for: .additionalInformation)
-        levelLabel.textColor = UIColor(hex: "#787878")
-        levelLabel.text = "Уровень: \(String(repeating: "I", count: olympiad.level))"
-        
-        return levelLabel
-    }
-    
-    private func configureProfileLabel() -> UILabel {
-        let profileLabel: UILabel = UILabel()
-        profileLabel.font = FontManager.shared.font(for: .additionalInformation)
-        profileLabel.textColor = UIColor(hex: "#787878")
-        profileLabel.numberOfLines = 0
-        profileLabel.lineBreakMode = .byWordWrapping
-        profileLabel.text = "Профиль: \(olympiad.profile)"
-        let labelWight = view.frame.width - 40
-        profileLabel.calculateHeight(with: labelWight)
-        return profileLabel
-    }
-    
-    private func configureProgramsLabel() {
-        let programsLabel = UILabel()
-        
-        programsLabel.font = FontManager.shared.font(for: .tableTitle)
-        programsLabel.textColor = .black
-        programsLabel.text = "Программы"
-        informationStackView.addArrangedSubview(programsLabel)
-        
-        let searchButton = getSearchButton()
-        
-        searchButton.action = { [weak self] in
-            guard let self = self else { return }
-            self.router?.routeToSearch(olympiadId: olympiad.olympiadID)
-        }
-        informationStackView.addSubview(searchButton)
-        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
-        searchButton.pinCenterY(to: programsLabel)
-    }
-    
-    private func configureFilterSortView() {
-        informationStackView.pinToPrevious(13 + 31 + 5)
-        informationStackView.addArrangedSubview(UIView())
-        
-        informationStackView.addSubview(filterSortView)
-        filterSortView.pinLeft(to: informationStackView.leadingAnchor)
-        filterSortView.pinRight(to: informationStackView.trailingAnchor)
-        filterSortView.pinBottom(to: informationStackView.bottomAnchor, 5)
-    }
-    
-    private func getSearchButton() -> UIClosureButton {
-        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        searchButton.tintColor = .black
-        searchButton.contentHorizontalAlignment = .fill
-        searchButton.contentVerticalAlignment = .fill
-        searchButton.imageView?.contentMode = .scaleAspectFit
-        searchButton.isEnabled = false
-        
-        searchButton.setWidth(28)
-        searchButton.setHeight(28)
-        
-        return searchButton
-    }
-    
     private func configureTableView() {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-        
+                
         tableView.register(
             UIProgramWithBenefitsCell.self,
             forCellReuseIdentifier: UIProgramWithBenefitsCell.identifier
@@ -288,142 +187,58 @@ extension OlympiadViewController {
             forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
         )
         
-        tableView.dataSource = self
-        tableView.delegate = self
+        tableView.dataSource = dataSource
+        tableView.delegate = dataSource
         
-        tableView.backgroundColor = .white
-        tableView.separatorStyle = .none
-        //        tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
-        
-        informationStackView.setNeedsLayout()
-        informationStackView.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let fittingSize = informationStackView.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        
-        informationStackView.frame.size.height = fittingSize.height
-        
-        tableView.tableHeaderView = informationStackView
-        
-        if #available(iOS 15.0, *) {
-            tableView.sectionHeaderTopPadding = 0
+        tableView.refreshControl = refreshControl
+
+        tableView.addHeaderView(informationStackView)
+    }
+    
+    func configureRefreshControl() {
+        refreshControl.tintColor = .systemCyan
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+    
+    @objc private func handleRefresh() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self else { return }
+            loadPrograms()
+            self.refreshControl.endRefreshing()
         }
     }
 }
 
 // MARK: - UITableViewDataSource
-extension OlympiadViewController : UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return universities.count
+extension OlympiadViewController {
+    private func setupDataSource() {
+        dataSource.viewController = self
+        
+        dataSource.onProgramSelect = { [weak self] indexPath in
+            self?.router?.routeToProgram(indexPath: indexPath)
+        }
+        
+        dataSource.onSectionToggle = { [weak self] section in
+            self?.toggleSection(at: section)
+        }
+        
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int {
-        isExpanded[section] ? programs[section].count : 0
+    private func toggleSection(at index: Int) {
+        isExpanded[index].toggle()
+        
+        if isExpanded[index] {
+            let request = BenefitsByPrograms.Load.Request(
+                olympiadID: olympiad.olympiadID,
+                universityID: universities[index].universityID,
+                section: index,
+                params: selectedParams
+            )
+            interactor?.loadBenefits(with: request)
+        } else {
+            reloadSectionWithoutAnimation(index)
+        }
     }
-    
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
-        guard
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: UIProgramWithBenefitsCell.identifier
-            ) as? UIProgramWithBenefitsCell
-        else {
-            return UITableViewCell()
-        }
-        
-        cell.configure(with: programs[indexPath.section][indexPath.row], indexPath: indexPath)
-        for view in cell.benefitsStack.arrangedSubviews {
-            guard let subview = view as? BenefitStackView else { continue }
-            subview.createPreviewVC = { [weak self] indexPath, index in
-                guard let self = self else { return nil }
-                let program = self.programs[indexPath.section][indexPath.row]
-                let previewVC = BenefitViewController(with: program, index: index)
-                return previewVC
-            }
-        }
-        
-        cell.hideSeparator(indexPath.row == programs[indexPath.section].count - 1)
-        return cell
-    }
-}
-
-
-// MARK: - UITableViewDelegate
-extension OlympiadViewController : UITableViewDelegate {
-    func tableView(
-        _ tableView: UITableView,
-        viewForHeaderInSection section: Int
-    ) -> UIView? {
-        guard let headerView = tableView.dequeueReusableHeaderFooterView(
-            withIdentifier: UIUniversityHeader.identifier
-        ) as? UIUniversityHeader else {
-            return nil
-        }
-        
-        headerView.configure(
-            with: universities[section],
-            isExpanded: isExpanded[section]
-        )
-        
-        headerView.tag = section
-        
-        headerView.toggleSection = { [weak self] section in
-            guard let self = self else { return }
-            isExpanded[section].toggle()
-            
-            if isExpanded[section] {
-                let request = BenefitsByPrograms.Load.Request(
-                    olympiadID: olympiad.olympiadID,
-                    universityID: universities[section].universityID,
-                    section: section,
-                    params: selectedParams
-                )
-                interactor?.loadBenefits(with: request)
-            } else {
-                reloadSectionWithoutAnimation(section)
-            }
-        }
-        
-        headerView.favoriteButtonTapped = { [weak self] sender, isFavorite in
-            guard let self  else { return }
-            if isFavorite {
-                self.universities[section].like = true
-                guard
-                    let model = self.interactor?.universityModel(at: section)
-                else { return }
-                
-                favoritesManager.addUniversityToFavorites(model: model)
-                
-            } else {
-                self.universities[section].like = false
-                favoritesManager.removeUniversityFromFavorites(universityID: sender.tag)
-            }
-        }
-        
-        return headerView
-    }
-    
-    func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        router?.routeToProgram(indexPath: indexPath)
-    }
-    
 }
 
 // MARK: - OlympiadDisplayLogic
@@ -432,12 +247,16 @@ extension OlympiadViewController : OlympiadDisplayLogic {
         universities = viewModel.universities
         isExpanded = [Bool](repeating: false, count: universities.count)
         programs = [[ProgramWithBenefitsViewModel]] (repeating: [], count: universities.count)
-        searchButton.isEnabled = true
+        informationStackView.searchButton.isEnabled = true
         
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()
         }
-        
+    }
+    
+    func displaySetFavorite(to isFavorite: Bool) {
+        self.isFavorite = isFavorite
+        reloadFavoriteButton()
     }
 }
 
@@ -513,73 +332,5 @@ extension OlympiadViewController : Filterble {
 
 // MARK: - Combine
 extension OlympiadViewController {
-    private func setupOlympiadBindings() {
-        favoritesManager.olympiadEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self = self else { return }
-                switch event {
-                case .added(let model):
-                    if self.olympiad.olympiadID == model.olympiadID {
-                        self.isFavorite = true
-                    }
-                case .removed(let olympiadId):
-                    if self.olympiad.olympiadID == olympiadId {
-                        self.isFavorite = false
-                    }
-                case .error(let olympiadId):
-                    if self.olympiad.olympiadID == olympiadId {
-                        self.isFavorite = startIsFavorite
-                    }
-                case .access(let olympiadId, let isFavorite):
-                    if self.olympiad.olympiadID == olympiadId {
-                        self.startIsFavorite = isFavorite
-                    }
-                }
-                self.reloadFavoriteButton()
-            }
-            .store(in: &cancellables)
-    }
     
-    private func setupUniversityBindings() {
-        favoritesManager.universityEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self = self else { return }
-                switch event {
-                case .added(let updatedUniversity):
-                    if let index = self.universities.firstIndex(where: {
-                        $0.universityID == updatedUniversity.universityID
-                    }) {
-                        if self.universities[index].like == true { break }
-                        self.universities[index].like = true
-                        self.tableView.reloadSections(
-                            IndexSet(integer: index),
-                            with: .automatic
-                        )
-                    }
-                case .removed(let universityID):
-                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        if self.universities[index].like == false { break }
-                        self.universities[index].like = false
-                        self.tableView.reloadSections(
-                            IndexSet(integer: index),
-                            with: .automatic
-                        )
-                    }
-                case .error(let universityID):
-                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        if self.universities[index].like == self.interactor?.favoriteStatusAt(index: index) { break }
-                        self.universities[index].like = self.interactor?.favoriteStatusAt(index: index) ?? false
-                        self.tableView.reloadSections(
-                            IndexSet(integer: index),
-                            with: .automatic
-                        )
-                    }
-                case .access(let universityID, let isFavorite):
-                    self.interactor?.setFavoriteStatus(isFavorite, to: universityID)
-                }
-            }
-            .store(in: &cancellables)
-    }
 }
