@@ -48,6 +48,7 @@ final class ProgramByFieldSearchStrategy : SearchStrategy {
         
         cell.configure(with: viewMmodel)
         cell.hideSeparator(isSeparatorHidden)
+        cell.leftConstraint = 20
         return cell
     }
     

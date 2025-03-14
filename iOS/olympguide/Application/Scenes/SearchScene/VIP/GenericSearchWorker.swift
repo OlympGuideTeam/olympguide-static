@@ -10,11 +10,14 @@ import Foundation
 
 final class GenericSearchWorker<Strategy: SearchStrategy> {
     typealias ResponseType = Strategy.ResponseType
+    
     @InjectSingleton
     var networkService: NetworkServiceProtocol
+    
     private let strategy: Strategy
     private let transform: ([ResponseType]) -> [Strategy.ModelType]
     private let endpoint: String
+    
     init(
         strategy: Strategy,
         endpoint: String

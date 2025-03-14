@@ -31,8 +31,17 @@ final class OlympiadWithBenefitsSearchStrategy: SearchStrategy {
     }
     
     
-    func configureCell(tableView: UITableView, indexPath: IndexPath, viewMmodel: OlympiadWithBenefitViewModel, isSeparatorHidden: Bool) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: OlympiadTableViewCell.identifier, for: indexPath) as? OlympiadTableViewCell
+    func configureCell(
+        tableView: UITableView,
+        indexPath: IndexPath,
+        viewMmodel: OlympiadWithBenefitViewModel,
+        isSeparatorHidden: Bool
+    ) -> UITableViewCell {
+        guard
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: OlympiadTableViewCell.identifier,
+                for: indexPath
+            ) as? OlympiadTableViewCell
         else {
             return UITableViewCell()
         }
@@ -47,15 +56,21 @@ final class OlympiadWithBenefitsSearchStrategy: SearchStrategy {
         model.olympiadName
     }
     
-    func responseTypeToModel(_ response: [OlympiadWithBenefitsModel]) -> [OlympiadWithBenefitViewModel] {
+    func responseTypeToModel(
+        _ response: [OlympiadWithBenefitsModel]
+    ) -> [OlympiadWithBenefitViewModel] {
         response.flatMap { $0.toViewModel() }
     }
     
-    func modelToViewModel(_ model: [OlympiadWithBenefitViewModel]) -> [OlympiadWithBenefitViewModel] {
+    func modelToViewModel(
+        _ model: [OlympiadWithBenefitViewModel]
+    ) -> [OlympiadWithBenefitViewModel] {
         model
     }
     
-    func build(with model: OlympiadWithBenefitViewModel) -> (UIViewController?, PresentMethod?) {
+    func build(
+        with model: OlympiadWithBenefitViewModel
+    ) -> (UIViewController?, PresentMethod?) {
         (BenefitViewController(with: model), .present)
     }
 }

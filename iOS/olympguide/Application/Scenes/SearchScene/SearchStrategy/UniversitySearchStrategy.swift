@@ -11,7 +11,9 @@ final class UniversitySearchStrategy: SearchStrategy {
     typealias ModelType = UniversityModel
     typealias ViewModelType = UniversityViewModel
     typealias ResponseType = UniversityModel
+    
     static var searchTitle: String = "Поиск по ВУЗам"
+    
     func configureCell(
         tableView: UITableView,
         indexPath: IndexPath,

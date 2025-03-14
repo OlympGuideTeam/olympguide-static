@@ -5,21 +5,19 @@
 //  Created by Tom Tim on 01.01.2025.
 //
 
-import UIKit
-
 // MARK: - ViewController → Interactor
 protocol SearchBusinessLogic {
-    func textDidChange(request: Search.TextDidChange.Request)
+    func textDidChange(with request: Search.TextDidChange.Request)
 }
 
 // MARK: - Interactor → Presenter
 protocol SearchPresentationLogic {
-    func presentTextDidChange<ResponseModel>(response: Search.TextDidChange.Response<ResponseModel>)
+    func presentTextDidChange<ResponseModel>(with response: Search.TextDidChange.Response<ResponseModel>)
 }
 
 // MARK: - Presenter → ViewController
 protocol SearchDisplayLogic: AnyObject {
-    func displayTextDidChange<ViewModel>(viewModel: Search.TextDidChange.ViewModel<ViewModel>)
+    func displayTextDidChange<ViewModel>(with viewModel: Search.TextDidChange.ViewModel<ViewModel>)
 }
 
 // MARK: - Router Logic

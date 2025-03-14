@@ -9,8 +9,9 @@ import UIKit
 
 final class FieldSearchStrategy: SearchStrategy {
     typealias ModelType = GroupOfFieldsModel.FieldModel
-    typealias ViewModelType = GroupOfFieldsViewModel.FieldViewModel
+    typealias ViewModelType = FieldViewModel
     typealias ResponseType = GroupOfFieldsModel
+    
     static var searchTitle: String = "Поиск по направления"
     
     func endpoint() -> String {
@@ -25,25 +26,26 @@ final class FieldSearchStrategy: SearchStrategy {
     
     func registerCells(in tableView: UITableView) {
         tableView.register(
-            SecondFieldTableViewCell.self,
-            forCellReuseIdentifier: SecondFieldTableViewCell.identifier
+            FieldTableViewCell.self,
+            forCellReuseIdentifier: FieldTableViewCell.identifier
         )
     }
     
     func configureCell(
         tableView: UITableView,
         indexPath: IndexPath,
-        viewMmodel: GroupOfFieldsViewModel.FieldViewModel,
+        viewMmodel: FieldViewModel,
         isSeparatorHidden: Bool = false
     ) -> UITableViewCell {
-        let identifier = SecondFieldTableViewCell.identifier
+        let identifier = FieldTableViewCell.identifier
         guard
-            let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as? SecondFieldTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as? FieldTableViewCell
         else {
             fatalError("Could not dequeue cell with identifier: \(identifier)")
         }
         
         cell.configure(with: viewMmodel)
+        cell.leftConstraint = 20
         return cell
     }
     
@@ -53,9 +55,9 @@ final class FieldSearchStrategy: SearchStrategy {
     
     func modelToViewModel(
         _ model: [GroupOfFieldsModel.FieldModel]
-    ) -> [GroupOfFieldsViewModel.FieldViewModel] {
+    ) -> [FieldViewModel] {
         model.map { field in
-            GroupOfFieldsViewModel.FieldViewModel(
+            FieldViewModel(
                 name: field.name,
                 code: field.code
             )
@@ -63,7 +65,9 @@ final class FieldSearchStrategy: SearchStrategy {
     }
     
     func build(with model: GroupOfFieldsModel.FieldModel) -> (UIViewController?, PresentMethod?) {
-        (nil, nil)
+        let vc = FieldAssembly.build(for: model)
+        
+        return (vc, .push)
     }
     
     func responseTypeToModel(_ response: [GroupOfFieldsModel]) -> [GroupOfFieldsModel.FieldModel] {
