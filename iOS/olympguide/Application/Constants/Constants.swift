@@ -50,6 +50,22 @@ enum AllConstants {
     }
 }
 
+
+extension AllConstants {
+    enum UIUniversityView {
+        enum Dimensions {
+            static let imageSize: CGFloat = 80.0
+            static let itemsSpacing: CGFloat = 15.0
+            
+            static let nameLabelTopMargin: CGFloat = 5.0
+            
+            static let buttonTopMargin: CGFloat = 5.0
+            
+            static let arrowImageSize: CGFloat = 17.0
+        }
+    }
+}
+
 extension AllConstants {
     enum AuthManager {
         static let loginEndpoint: String = "/auth/login"

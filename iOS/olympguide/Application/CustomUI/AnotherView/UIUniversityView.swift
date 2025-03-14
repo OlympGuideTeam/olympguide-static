@@ -9,6 +9,9 @@ import UIKit
 import Combine
 
 final class UIUniversityView: UIView {
+    typealias Constants = AllConstants.UIUniversityView.Dimensions
+    typealias Common = AllConstants.Common
+    
     private let logoImageView = UIImageViewWithShimmer(frame: .zero)
     private let nameLabel = UILabel()
     private let regionLabel = UILabel()
@@ -34,8 +37,8 @@ final class UIUniversityView: UIView {
     var isExpanded: Bool = false {
         didSet {
             arrowImageView.image = isExpanded ?
-                UIImage(systemName: "chevron.up") :
-                UIImage(systemName: "chevron.down")
+                Common.Images.openedSection :
+                Common.Images.closedSection
         }
     }
     
@@ -45,7 +48,7 @@ final class UIUniversityView: UIView {
         button.contentHorizontalAlignment = .fill
         button.contentVerticalAlignment = .fill
         button.imageView?.contentMode = .scaleAspectFit
-        button.setImage(UIImage(systemName: "bookmark"), for: .normal)
+        button.setImage(Common.Images.unlike, for: .normal)
         return button
     }()
     
@@ -76,30 +79,33 @@ final class UIUniversityView: UIView {
         nameLabel.lineBreakMode = .byWordWrapping
         
         regionLabel.font = FontManager.shared.font(for: .region)
-        regionLabel.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
+        regionLabel.textColor = Common.Colors.additionalText
                 
         logoImageView.pinLeft(to: self.leadingAnchor)
         logoImageView.pinTop(to: self.topAnchor)
-        logoImageView.setWidth(80)
-        logoImageView.setHeight(80)
+        logoImageView.setWidth(Constants.imageSize)
+        logoImageView.setHeight(Constants.imageSize)
         
         regionLabel.pinTop(to: self.topAnchor)
-        regionLabel.pinLeft(to: logoImageView.trailingAnchor, 15)
+        regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.itemsSpacing)
         regionLabel.pinRight(to: self.trailingAnchor)
         
-        nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
-        nameLabel.pinLeft(to: logoImageView.trailingAnchor, 15)
-        nameLabel.pinRight(to: self.trailingAnchor, 37)
+        nameLabel.pinTop(to: regionLabel.bottomAnchor, Constants.nameLabelTopMargin)
+        nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.itemsSpacing)
+        nameLabel.pinRight(
+            to: self.trailingAnchor,
+            Constants.itemsSpacing + Common.Dimensions.favoriteButtonSize
+        )
         
-        favoriteButton.pinTop(to: regionLabel.bottomAnchor, 5)
+        favoriteButton.pinTop(to: regionLabel.bottomAnchor, Constants.buttonTopMargin)
         favoriteButton.pinRight(to: self.trailingAnchor)
-        favoriteButton.setWidth(22)
-        favoriteButton.setHeight(22)
+        favoriteButton.setWidth(Common.Dimensions.favoriteButtonSize)
+        favoriteButton.setHeight(Common.Dimensions.favoriteButtonSize)
         
         arrowImageView.contentMode = .scaleAspectFit
         arrowImageView.tintColor = .black
-        arrowImageView.setWidth(17)
-        arrowImageView.pinTop(to: regionLabel.bottomAnchor, 5)
+        arrowImageView.setWidth(Constants.arrowImageSize)
+        arrowImageView.pinTop(to: regionLabel.bottomAnchor, Constants.buttonTopMargin)
         arrowImageView.pinRight(to: self.trailingAnchor)
         arrowImageView.isHidden = true
         
@@ -113,8 +119,8 @@ final class UIUniversityView: UIView {
         _ right: CGFloat = 15.0
     ) {
         let isFavorite = viewModel.like
-        let newImageName = isFavorite ? "bookmark.fill" : "bookmark"
-        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        let newImage = isFavorite ? Common.Images.like : Common.Images.unlike
+        favoriteButton.setImage(newImage, for: .normal)
         nameLabel.text = viewModel.name
         regionLabel.text = viewModel.region
         logoImageView.startShimmer()
@@ -123,7 +129,10 @@ final class UIUniversityView: UIView {
             self.logoImageView.stopShimmer()
             self.logoImageView.image = image
         }
-        nameLabel.calculateHeight(with: UIScreen.main.bounds.width - left - right - 80 - 37 - 15)
+        nameLabel.calculateHeight(
+            with: UIScreen.main.bounds.width - left - right
+            - Constants.imageSize - Common.Dimensions.favoriteButtonSize - 2 * Constants.itemsSpacing
+        )
         if !arrowIsHidden {
             favoriteButton.isHidden = true
         } else {
