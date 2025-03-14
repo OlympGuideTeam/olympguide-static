@@ -39,7 +39,11 @@ final class UIInformationLabel: UILabel {
         )
         
         let textColor = UIColor.black.withAlphaComponent(0.53)
-        attributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: fullText.count))
+        attributedString.addAttribute(
+            .foregroundColor,
+            value: textColor,
+            range: NSRange(location: 0, length: fullText.count)
+        )
         
         attributedString.addAttribute(
             .font,
