@@ -11,7 +11,7 @@ extension UIStackView {
     func configure(
         with code: String,
         and name: String,
-        width: CGFloat = UIScreen.main.bounds.width - 129
+        width: CGFloat? = UIScreen.main.bounds.width - 129
     ) {
         self.axis = .horizontal
         self.alignment = .top
@@ -33,19 +33,22 @@ extension UIStackView {
             self.addArrangedSubview(label)
         }
         
-        let spaceLabel1 = UILabel()
-        spaceLabel1.setWidth(4)
-        let spaceLabel2 = UILabel()
-        spaceLabel2.setWidth(2)
-        self.addArrangedSubview(spaceLabel1)
-        let dashLabel = UILabel()
-        dashLabel.text = "-"
-        dashLabel.font = FontManager.shared.font(for: .commonInformation)
-        dashLabel.textColor = .black
-        dashLabel.textAlignment = .center
-        dashLabel.setWidth(11)
-        self.addArrangedSubview(dashLabel)
-        self.addArrangedSubview(spaceLabel2)
+        if code.count > 0 {
+            
+            let spaceLabel1 = UILabel()
+            spaceLabel1.setWidth(4)
+            let spaceLabel2 = UILabel()
+            spaceLabel2.setWidth(2)
+            self.addArrangedSubview(spaceLabel1)
+            let dashLabel = UILabel()
+            dashLabel.text = "-"
+            dashLabel.font = FontManager.shared.font(for: .commonInformation)
+            dashLabel.textColor = .black
+            dashLabel.textAlignment = .center
+            dashLabel.setWidth(11)
+            self.addArrangedSubview(dashLabel)
+            self.addArrangedSubview(spaceLabel2)
+        }
         
         let nameLabel = UILabel()
         nameLabel.text = name
