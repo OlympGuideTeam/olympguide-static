@@ -8,18 +8,20 @@
 import UIKit
 
 final class OlympiadsPresenter: OlympiadsPresentationLogic {
-    
-    weak var viewController: OlympiadsDisplayLogic?
+    weak var viewController: (OlympiadsDisplayLogic & UIViewController)?
 
-    func presentOlympiads(_ response: Olympiads.Load.Response) {
-        
-        let viewModels = response.olympiads.map { $0.toViewModel() }
+    func presentLoadOlympiads(with response: Olympiads.Load.Response) {
+        if let error = response.error {
+            viewController?.showAlert(with: error.localizedDescription)
+        }
+        guard let olympiads = response.olympiads else { return }
+        let viewModels = olympiads.map { $0.toViewModel() }
         
         let viewModel = Olympiads.Load.ViewModel(olympiads: viewModels)
-        viewController?.displayOlympiads(viewModel)
+        viewController?.displayOlympiads(with: viewModel)
     }
-
-    func presentError(message: String) {
-        viewController?.displayError(message: message)
+    
+    func presentSetFavorite(at index: Int, _ isFavorite: Bool) {
+        viewController?.displaySetFavorite(at: index, isFavorite)
     }
 }

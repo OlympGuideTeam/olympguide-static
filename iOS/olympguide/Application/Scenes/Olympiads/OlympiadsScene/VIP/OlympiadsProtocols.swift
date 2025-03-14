@@ -8,20 +8,18 @@
 import Foundation
 
 protocol OlympiadsBusinessLogic {
-    func loadOlympiads(_ request: Olympiads.Load.Request)
-    func favoriteStatus(at index: Int) -> Bool
+    func loadOlympiads(with request: Olympiads.Load.Request)
     func olympiadModel(at index: Int) -> OlympiadModel
-    func setFavoriteStatus(at index: Int, to isFavorite: Bool)
 }
 
 protocol OlympiadsPresentationLogic {
-    func presentOlympiads(_ response: Olympiads.Load.Response)
-    func presentError(message: String)
+    func presentLoadOlympiads(with response: Olympiads.Load.Response)
+    func presentSetFavorite(at index: Int, _ isFavorite: Bool)
 }
 
 protocol OlympiadsDisplayLogic: AnyObject {
-    func displayOlympiads(_ viewModel: Olympiads.Load.ViewModel)
-    func displayError(message: String)
+    func displayOlympiads(with viewModel: Olympiads.Load.ViewModel)
+    func displaySetFavorite(at index: Int, _ isFavorite: Bool)
 }
 
 protocol OlympiadsRoutingLogic {
