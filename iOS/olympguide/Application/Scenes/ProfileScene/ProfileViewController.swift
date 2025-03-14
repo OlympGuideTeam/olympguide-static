@@ -50,7 +50,7 @@ class ProfileViewController: UIViewController {
         "Избранные ВУЗы",
         "Избранные программы",
         "Избранные олимпиады",
-        "Тема приложения",
+//        "Тема приложения",
         "О нас"
     ]
     
@@ -133,19 +133,33 @@ extension ProfileViewController : UITableViewDataSource {
         if !authManager.isAuthenticated {
             if indexPath.row == 0 {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Зарегистрироваться", borderColor: UIColor(hex: "#FF2D55"), textColor: .black)
-                cell.actionButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
+                cell.configure(
+                    title: "Зарегистрироваться",
+                    borderColor: UIColor(hex: "#FF2D55"),
+                    textColor: .black
+                )
+                cell.actionButton.addTarget(
+                    self,
+                    action: #selector(registerButtonTapped),
+                    for: .touchUpInside
+                )
                 return cell
             } else if indexPath.row == 1 {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Войти", borderColor: UIColor(hex: "#32ADE6"), textColor: .black)
-                cell.actionButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+                cell.configure(
+                    title: "Войти",
+                    borderColor: UIColor(hex: "#32ADE6"),
+                    textColor: .black
+                )
+                cell.actionButton.addTarget(
+                    self,
+                    action: #selector(loginButtonTapped),
+                    for: .touchUpInside
+                )
                 return cell
             } else {
                 let cell = ProfileTableViewCell()
                 cell.configure(title: nonAuthLabels[indexPath.row - 2])
-                print(indexPath.row)
-                print(nonAuthLabels.count)
                 cell.hideSeparator(indexPath.row == nonAuthLabels.count + 2 - 1)
                 return cell
             }
@@ -159,8 +173,16 @@ extension ProfileViewController : UITableViewDataSource {
             }
             else {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55"), textColor: .black)
-                cell.actionButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
+                cell.configure(
+                    title: "Выйти",
+                    borderColor: UIColor(hex: "#FF2D55"),
+                    textColor: .black
+                )
+                cell.actionButton.addTarget(
+                    self,
+                    action: #selector(logoutButtonTapped),
+                    for: .touchUpInside
+                )
                 return cell
             }
         }
