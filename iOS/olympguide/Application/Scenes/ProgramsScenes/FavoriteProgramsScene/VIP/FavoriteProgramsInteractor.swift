@@ -6,10 +6,13 @@
 //
 
 import Foundation
+import Combine
 
-final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteProgramsDataStore {
+final class FavoriteProgramsInteractor: FavoriteProgramsDataStore {
     @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
+    private var cancellables = Set<AnyCancellable>()
+
     
     var programs: [ProgramsByUniversityModel] = []
     var removedPrograms: [Int: (UniversityModel, ProgramShortModel)] = [:]
@@ -17,7 +20,12 @@ final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteP
     var presenter: FavoriteProgramsPresentationLogic?
     var worker: FavoriteProgramsWorkerLogic?
     
-    
+    init() {
+        setupBindings()
+    }
+}
+
+extension FavoriteProgramsInteractor : FavoriteProgramsBusinessLogic {
     func loadPrograms(with request: FavoritePrograms.Load.Request) {
         worker?.fetchPrograms() { [weak self] result in
             switch result {
@@ -33,20 +41,45 @@ final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteP
             }
         }
     }
+}
+
+extension FavoriteProgramsInteractor {
+    func setupBindings() {
+        favoritesManager.programEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let univer, let program):
+                    likeProgram(univer, program)
+                case .removed(let programID):
+                    guard let indexPath = self.findIndexPath(programID: programID) else { return }
+                    dislikeProgram(at: indexPath)
+                    presenter?.presentSetFavorite(at: indexPath)
+                case .error(let programID):
+                    handleBatchError(programID: programID)
+                case .access(let programID, let isFavorite):
+                    handleBatchSuccess(programID: programID, isFavorite: isFavorite)
+                }
+            }.store(in: &cancellables)
+    }
     
     func likeProgram(_ univer: UniversityModel, _ program: ProgramShortModel) {
+        var updateProgram = program
+        updateProgram.like = true
+        guard findIndexPath(programID: updateProgram.programID) == nil else { return }
         if let insertSection = programs.firstIndex(where: { $0.univer.universityID == univer.universityID}) {
-            let insertRaw = programs[insertSection].programs.firstIndex(where: { $0.programID > program.programID}) ?? programs[insertSection].programs.count
-            programs[insertSection].programs.insert(program, at: insertRaw)
+            let insertRaw = programs[insertSection].programs.firstIndex(where: { $0.programID > updateProgram.programID}) ?? programs[insertSection].programs.count
+            programs[insertSection].programs.insert(updateProgram, at: insertRaw)
         } else {
             let insertSection = programs.firstIndex { $0.univer.universityID > univer.universityID} ?? self.programs.count
             let newElement = ProgramsByUniversityModel(
                 univer: univer,
-                programs: [program]
+                programs: [updateProgram]
             )
             programs.insert(newElement, at: insertSection)
         }
-        removedPrograms[program.programID] = nil
+        removedPrograms[updateProgram.programID] = nil
         
         let response = FavoritePrograms.Load.Response(programs: programs)
         presenter?.presentLoadPrograms(with: response)
@@ -99,10 +132,6 @@ final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteP
         if !isFavorite {
             removedPrograms[programID] = nil
         }
-    }
-    
-    func restoreFavorite(at indexPath: IndexPath) -> Bool {
-        programs[indexPath.section].programs[indexPath.row].like
     }
     
     func isFavorite(programID: Int, serverValue: Bool) -> Bool {

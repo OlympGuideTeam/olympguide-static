@@ -22,4 +22,8 @@ final class FavoriteProgramsPresenter : FavoriteProgramsPresentationLogic {
         let viewModel = FavoritePrograms.Load.ViewModel(programs: viewPrograms)
         viewController?.displayLoadProgramsResult(with: viewModel)
     }
+    
+    func presentSetFavorite(at indexPath: IndexPath) {
+        viewController?.displaySetFavoriteResult(at: indexPath)
+    }
 }
