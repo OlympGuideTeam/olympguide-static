@@ -73,3 +73,20 @@ extension AllConstants {
         static let checkEndpoint: String = "/auth/check-session"
     }
 }
+
+extension AllConstants {
+    enum FieldTableViewCell {
+        enum Dimensions {
+            static let interItemSpacing: CGFloat = 15
+            static let favoriteButtonSize: CGFloat = 22
+            
+            static let leadingMargin: CGFloat = 40.0
+            static let topMargin: CGFloat = 5.0
+            static let bottomMargin: CGFloat = 5.0
+        }
+        
+        enum Images {
+            static let placeholder: UIImage? = UIImage(systemName: "photo")
+        }
+    }
+}
