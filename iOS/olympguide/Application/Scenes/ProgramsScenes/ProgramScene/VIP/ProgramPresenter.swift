@@ -24,21 +24,14 @@ extension ProgramPresenter : ProgramPresentationLogic {
         
         guard let program = response.program else { return }
         
-        let programModel = ProgramShortModel(
-            programID: program.programID,
-            name: program.name,
-            field: program.field,
-            budgetPlaces: program.budgetPlaces,
-            paidPlaces: program.paidPlaces,
-            cost: program.cost,
-            requiredSubjects: program.requiredSubjects,
-            optionalSubjects: program.optionalSubjects,
-            like: program.like,
-            link: program.link ?? ""
-        )
+        let programModel = program.toShortModel()
         
         let viewModel = Program.Load.ViewModel(program: programModel)
         viewController?.displayLoadProgram(with: viewModel)
+    }
+    
+    func presentSetFavorite(to isFavorite: Bool) {
+        viewController?.displaySetFavorite(to: isFavorite)
     }
 }
 
@@ -51,19 +44,8 @@ extension ProgramPresenter : BenefitsByOlympiadsPresentationLogic {
         
         guard let olympiads = response.olympiads else { return }
         
-        let benefits = olympiads.flatMap { model in
-            model.benefits.map { benefit in
-                OlympiadWithBenefitViewModel(
-                    olympiadName: model.olympiad.name,
-                    olympiadLevel: model.olympiad.level,
-                    olympiadProfile: model.olympiad.profile,
-                    minClass: benefit.minClass,
-                    minDiplomaLevel: benefit.minDiplomaLevel,
-                    isBVI: benefit.isBVI,
-                    confirmationSubjects: benefit.confirmationSubjects,
-                    fullScoreSubjects: benefit.fullScoreSubjects
-                )
-            }
+        let benefits = olympiads.flatMap {
+            $0.toViewModel()
         }
         
         let viewModel = BenefitsByOlympiads.Load.ViewModel(benefits: benefits)

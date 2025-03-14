@@ -14,19 +14,11 @@ enum Programs {
         }
         
         struct Response {
-            let groupsOfPrograms: [GroupOfProgramsModel]?
-            let error: Error?
+            var groupsOfPrograms: [GroupOfProgramsModel]? = nil
+            var error: Error? = nil
         }
         
         struct ViewModel {
-            struct GroupOfProgramsViewModel {
-                let name: String
-                let code: String
-                var isExpanded: Bool = false
-                
-                var programs: [ProgramViewModel]
-            }
-            
             let groupsOfPrograms: [GroupOfProgramsViewModel]
         }
     }
