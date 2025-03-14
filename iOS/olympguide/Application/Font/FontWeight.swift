@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum FontWeight: String {
+enum FontWeight : String {
     case bold = "Bold"
     case light = "Light"
     case medium = "Medium"
@@ -15,7 +15,7 @@ enum FontWeight: String {
     case semiBold = "SemiBold"
     case thin = "Thin"
     
-    var systemWeight: UIFont.Weight {
+    var systemWeight : UIFont.Weight {
         switch self {
         case .regular:
             return .regular
