@@ -225,3 +225,17 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum CustomDatePicker {
+        enum Dimensions {
+            static let userAge: Int = 16
+            
+            static let startMonth: Int = 1
+            static let startDay: Int = 1
+        }
+        
+        enum Strings {
+            static let dateFormat: String = "dd.MM.yyyy"
+        }
+    }
+}
