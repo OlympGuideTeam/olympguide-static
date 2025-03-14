@@ -207,3 +207,21 @@ extension AllConstants {
         }
     }
 }
+
+extension AllConstants {
+    enum UniversityTableViewCell {
+        enum Dimensions {
+            // universityView
+            static let universityTopMargin: CGFloat = 30.0
+            
+            // separatorLine
+            static let separatorTopMargin: CGFloat = 20.0
+            
+            // shimmerLayer
+            static let shimmerHeight: CGFloat = 75.0
+            static let shimmerRadius: CGFloat = 13.0
+            static let shimmerVerticalMargin: CGFloat = 10.0
+        }
+    }
+}
+

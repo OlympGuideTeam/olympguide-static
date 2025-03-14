@@ -7,60 +7,25 @@
 
 import UIKit
 
-// MARK: - Constants
-fileprivate enum Constants {
-    enum Identifier {
-        static let cellIdentifier = "UniversityTableViewCell"
-    }
-    
-    enum Images {
-        static let bookmark = "bookmark"
-        static let bookmarkFill = "bookmark.fill"
-        static let placeholder = "photo"
-    }
-    
-    enum Colors {
-        static let separatorColor = UIColor(hex: "#E7E7E7")
-        static let regionTextColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
-    }
-    
-    enum Fonts {
-        static let nameLabelFont = FontManager.shared.font(for: .commonInformation)
-        static let regionLabelFont = FontManager.shared.font(for: .region)
-    }
-    
-    enum Dimensions {
-        static let logoTopMargin: CGFloat = 30
-        static let logoLeftMargin: CGFloat = 15
-        static let logoSize: CGFloat = 80
-        static let interItemSpacing: CGFloat = 15
-        static let nameLabelBottomMargin: CGFloat = 20
-        static let favoriteButtonSize: CGFloat = 22
-        static let separatorHeight: CGFloat = 1
-        static let separatorHorizontalInset: CGFloat = 20
-    }
-}
-
 class UniversityTableViewCell: UITableViewCell {
+    typealias Constants = AllConstants.UniversityTableViewCell.Dimensions
+    typealias Common = AllConstants.Common
+    
     var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
     
     // MARK: - Variables
-    static let identifier = Constants.Identifier.cellIdentifier
+    static let identifier = "UniversityTableViewCell"
     
     private let universityView: UIUniversityView = UIUniversityView()
     
     private let shimmerLayer: UIShimmerView = UIShimmerView()
     
-    private let separatorLine: UIView = {
-        let view = UIView()
-        view.backgroundColor = Constants.Colors.separatorColor
-        return view
-    }()
+    private let separatorLine: UIView = UIView()
     
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
+        configureUI()
     }
     
     @available(*, unavailable)
@@ -69,30 +34,46 @@ class UniversityTableViewCell: UITableViewCell {
     }
     
     // MARK: - Private funcs
-    private func setupUI() {
+    private func configureUI() {
+        configureUniversityView()
+        configureSeparatorLine()
+        configureShimmerLayer()
+    }
+    
+    private func configureUniversityView() {
         contentView.addSubview(universityView)
+        universityView.favoriteButton.addTarget(
+            self,
+            action: #selector(favoriteButtonTapped(_:)),
+            for: .touchUpInside
+        )
+        
+        universityView.pinTop(to: contentView.topAnchor, Constants.universityTopMargin)
+        universityView.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        universityView.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+    }
+    
+    private func configureSeparatorLine() {
         contentView.addSubview(separatorLine)
+        
+        separatorLine.backgroundColor = Common.Colors.separator
+
+        separatorLine.pinTop(to: universityView.bottomAnchor, Constants.separatorTopMargin)
+        separatorLine.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        separatorLine.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+        separatorLine.pinBottom(to: contentView.bottomAnchor)
+        separatorLine.setHeight(Common.Dimensions.separatorHeight)
+    }
+    
+    private func configureShimmerLayer() {
         contentView.addSubview(shimmerLayer)
         
-        
-        universityView.favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
-        
-        universityView.pinTop(to: contentView.topAnchor, 30)
-        universityView.pinLeft(to: contentView.leadingAnchor, 15)
-        universityView.pinRight(to: contentView.trailingAnchor, 15)
-        
-        separatorLine.pinTop(to: universityView.bottomAnchor, 20)
-        separatorLine.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.separatorHorizontalInset)
-        separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorHorizontalInset)
-        separatorLine.pinBottom(to: contentView.bottomAnchor)
-        separatorLine.setHeight(Constants.Dimensions.separatorHeight)
-        
-        shimmerLayer.pinTop(to: contentView.topAnchor, 10)
-        shimmerLayer.pinLeft(to: contentView.leadingAnchor, 20)
-        shimmerLayer.pinRight(to: contentView.trailingAnchor, 20)
-        shimmerLayer.pinBottom(to: contentView.bottomAnchor, 10)
-        shimmerLayer.setHeight(75)
-        shimmerLayer.layer.cornerRadius = 13
+        shimmerLayer.pinTop(to: contentView.topAnchor, Constants.shimmerVerticalMargin)
+        shimmerLayer.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        shimmerLayer.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+        shimmerLayer.pinBottom(to: contentView.bottomAnchor, Constants.shimmerVerticalMargin)
+        shimmerLayer.setHeight(Constants.shimmerHeight)
+        shimmerLayer.layer.cornerRadius = Constants.shimmerRadius
     }
     
     // MARK: - Methods
@@ -128,9 +109,9 @@ class UniversityTableViewCell: UITableViewCell {
     
     // MARK: - Objc funcs
     @objc private func favoriteButtonTapped(_ sender: UIButton) {
-        let isFavorite = universityView.favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
-        let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
-        universityView.favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        let isFavorite = universityView.favoriteButton.image(for: .normal) == Common.Images.like
+        let newImage = isFavorite ? Common.Images.unlike : Common.Images.like
+        universityView.favoriteButton.setImage(newImage, for: .normal)
         favoriteButtonTapped?(sender, !isFavorite)
     }
 }
