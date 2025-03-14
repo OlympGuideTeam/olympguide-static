@@ -6,8 +6,13 @@
 //
 
 import Combine
+import Foundation
 
 final class FavoritesManager: ObservableObject, FavoritesManagerProtocol {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    private var cancellables = Set<AnyCancellable>()
+    
     static let shared = FavoritesManager()
     
     @Published private(set) var likedUniversities: Set<Int> = []
@@ -28,6 +33,19 @@ final class FavoritesManager: ObservableObject, FavoritesManagerProtocol {
         case removed(Int)
         case error(Int)
         case access(Int, Bool)
+        
+        var id: Int {
+            switch self {
+            case .added(let university):
+                return university.universityID
+            case .removed(let id):
+                return id
+            case .error(let id):
+                return id
+            case .access(let id, _):
+                return id
+            }
+        }
     }
     
     enum ProgramFavoriteEvent {
@@ -35,6 +53,19 @@ final class FavoritesManager: ObservableObject, FavoritesManagerProtocol {
         case removed(Int)
         case error(Int)
         case access(Int, Bool)
+        
+        var programId: Int {
+            switch self {
+            case .added(_, let program):
+                return program.programID
+            case .removed(let id):
+                return id
+            case .error(let id):
+                return id
+            case .access(let id, _):
+                return id
+            }
+        }
     }
     
     enum OlympiadFavoriteEvent {
@@ -42,6 +73,19 @@ final class FavoritesManager: ObservableObject, FavoritesManagerProtocol {
         case removed(Int)
         case error(Int)
         case access(Int, Bool)
+        
+        var id: Int {
+            switch self {
+            case .added(let olympiad):
+                return olympiad.olympiadID
+            case .removed(let id):
+                return id
+            case .error(let id):
+                return id
+            case .access(let id, _):
+                return id
+            }
+        }
     }
     
     enum Subject {
@@ -182,5 +226,21 @@ extension FavoritesManager {
             return true
         }
         return serverValue
+    }
+}
+
+extension FavoritesManager {
+    private func setupBindings() {
+        authManager.isAuthenticatedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuth in
+                self?.likedUniversities.removeAll()
+                self?.unlikedUniversities.removeAll()
+                self?.likedPrograms.removeAll()
+                self?.unlikedPrograms.removeAll()
+                self?.likedOlympiads.removeAll()
+                self?.unlikedOlympiads.removeAll()
+            }
+            .store(in: &cancellables)
     }
 }
