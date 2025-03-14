@@ -17,4 +17,15 @@ struct GroupOfProgramsModel : Codable {
         case groupID = "group_id"
         case name, code, programs
     }
+    
+    func toViewModel() -> GroupOfProgramsViewModel {
+        GroupOfProgramsViewModel(
+            field: FieldViewModel(
+                name: name,
+                code: code ?? ""),
+            programs: programs.map {
+                $0.toViewModel()
+            }
+        )
+    }
 }
