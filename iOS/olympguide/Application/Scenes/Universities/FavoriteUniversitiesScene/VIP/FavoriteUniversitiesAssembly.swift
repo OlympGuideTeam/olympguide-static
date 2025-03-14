@@ -10,7 +10,7 @@ import UIKit
 final class FavoriteUniversitiesAssembly {
     static func build() -> UIViewController {
         let viewController = FavoriteUniversitiesViewController()
-        let interactor = UniversitiesInteractor()
+        let interactor = FavoriteUniversitiesInteractor()
         let presenter = UniversitiesPresenter()
         let router = UniversitiesRouter()
         let worker = FavoriteUniversitiesWorker()
@@ -20,6 +20,7 @@ final class FavoriteUniversitiesAssembly {
         interactor.presenter = presenter
         presenter.viewController = viewController
         router.viewController = viewController
+        router.dataStore = interactor
         interactor.worker = worker
         
         return viewController
