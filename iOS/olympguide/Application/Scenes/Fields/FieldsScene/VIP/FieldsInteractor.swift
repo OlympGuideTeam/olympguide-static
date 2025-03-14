@@ -11,7 +11,7 @@ final class FieldsInteractor: FieldsBusinessLogic, FieldsDataStore {
     var worker: FieldsWorker = FieldsWorker()
     var groupsOfFields: [GroupOfFieldsModel] = []
 
-    func loadFields(_ request: Fields.Load.Request) {
+    func loadFields(with request: Fields.Load.Request) {
         let params: [Param] = request.params.flatMap { key, value in
             value.array
         }
@@ -23,9 +23,10 @@ final class FieldsInteractor: FieldsBusinessLogic, FieldsDataStore {
             case .success(let groupsOfFields):
                 self?.groupsOfFields = groupsOfFields
                 let response = Fields.Load.Response(groupsOfFields: groupsOfFields)
-                self?.presenter?.presentFields(response: response)
+                self?.presenter?.presentFields(with: response)
             case .failure(let error):
-                self?.presenter?.presentError(message: error.localizedDescription)
+                let response = Fields.Load.Response(error: error)
+                self?.presenter?.presentFields(with: response)
             }
         }
     }

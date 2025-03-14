@@ -15,7 +15,8 @@ enum Fields {
         }
         
         struct Response {
-            let groupsOfFields: [GroupOfFieldsModel]
+            var groupsOfFields: [GroupOfFieldsModel]? = nil
+            var error: Error? = nil
         }
         
         struct ViewModel {

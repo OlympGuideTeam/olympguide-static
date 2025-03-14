@@ -38,36 +38,23 @@ fileprivate enum Constants {
 }
 
 class FieldsViewController: UIViewController, WithSearchButton {
+    
     // MARK: - VIP
     var interactor: (FieldsDataStore & FieldsBusinessLogic)?
     var router: FieldsRoutingLogic?
     
     var filterItems: [FilterItem] = []
     
-    var fieldItems: [FieldItem] {
-        var result: [FieldItem] = []
-        for (groupIndex, group) in fields.enumerated() {
-            result.append(.header(group))
-            if group.isExpanded {
-                for (fieldIndex, dubField) in group.fields.enumerated() {
-                    autoreleasepool {
-                        let indexPath = IndexPath(row: fieldIndex, section: groupIndex)
-                        result.append(.field(dubField, indexPath))
-                    }
-                }
-            }
-        }
-        return result
-    }
     private var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
     // MARK: - Variables
-    private let tableView = UITableView()
+    private let tableView: UICustomTbleView = UICustomTbleView()
+    private let dataSource: FieldsDataSource = FieldsDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     lazy var filterSortView: FilterSortView = FilterSortView()
     
-    private var fields: [GroupOfFieldsViewModel] = []
+    var fields: [GroupOfFieldsViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -75,7 +62,7 @@ class FieldsViewController: UIViewController, WithSearchButton {
         setupFilterItems()
         configureUI()
         loadFields()
-        
+        setupDataSource()
         let backItem = UIBarButtonItem(
             title: Constants.Strings.backButtonTitle,
             style: .plain,
@@ -91,7 +78,7 @@ class FieldsViewController: UIViewController, WithSearchButton {
     
     private func loadFields() {
         let request = Fields.Load.Request(params: selectedParams)
-        interactor?.loadFields(request)
+        interactor?.loadFields(with: request)
     }
     
     private func setupFilterItems() {
@@ -113,15 +100,10 @@ class FieldsViewController: UIViewController, WithSearchButton {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
     }
-    
-    func displayError(message: String) {
-        print("Error: \(message)")
-    }
 }
 
 // MARK: - UI Configuration
 extension FieldsViewController {
-    
     private func configureUI() {
         configureNavigationBar()
         configureRefreshControl()
@@ -144,17 +126,10 @@ extension FieldsViewController {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
     }
     
-    
     private func configureTableView() {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(
-            top: 0,
-            left: 0,
-            bottom: 50,
-            right: 0
-        )
         
         tableView.register(
             FieldTableViewCell.self,
@@ -165,35 +140,10 @@ extension FieldsViewController {
             forCellReuseIdentifier: UIFieldHeaderCell.identifier
         )
         
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.backgroundColor = Constants.Colors.tableViewBackground
-        tableView.separatorStyle = .none
-        tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = true
+        tableView.dataSource = dataSource
+        tableView.delegate = dataSource
         
-        let headerContainer = UIView()
-        headerContainer.backgroundColor = .clear
-        
-        headerContainer.addSubview(filterSortView)
-        
-        filterSortView.pinTop(to: headerContainer.topAnchor, Constants.Dimensions.tableViewTopMargin)
-        filterSortView.pinLeft(to: headerContainer.leadingAnchor)
-        filterSortView.pinRight(to: headerContainer.trailingAnchor)
-        filterSortView.pinBottom(to: headerContainer.bottomAnchor, 21)
-        
-        headerContainer.setNeedsLayout()
-        headerContainer.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let fittingSize = headerContainer.systemLayoutSizeFitting(targetSize)
-        headerContainer.frame.size.height = fittingSize.height
-        tableView.tableHeaderView = headerContainer
-        
-        tableView.tableHeaderView = headerContainer
+        tableView.addFilterSortView(filterSortView)
     }
     
     // MARK: - Actions
@@ -208,118 +158,19 @@ extension FieldsViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension FieldsViewController: UITableViewDataSource {
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int {
-        return fieldItems.count
-    }
-    
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
+extension FieldsViewController {
+    private func setupDataSource() {
+        dataSource.viewController = self
         
-        let item = fieldItems[indexPath.row]
-        
-        switch item {
-        case .header(let group):
-            guard let cell = tableView.dequeueReusableCell(
-                withIdentifier: UIFieldHeaderCell.identifier,
-                for: indexPath
-            ) as? UIFieldHeaderCell
-            else {
-                return UITableViewCell()
-            }
-            
-            cell.configure(
-                with: group.mainField,
-                isExpanded: group.isExpanded
-            )
-            
-            return cell
-        case .field(let field, _):
-            guard let cell = tableView.dequeueReusableCell(
-                withIdentifier: FieldTableViewCell.identifier,
-                for: indexPath
-            ) as? FieldTableViewCell
-            else {
-                return UITableViewCell()
-            }
-            
-            cell.configure(with: field)
-            return cell
+        dataSource.routeToField = { [weak self] indexPath in
+            self?.router?.routeToField(for: indexPath)
         }
     }
 }
-
-// MARK: - UITableViewDelegate
-extension FieldsViewController: UITableViewDelegate {
-    
-    func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
-        let item = fieldItems[indexPath.row]
-
-        switch item {
-            case .header(let group):
-                toggleSection(at: indexPath, group: group, in: tableView)
-            case .field(_, let realIndexPath):
-            tableView.deselectRow(at: indexPath, animated: true)
-            router?.routeToField(for: realIndexPath)
-        }
-    }
-    
-    func toggleSection(
-        at indexPath: IndexPath,
-        group: GroupOfFieldsViewModel,
-        in tableView: UITableView
-    ) {
-        let toggleIndex = indexPath.row
-        let fieldsCount = group.fields.count
-        
-        tableView.beginUpdates()
-        
-        if group.isExpanded {
-            group.isExpanded = false
-            var indexPathsToDelete: [IndexPath] = []
-            
-            for i in 1...fieldsCount {
-                indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
-            }
-            
-            tableView.deleteRows(at: indexPathsToDelete, with: .fade)
-        }
-        else {
-            group.isExpanded = true
-
-            var indexPathsToInsert: [IndexPath] = []
-            for i in 1...fieldsCount {
-                indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
-            }
-            tableView.insertRows(at: indexPathsToInsert, with: .fade)
-        }
-        
-        tableView.reloadRows(at: [indexPath], with: .none)
-        tableView.endUpdates()
-        
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-}
-
-class ReusableHeader: UITableViewHeaderFooterView {
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        print("Header is about to be reused!")
-    }
-}
-
 
 // MARK: - FieldsDisplayLogic
 extension FieldsViewController : FieldsDisplayLogic {
-    func displayFields(viewModel: Fields.Load.ViewModel) {
+    func displayFields(with viewModel: Fields.Load.ViewModel) {
         fields = viewModel.groupsOfFields
         
         DispatchQueue.main.async {
@@ -329,7 +180,7 @@ extension FieldsViewController : FieldsDisplayLogic {
     }
 }
 
-
+// MARK: - Filterble
 extension FieldsViewController : Filterble {
     func deleteFilter(forItemAt index: Int) {
         let item = filterItems[index]
@@ -339,6 +190,7 @@ extension FieldsViewController : Filterble {
     }
 }
 
+// MARK: - OptionsViewControllerDelegate
 extension FieldsViewController : OptionsViewControllerDelegate {
     func didSelectOption(
         _ indices: Set<Int>,
@@ -363,6 +215,6 @@ extension FieldsViewController : OptionsViewControllerDelegate {
         }
         
         let request = Fields.Load.Request(params: selectedParams)
-        interactor?.loadFields(request)
+        interactor?.loadFields(with: request)
     }
 }

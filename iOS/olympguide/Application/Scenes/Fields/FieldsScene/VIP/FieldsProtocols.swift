@@ -8,24 +8,26 @@
 import Foundation
 
 protocol FieldsBusinessLogic {
-    func loadFields(_ request: Fields.Load.Request)
+    func loadFields(with request: Fields.Load.Request)
 }
 
 protocol FieldsPresentationLogic {
-    func presentFields(response: Fields.Load.Response)
-    func presentError(message: String)
+    func presentFields(with response: Fields.Load.Response)
 }
 
 protocol FieldsDisplayLogic: AnyObject {
-    func displayFields(viewModel: Fields.Load.ViewModel)
-    func displayError(message: String)
+    func displayFields(with viewModel: Fields.Load.ViewModel)
 }
 
 protocol FieldsRoutingLogic {
-    func routeToDetails(for field: GroupOfFieldsModel.FieldModel)
+    func routeToField(for indexPath: IndexPath)
     func routeToSearch()
 }
 
 protocol FieldsDataStore {
     var groupsOfFields: [GroupOfFieldsModel] { get set }
+}
+
+protocol FieldsDataPassing {
+    var dataStore: FieldsDataStore? { get }
 }
