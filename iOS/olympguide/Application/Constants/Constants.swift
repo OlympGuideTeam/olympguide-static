@@ -194,3 +194,16 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum UIProgramWithBenefitsCell {
+        enum Dimensions {
+            // nameStack
+            static let nameStackTopMargin: CGFloat = 10.0
+            
+            // benefitsStack
+            static let benefitStackTopMargin: CGFloat = 5.0
+            static let benefitStackBottompMargin: CGFloat = 10.0
+            static let benefitStackBottompSpacing: CGFloat = 10.0
+        }
+    }
+}
