@@ -152,3 +152,23 @@ extension AllConstants {
     }
 }
 
+extension AllConstants {
+    enum ProfileTableViewCell {
+        enum Images {
+            static let chevronImage: UIImage? = UIImage(systemName: "chevron.right")
+        }
+        
+        enum Dimensions {
+            static let chevronWidth: CGFloat = 13.0
+            static let chevronHeight: CGFloat = 22.0
+            
+            static let itemSpacing: CGFloat = 4.0
+            
+            static let verticalMargin: CGFloat = 21.0
+        }
+        
+        enum Colors {
+            static let chevronColor: UIColor = .black
+        }
+    }
+}
