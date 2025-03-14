@@ -22,7 +22,7 @@ extension Filterble {
         
         switch item.initMethod {
         case .endpoint(let endpoint):
-            optionsVC = OptionsViewController(
+            optionsVC = OptionsAssembly.build(
                 title: item.title,
                 isMultipleChoice: item.isMultipleChoice,
                 selectedIndices: item.selectedIndices,
@@ -30,7 +30,7 @@ extension Filterble {
                 paramType: item.paramType
             )
         case .models(let models):
-            optionsVC = OptionsViewController(
+            optionsVC = OptionsAssembly.build(
                 title: item.title,
                 isMultipleChoice: item.isMultipleChoice,
                 selectedIndices: item.selectedIndices,
