@@ -8,6 +8,8 @@
 import UIKit
 
 class CustomPasswordField: CustomTextField, HighlightableField {
+    typealias Constants = AllConstants.CustomPasswordField
+
     var isWrong: Bool = false
     
     var savedText: String? = nil
@@ -15,7 +17,7 @@ class CustomPasswordField: CustomTextField, HighlightableField {
     override init(with title: String) {
         super.init(with: title)
         setSecureTextEntry(true)
-        setActionButtonImage(UIImage(systemName: "eye"))
+        setActionButtonImage(Constants.Images.show)
         setActionButtonTarget(
             self,
             #selector(showPassword),
@@ -38,7 +40,7 @@ class CustomPasswordField: CustomTextField, HighlightableField {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setSecureTextEntry(true)
-        setActionButtonImage(UIImage(systemName: "eye"))
+        setActionButtonImage(Constants.Images.show)
         setActionButtonTarget(self, #selector(showPassword), for: .touchDown)
     }
     
@@ -55,16 +57,13 @@ class CustomPasswordField: CustomTextField, HighlightableField {
         visiblePassword.alpha = 0
     }
     @objc private func hidePassword() {
-        setActionButtonImage(UIImage(systemName: "eye"))
-//        savedText = textField.text
-//        setSecureTextEntry(true)
+        setActionButtonImage(Constants.Images.show)
         visiblePassword.alpha = 0
         textField.alpha = 1
     }
     
     @objc private func showPassword() {
-        setActionButtonImage(UIImage(systemName: "eye.slash"))
-//        setSecureTextEntry(false)
+        setActionButtonImage(Constants.Images.hide)
         visiblePassword.text = textField.text
         visiblePassword.alpha = 1
         textField.alpha = 0
