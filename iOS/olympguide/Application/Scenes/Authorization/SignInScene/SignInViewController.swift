@@ -8,14 +8,15 @@
 import UIKit
 
 final class SignInViewController: UIViewController, SignInValidationErrorDisplayable, NonTabBarVC {
+    typealias Constants = AllConstants.SignInViewController
     
     // MARK: - VIP
     var interactor: SignInBusinessLogic?
     var router: SignInRoutingLogic?
     
     // MARK: - UI
-    let emailTextField: HighlightableField = CustomInputDataField(with: "email")
-    let passwordTextField: HighlightableField = CustomPasswordField(with: "пароль")
+    let emailTextField: HighlightableField = CustomInputDataField(with: Constants.Strings.emailPlaceholder)
+    let passwordTextField: HighlightableField = CustomPasswordField(with: Constants.Strings.passwordPlaceholder)
     
     private let nextButton: UIButton = UIButton(type: .system)
     private var nextButtonBottomConstraint: NSLayoutConstraint?
@@ -25,7 +26,7 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Вход"
+        title = Constants.Strings.title
         
         emailTextField.tag = 1
         passwordTextField.tag = 2
@@ -59,8 +60,8 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     private func configureEmailTextField() {
         view.addSubview(emailTextField)
         
-        emailTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 16)
-        emailTextField.pinLeft(to: view.leadingAnchor, 20)
+        emailTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.emailTextFieldTop)
+        emailTextField.pinLeft(to: view.leadingAnchor, Constants.Dimensions.emailTextFieldLeft)
         emailTextField.setTextFieldType(.emailAddress, .username)
         emailTextField.delegate = self
     }
@@ -68,29 +69,27 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     private func configurePasswordTextField() {
         view.addSubview(passwordTextField)
         
-        passwordTextField.pinTop(to: emailTextField.bottomAnchor, 24)
-        passwordTextField.pinLeft(to: view.leadingAnchor, 20)
+        passwordTextField.pinTop(to: emailTextField.bottomAnchor, Constants.Dimensions.passwordTextFieldTop)
+        passwordTextField.pinLeft(to: view.leadingAnchor, Constants.Dimensions.passwordTextFieldLeft)
         passwordTextField.setTextFieldType(.default, .password)
         passwordTextField.delegate = self
     }
     
     private func configureNextButton() {
         nextButton.titleLabel?.font = FontManager.shared.font(for: .bigButton)
-        nextButton.layer.cornerRadius = 13
-        nextButton.titleLabel?.tintColor = .black
-        nextButton.backgroundColor = UIColor(hex: "#E0E8FE")
-        nextButton.setTitle("Войти", for: .normal)
+        nextButton.layer.cornerRadius = Constants.Dimensions.nextButtonCornerRadius
+        nextButton.titleLabel?.tintColor = Constants.Colors.nextButtonText
+        nextButton.backgroundColor = UIColor(hex: Constants.Colors.nextButtonBackground)
+        nextButton.setTitle(Constants.Strings.nextButtonTitle, for: .normal)
         
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nextButton)
         
-        NSLayoutConstraint.activate([
-            nextButton.heightAnchor.constraint(equalToConstant: 48),
-            nextButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-        ])
+        nextButton.setHeight(Constants.Dimensions.nextButtonHeight)
+        nextButton.pinLeft(to: view.leadingAnchor, Constants.Dimensions.emailTextFieldLeft)
+        nextButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.emailTextFieldLeft)
         
-        nextButtonBottomConstraint = nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -43)
+        nextButtonBottomConstraint = nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: Constants.Dimensions.nextButtonBottomOffsetDefault)
         nextButtonBottomConstraint?.isActive = true
         
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
@@ -100,7 +99,7 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     @objc
     private func didTapNextButton() {
         let request = SignInModels.SignIn.Request(email: email, password: password)
-        interactor?.signIn(request)
+        interactor?.signIn(with: request)
     }
 }
 
@@ -135,17 +134,7 @@ extension SignInViewController {
     }
     
     private func unsubscribeFromKeyboardNotifications() {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
+        NotificationCenter.default.removeObserver(self)
     }
     
     @objc
@@ -153,7 +142,7 @@ extension SignInViewController {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
            let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
             let keyboardHeight = keyboardFrame.height
-            nextButtonBottomConstraint?.constant = -keyboardHeight - 10
+            nextButtonBottomConstraint?.constant = -keyboardHeight + Constants.Dimensions.nextButtonBottomOffsetKeyboard
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()
@@ -164,7 +153,7 @@ extension SignInViewController {
     @objc
     private func keyboardWillHide(notification: Notification) {
         if let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
-            nextButtonBottomConstraint?.constant = -43
+            nextButtonBottomConstraint?.constant = Constants.Dimensions.nextButtonBottomOffsetDefault
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()
@@ -173,17 +162,12 @@ extension SignInViewController {
     }
 }
 
-
 extension SignInViewController : SignInDisplayLogic {
-    func displaySignInResult(_ viewModel: SignInModels.SignIn.ViewModel) {
+    func displaySignInResult(with viewModel: SignInModels.SignIn.ViewModel) {
         if viewModel.success {
             router?.routeToRoot()
-        } else {
-            if let errorMesseges = viewModel.errorMessages, errorMesseges.count > 0 {
-                showAlert(with: errorMesseges.joined(separator: "\n"))
-                return
-            }
+        } else if let errorMessages = viewModel.errorMessages, !errorMessages.isEmpty {
+            showAlert(with: errorMessages.joined(separator: "\n"))
         }
     }
 }
-
