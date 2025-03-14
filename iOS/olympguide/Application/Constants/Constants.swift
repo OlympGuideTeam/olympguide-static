@@ -90,3 +90,34 @@ extension AllConstants {
         }
     }
 }
+
+extension AllConstants {
+    enum OlympiadTableViewCell {
+        enum Dimensions {
+            // nameLabel
+            static let nameLabelTopMargin: CGFloat = 5.0
+            static let nameLabelBottomMargin: CGFloat = 20.0
+            
+            // nameAndProfileLabel
+            static let nameAndProfileTopMargin: CGFloat = 20.0
+            
+            // favoriteButton
+            static let buttonTopMargin: CGFloat = 5.0
+            
+            // benefitLabel
+            static let benefitLabelTopMargin: CGFloat = 5.0
+            static let benefitLabelBottomMargin: CGFloat = 5.0
+            
+            // shimmerLayer
+            static let shimmerHeight: CGFloat = 75.0
+            static let shimmerRadius: CGFloat = 13.0
+            static let shimmerTopMargin: CGFloat = 10.0
+            static let shimmerBottomMargin: CGFloat = 10.0
+        }
+        
+        enum Strings {
+            static let winnerText: String = "Победитель"
+            static let prizeText: String = "Призёр"
+        }
+    }
+}
