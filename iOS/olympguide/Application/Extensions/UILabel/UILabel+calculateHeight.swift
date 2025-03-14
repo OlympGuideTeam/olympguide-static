@@ -8,10 +8,11 @@
 import UIKit
 
 extension UILabel {
-    func calculateHeight(with width: CGFloat) {
+    func calculateHeight(with width: CGFloat? = UIScreen.main.bounds.width - 40) {
         guard
             let labelFont = self.font,
-            let text = self.text
+            let text = self.text,
+            let width = width
         else { return }
         
         let maxSize = CGSize(width: width, height: .greatestFiniteMagnitude)
