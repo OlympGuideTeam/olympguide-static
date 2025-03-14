@@ -239,3 +239,12 @@ extension AllConstants {
         }
     }
 }
+
+extension AllConstants {
+    enum CustomInputDataField {
+        enum Dimensions {
+            static let animationDuration: TimeInterval = 0.2
+        }
+    }
+}
+
