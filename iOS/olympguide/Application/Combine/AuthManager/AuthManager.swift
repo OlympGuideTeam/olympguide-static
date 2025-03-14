@@ -11,8 +11,7 @@ import Combine
 class AuthManager : AuthManagerProtocol {
     typealias Constants = AllConstants.AuthManager
     
-//    @InjectSingleton(defaultValue: NetworkService.shared)
-//    var networkService: NetworkServiceProtocol
+    static let shared = AuthManager()
     
     lazy var networkService: NetworkServiceProtocol = NetworkService.shared
     
