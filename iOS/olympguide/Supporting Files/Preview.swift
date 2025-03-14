@@ -90,7 +90,7 @@ struct OptionsViewControllerWrapper : UIViewControllerRepresentable {
             )
         ]
         
-        let vc = OptionsViewController(
+        let vc = OptionsAssembly.build(
             title: "Сортировать",
             isMultipleChoice: false,
             selectedIndices: Set(),
