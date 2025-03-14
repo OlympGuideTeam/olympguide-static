@@ -7,9 +7,12 @@
 
 import UIKit
 
-final class UniversityPresenter : UniversityPresentationLogic {
+final class UniversityPresenter {
     weak var viewController: (ProgramsDisplayLogic & UniversityDisplayLogic & UIViewController)?
-    
+}
+
+// MARK: - UniversityPresentationLogic
+extension UniversityPresenter : UniversityPresentationLogic {
     func presentLoadUniversity(with response: University.Load.Response) {
         if let error = response.error {
             viewController?.showAlert(with: error.localizedDescription)
@@ -28,8 +31,13 @@ final class UniversityPresenter : UniversityPresentationLogic {
             viewController?.displayToggleFavoriteResult(with: viewModel)
         }
     }
+    
+    func presentSetFavorite(to isFavorite: Bool) {
+        viewController?.displayftSetFavorite(to: isFavorite)
+    }
 }
 
+// MARK: - ProgramsPresentationLogic
 extension UniversityPresenter : ProgramsPresentationLogic {
     func presentLoadPrograms(with response: Programs.Load.Response) {
         if let error = response.error {
@@ -38,27 +46,15 @@ extension UniversityPresenter : ProgramsPresentationLogic {
         }
         
         if let groupsOfPrograms = response.groupsOfPrograms {
-            let groupsOfProgramsViewModel = groupsOfPrograms.map { groupOfPrograms in
-                Programs.Load.ViewModel.GroupOfProgramsViewModel(
-                    name: groupOfPrograms.name,
-                    code: groupOfPrograms.code ?? "",
-                    programs: groupOfPrograms.programs.map { program in
-                        ProgramViewModel(
-                            programID: program.programID,
-                            name: program.name,
-                            code: program.field,
-                            budgetPlaces: program.budgetPlaces,
-                            paidPlaces: program.paidPlaces,
-                            cost: program.cost,
-                            like: program.like,
-                            requiredSubjects: program.requiredSubjects,
-                            optionalSubjects: program.optionalSubjects
-                        )
-                    }
-                )
+            let groupsOfProgramsViewModel = groupsOfPrograms.map {
+                $0.toViewModel()
             }
             let viewModel = Programs.Load.ViewModel(groupsOfPrograms: groupsOfProgramsViewModel)
             viewController?.displayLoadProgramsResult(with: viewModel)
         }
+    }
+    
+    func presentSetFavorite(at indexPath: IndexPath, isFavorite: Bool) {
+        viewController?.displaySetFavorite(at: indexPath, isFavorite)
     }
 }

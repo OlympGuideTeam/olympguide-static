@@ -5,11 +5,9 @@
 //  Created by Tom Tim on 20.02.2025.
 //
 
-import Foundation
-
 import UIKit
 
-final class UniversityRouter: UniversityDataPassing, ProgramsDataPassing {
+final class UniversityRouter : UniversityDataPassing, ProgramsDataPassing {
     var dataStore: (UniversityDataStore & ProgramsDataStore)?
     
     var universityDataStore: UniversityDataStore? {
@@ -25,7 +23,7 @@ final class UniversityRouter: UniversityDataPassing, ProgramsDataPassing {
     weak var viewController: UIViewController?
 }
 
-extension UniversityRouter: ProgramsRoutingLogic {
+extension UniversityRouter : ProgramsRoutingLogic {
     func routeToProgram(with indexPath: IndexPath) {
         guard
             let university = programsDataStore?.university,
