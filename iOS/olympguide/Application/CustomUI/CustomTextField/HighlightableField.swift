@@ -13,9 +13,11 @@ protocol HighlightableField: CustomTextField {
 }
 
 extension HighlightableField where Self: UIView {
+    typealias Common = AllConstants.Common
+    
     func highlightError() {
-        UIView.animate(withDuration: 0.3) {
-            self.backgroundColor = UIColor(hex: "#FFCDCD")
+        UIView.animate(withDuration: Common.Dimensions.longDuration) {
+            self.backgroundColor = Common.Colors.wrong
         }
         isWrong = true
     }
