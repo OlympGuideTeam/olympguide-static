@@ -172,3 +172,25 @@ extension AllConstants {
         }
     }
 }
+
+extension AllConstants {
+    enum ProgramTableViewCell {
+        enum Dimensions {
+            static let leadingMargin: CGFloat = 40.0
+            
+            static let informationTopMargin: CGFloat = 5.0
+            static let informationRightMargin: CGFloat = 15.0
+            
+            static let blocksSpacing: CGFloat = 11.0
+            
+            static let spacing: CGFloat = 7.0
+        }
+        
+        enum Strings {
+            static let budgetText: String = "Бюджетных мест  "
+            static let paidText: String = "Платных мест  "
+            static let costText: String = "Стоимость  "
+        }
+    }
+}
+
