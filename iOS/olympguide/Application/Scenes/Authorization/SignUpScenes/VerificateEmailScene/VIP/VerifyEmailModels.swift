@@ -18,7 +18,7 @@ enum VerifyEmailModels {
         }
         
         struct ViewModel {
-            let errorMessage: String?
+            var error: Error? = nil
         }
     }
     
@@ -28,12 +28,9 @@ enum VerifyEmailModels {
         }
         
         struct Response {
-            let success: Bool
-            let error: Error?
+            var error: Error? = nil
         }
         
-        struct ViewModel {
-            let errorMessage: String?
-        }
+        struct ViewModel { }
     }
 }

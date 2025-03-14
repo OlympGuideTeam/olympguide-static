@@ -95,7 +95,7 @@ final class VerifyEmailViewController: UIViewController, NonTabBarVC {
         
         verifyCodeField.onComplete = {[weak self] code in
             let request = VerifyEmailModels.VerifyCode.Request(code: code, email: self?.userEmail ?? "")
-            self?.interactor?.verifyCode(request: request)
+            self?.interactor?.verifyCode(with: request)
         }
     }
     
@@ -153,25 +153,23 @@ final class VerifyEmailViewController: UIViewController, NonTabBarVC {
     @objc
     func resendCodeTapped() {
         if timer == nil {
-            interactor?.resendCode(request: VerifyEmailModels.ResendCode.Request(email: userEmail))
+            let request =  VerifyEmailModels.ResendCode.Request(email: userEmail)
+            interactor?.resendCode(with: request)
         }
     }
 }
 
 extension VerifyEmailViewController: VerifyEmailDisplayLogic {
-    func displayResendCodeResult(viewModel: VerifyEmailModels.ResendCode.ViewModel) {
+    func displayResendCodeResult(with viewModel: VerifyEmailModels.ResendCode.ViewModel) {
         remainingTime = 180
         timer?.invalidate()
         timer = nil
         startTimer()
     }
     
-    func displayVerifyCodeResult(viewModel: VerifyEmailModels.VerifyCode.ViewModel) {
-        if let errorMessage = viewModel.errorMessage {
-            let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
-            verifyCodeField.makeRed()
+    func displayVerifyCodeResult(with viewModel: VerifyEmailModels.VerifyCode.ViewModel) {
+        if viewModel.error != nil {
+            verifyCodeField.shakeAndChangeColor()
         } else {
             router?.routeToPersonalData()
         }

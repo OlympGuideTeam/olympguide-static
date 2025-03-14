@@ -12,39 +12,30 @@ final class VerifyEmailPresenter: VerifyEmailPresentationLogic {
     
     weak var viewController: (UIViewController & VerifyEmailDisplayLogic)?
     
-    func presentVerifyCode(response: VerifyEmailModels.VerifyCode.Response) {
+    func presentVerifyCode(with response: VerifyEmailModels.VerifyCode.Response) {
         if response.success {
-            let viewModel = VerifyEmailModels.VerifyCode.ViewModel(errorMessage: nil)
-            viewController?.displayVerifyCodeResult(viewModel: viewModel)
+            let viewModel = VerifyEmailModels.VerifyCode.ViewModel()
+            viewController?.displayVerifyCodeResult(with: viewModel)
         } else {
-            let errorMessage: String
-            
             if let error = response.error {
-                errorMessage = error.localizedDescription
-            } else {
-                errorMessage = "Произошла неизвестная ошибка"
+                if let networkError = error as? NetworkError,
+                   case NetworkError.invalidCode = networkError {
+                    let viewModel = VerifyEmailModels.VerifyCode.ViewModel(error: error)
+                    viewController?.displayVerifyCodeResult(with: viewModel)
+                    return
+                }
+                viewController?.showAlert(with: error.localizedDescription)
             }
-            
-            let viewModel = VerifyEmailModels.VerifyCode.ViewModel(errorMessage: errorMessage)
-            viewController?.displayVerifyCodeResult(viewModel: viewModel)
         }
     }
     
-    func presentResendCode(response: VerifyEmailModels.ResendCode.Response) {
-        if response.success {
-            let viewModel = VerifyEmailModels.ResendCode.ViewModel(errorMessage: nil)
-            viewController?.displayResendCodeResult(viewModel: viewModel)
-        } else {
-            let errorMessage: String
-            
-            if let error = response.error {
-                errorMessage = error.localizedDescription  
-            } else {
-                errorMessage = "Произошла неизвестная ошибка"
-            }
-            
-            _ = EnterEmailModels.SendCode.ViewModel(errorMessage: errorMessage)
-            viewController?.showAlert(with: errorMessage)
+    func presentResendCode(with response: VerifyEmailModels.ResendCode.Response) {
+        if let error = response.error {
+            viewController?.showAlert(with: error.localizedDescription)
+            return
         }
+        
+        let viewModel = VerifyEmailModels.ResendCode.ViewModel()
+        viewController?.displayResendCodeResult(with: viewModel)
     }
 }

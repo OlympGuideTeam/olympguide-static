@@ -6,25 +6,25 @@
 //
 
 import UIKit
+// MARK: - Constants
+fileprivate enum Constants {
+    static let keyPath: String = "position"
+    static let duration: CFTimeInterval = 0.09
+    static let repeatCount: Float = 2
+    static let shift: CGFloat = 3
+    static let colorDuration: CFTimeInterval = 0.1
+}
 
-/// Полностью кастомный "инпут" для ввода кода.
 final class VerifyCodeField: UIView, UIKeyInput {
     private let hiddenTextField = CustomTextFeield()
     
-    /// Колбэк, который вызывается, когда пользователь ввёл все цифры
     var onComplete: ((String) -> Void)?
     
-    /// Общее количество цифр в коде (можно сделать настраиваемым)
     private let digitCount: Int = 4
-    
-    /// Текущий массив введённых символов (цифр)
     private var digits: [Character] = []
-    
-    /// Массив для отображения цифр (4 UILabel)
     private var digitLabels: [UILabel] = []
     
     // MARK: - Инициализаторы
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -35,6 +35,7 @@ final class VerifyCodeField: UIView, UIKeyInput {
         super.init(coder: coder)
         setupView()
     }
+    
     override var intrinsicContentSize: CGSize {
         return CGSize(
             width: 230,
@@ -51,8 +52,8 @@ final class VerifyCodeField: UIView, UIKeyInput {
             )
         }
     }
-    // MARK: - Настройка внешнего вида
     
+    // MARK: - Настройка внешнего вида
     private func setupView() {
         hiddenTextField.keyboardType = .numberPad
         hiddenTextField.isHidden = true
@@ -60,9 +61,6 @@ final class VerifyCodeField: UIView, UIKeyInput {
         hiddenTextField.delegate = self
         addSubview(hiddenTextField)
         
-        // Добавление жеста для обработки нажатия
-        
-        // Создаём UIStackView для удобного расположения "ячеек" (UILabel)
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -70,16 +68,12 @@ final class VerifyCodeField: UIView, UIKeyInput {
         stackView.spacing = 10
         
         addSubview(stackView)
-        // Отключаем autoresizing маски и проставляем констрейнты
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-        ])
         
-        // Создаём нужное количество "полей" (UILabel)
+        stackView.pinTop(to: topAnchor)
+        stackView.pinBottom(to: bottomAnchor)
+        stackView.pinLeft(to: leadingAnchor)
+        stackView.pinRight(to: trailingAnchor)
+        
         for _ in 0..<digitCount {
             let label = UILabel()
             label.backgroundColor = .white
@@ -94,28 +88,46 @@ final class VerifyCodeField: UIView, UIKeyInput {
             digitLabels.append(label)
         }
         
-        // Чтобы нажатие на эту область вызывало клавиатуру,
-        // сделаем view "тапабельным"
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         addGestureRecognizer(tapGesture)
         isUserInteractionEnabled = true
-    }
-    
-    @objc private func handleTap() {
-        // По тапу становится firstResponder
-//                becomeFirstResponder()
-        hiddenTextField.becomeFirstResponder()
     }
     
     func setFocusToFirstField() {
         handleTap()
     }
     
-    func makeRed() {
-        UIView.animate(withDuration: 0.3) {[weak self] in
-            self?.digitLabels.forEach {
+    func clear() {
+        UIView.animate(withDuration: Constants.colorDuration) {
+            self.digitLabels.forEach {
+                $0.backgroundColor = .white
+            }
+        }
+        digits.removeAll()
+        updateLabels()
+        setFocusToFirstField()
+    }
+    
+    @objc private func handleTap() {
+        hiddenTextField.becomeFirstResponder()
+    }
+    
+    
+    func shakeAndChangeColor() {
+        let shakeAnimation = CABasicAnimation(keyPath: Constants.keyPath)
+        shakeAnimation.duration = Constants.duration
+        shakeAnimation.repeatCount = Constants.repeatCount
+        shakeAnimation.autoreverses = true
+        shakeAnimation.fromValue = NSValue(cgPoint: CGPoint(x: self.center.x - Constants.shift, y: self.center.y))
+        shakeAnimation.toValue = NSValue(cgPoint: CGPoint(x: self.center.x + Constants.shift, y: self.center.y))
+        
+        self.layer.add(shakeAnimation, forKey: Constants.keyPath)
+        UIView.animate(withDuration: Constants.colorDuration, animations: {
+            self.digitLabels.forEach {
                 $0.backgroundColor = UIColor(hex: "FFCDCD")
             }
+        }) { _ in
+//            self.clear()
         }
     }
     
@@ -123,13 +135,11 @@ final class VerifyCodeField: UIView, UIKeyInput {
     private func updateLabels() {
         for i in 0..<digitCount {
             if i < digits.count {
-                // Если символ уже введён - показываем
                 digitLabels[i].text = String(digits[i])
                 UIView.animate(withDuration: 0.2) {[weak self] in
                     self?.digitLabels[i].layer.borderWidth = 2
                 }
             } else {
-                // Если символа ещё нет - пустая строка
                 digitLabels[i].text = ""
                 UIView.animate(withDuration: 0.2) {[weak self] in
                     self?.digitLabels[i].layer.borderWidth = 1
@@ -139,14 +149,11 @@ final class VerifyCodeField: UIView, UIKeyInput {
     }
     
     // MARK: - UIKeyInput
-    /// Говорит, есть ли у нас текст (используется для backspace и т.д.)
     var hasText: Bool {
         !digits.isEmpty
     }
     
-    // Вставка нового текста (символа)
     func insertText(_ text: String) {
-        // Проверяем, что это ровно 1 символ и он - цифра
         guard text.count == 1,
               let char = text.first,
               char.isNumber
@@ -154,27 +161,20 @@ final class VerifyCodeField: UIView, UIKeyInput {
             return
         }
         
-        // Если уже достигнут лимит — не добавляем
         guard digits.count < digitCount else {
             return
         }
         
-        // Добавляем символ в массив
         digits.append(char)
-        
-        // Обновляем отображение
         updateLabels()
         
-        // Если достигли нужного количества символов, вызываем колбэк
         if digits.count == digitCount {
             onComplete?(String(digits))
-            // Здесь можно убрать фокус
-//            resignFirstResponder()
+            
             hiddenTextField.resignFirstResponder()
         }
     }
     
-    // Удаление последнего символа (Backspace)
     func deleteBackward() {
         guard !digits.isEmpty else { return }
         if digitLabels[0].backgroundColor == UIColor(hex: "FFCDCD") {
@@ -184,27 +184,23 @@ final class VerifyCodeField: UIView, UIKeyInput {
                 }
             }
         }
-        // Удаляем из массива последнюю цифру
         digits.removeLast()
-        // Обновляем
         updateLabels()
     }
     
-    // MARK: - First Responder
-    /// Разрешаем объекту становиться firstResponder,
-    /// чтобы он мог открывать клавиатуру.
-//    override var canBecomeFirstResponder: Bool {
-//        true
-//    }
-    
-    //    // MARK: - Переопределяем тип клавиатуры (числовая)
     private var keyboardType: UIKeyboardType {
         .numberPad
     }
 }
 
+
+// MARK: - UITextFieldDelegate
 extension VerifyCodeField : UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    func textField(
+        _ textField: UITextField,
+        shouldChangeCharactersIn range: NSRange,
+        replacementString string: String
+    ) -> Bool {
         insertText(string)
         return false
     }
