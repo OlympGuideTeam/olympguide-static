@@ -18,6 +18,8 @@ protocol RegionDelegateOwner: AnyObject {
 }
 
 final class RegionTextField: CustomTextField, HighlightableField, RegionDelegateOwner {
+    typealias Constants = AllConstants.RegionTextField.Strings
+
     var isWrong: Bool = false
     
     weak var regionDelegate: RegionTextFieldDelegate?
@@ -53,11 +55,10 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
     }
     
     private func presentOptions() {
-        let optionVC = OptionsViewController(
-            title: "Регион",
+        let optionVC = OptionsAssembly.build(
+            title: Constants.optionVCTitle,
             isMultipleChoice: false,
             selectedIndices: selectedIndecies,
-//            count: 87,
             endPoint: endPoint
         )
         optionVC.delegate = self
@@ -67,7 +68,11 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
 }
 
 extension RegionTextField : OptionsViewControllerDelegate {
-    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [OptionViewModel], paramType: ParamType?) {
+    func didSelectOption(
+        _ optionsIndicies: Set<Int>,
+        _ optionsNames: [OptionViewModel],
+        paramType: ParamType?
+    ) {
         selectedIndecies = optionsIndicies
         if optionsIndicies.isEmpty {
             setTextFieldText("")

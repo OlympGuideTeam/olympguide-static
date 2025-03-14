@@ -8,6 +8,8 @@
 import UIKit
 
 final class EnterEmailViewController: UIViewController, NonTabBarVC {
+    typealias Constants = AllConstants.EnterEmailViewController
+    typealias Common = AllConstants.Common
     
     // MARK: - VIP
     var interactor: EnterEmailBusinessLogic?
@@ -22,15 +24,25 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Регистрация"
+        title = Constants.Strings.title
         configureUI()
-        let backItem = UIBarButtonItem(title: "Регистрация", style: .plain, target: nil, action: nil)
+        let backItem = UIBarButtonItem(
+            title: Constants.Strings.title,
+            style: .plain,
+            target: nil,
+            action: nil
+        )
         navigationItem.backBarButtonItem = backItem
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         subscribeToKeyboardNotifications()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        emailTextField.didTapSearchBar()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -40,7 +52,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     
     // MARK: - Private UI Setup
     private func configureUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = Constants.Colors.background
         configureEmailTextField()
         configureNextButton()
     }
@@ -48,29 +60,27 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     private func configureEmailTextField() {
         view.addSubview(emailTextField)
         
-        emailTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 16)
-        emailTextField.pinLeft(to: view.leadingAnchor, 20)
+        emailTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.emailTextFieldTopPadding)
+        emailTextField.pinLeft(to: view.leadingAnchor, Constants.Dimensions.horizontalMargin)
         emailTextField.setTextFieldType(.emailAddress, .emailAddress)
         emailTextField.delegate = self
     }
     
     private func configureNextButton() {
         nextButton.titleLabel?.font = FontManager.shared.font(for: .bigButton)
-        nextButton.layer.cornerRadius = 13
-        nextButton.titleLabel?.tintColor = .black
-        nextButton.backgroundColor = UIColor(hex: "#E0E8FE")
-        nextButton.setTitle("Продолжить", for: .normal)
+        nextButton.layer.cornerRadius = Constants.Dimensions.nextButtonCornerRadius
+        nextButton.titleLabel?.tintColor = Constants.Colors.nextButtonText
+        nextButton.backgroundColor = Constants.Colors.nextButtonBackground
+        nextButton.setTitle(Constants.Strings.nextButtonTitle, for: .normal)
         
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nextButton)
         
-        NSLayoutConstraint.activate([
-            nextButton.heightAnchor.constraint(equalToConstant: 48),
-            nextButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-        ])
+        nextButton.setHeight(Constants.Dimensions.nextButtonHeight)
+        nextButton.pinLeft(to: view.leadingAnchor, Constants.Dimensions.horizontalMargin)
+        nextButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.horizontalMargin)
         
-        nextButtonBottomConstraint = nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -43)
+        nextButtonBottomConstraint = nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -Constants.Dimensions.nextButtonBottomPadding)
         nextButtonBottomConstraint?.isActive = true
         
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
@@ -80,7 +90,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     @objc
     private func didTapNextButton() {
         let request = EnterEmailModels.SendCode.Request(email: currentEmail)
-        interactor?.sendCode(request: request)
+        interactor?.sendCode(with: request)
     }
 }
 
@@ -126,7 +136,7 @@ extension EnterEmailViewController {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
            let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
             let keyboardHeight = keyboardFrame.height
-            nextButtonBottomConstraint?.constant = -keyboardHeight - 10
+            nextButtonBottomConstraint?.constant = -keyboardHeight - Constants.Dimensions.keyboardBottomPadding
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()
@@ -137,7 +147,7 @@ extension EnterEmailViewController {
     @objc
     private func keyboardWillHide(notification: Notification) {
         if let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double {
-            nextButtonBottomConstraint?.constant = -43
+            nextButtonBottomConstraint?.constant = -Constants.Dimensions.nextButtonBottomPadding
             
             UIView.animate(withDuration: animationDuration) {
                 self.view.layoutIfNeeded()
@@ -148,14 +158,8 @@ extension EnterEmailViewController {
 
 // MARK: - EnterEmailDisplayLogic
 extension EnterEmailViewController: EnterEmailDisplayLogic {
-    func displaySendCodeResult(viewModel: EnterEmailModels.SendCode.ViewModel) {
-        if let errorMessage = viewModel.errorMessage {
-            let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            emailTextField.highlightError()
-            present(alert, animated: true)
-        } else {
-            router?.routeToVerifyCode()
-        }
+    func displaySendCodeResult(with viewModel: EnterEmailModels.SendCode.ViewModel) {
+        router?.routeToVerifyCode()
     }
 }
+

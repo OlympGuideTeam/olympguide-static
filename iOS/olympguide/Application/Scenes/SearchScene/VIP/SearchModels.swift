@@ -5,8 +5,6 @@
 //  Created by Tom Tim on 01.01.2025.
 //
 
-import Foundation
-
 enum SearchType {
     case universities
     case olympiads

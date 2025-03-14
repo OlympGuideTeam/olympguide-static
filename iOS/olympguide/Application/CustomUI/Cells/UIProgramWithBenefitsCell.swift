@@ -8,7 +8,11 @@
 import UIKit
 
 final class UIProgramWithBenefitsCell : UITableViewCell {
+    typealias Constants = AllConstants.UIProgramWithBenefitsCell.Dimensions
+    typealias Common = AllConstants.Common
+    
     static let identifier = "UIProgramWithBenefitsCell"
+    
     let benefitsStack: UIStackView = UIStackView()
     let nameStack: UIStackView = UIStackView()
     let separatorView: UIView = UIView()
@@ -37,26 +41,36 @@ final class UIProgramWithBenefitsCell : UITableViewCell {
     }
     
     private func configureLayouts() {
+        configureNameStack()
+        configureBenefitsStack()
+        configureSeparatorView()
+    }
+    
+    private func configureNameStack() {
         contentView.addSubview(nameStack)
-        nameStack.pinTop(to: contentView.topAnchor, 10)
-        nameStack.pinLeft(to: contentView.leadingAnchor, 20)
-        nameStack.pinRight(to: contentView.trailingAnchor, 20)
-        
+        nameStack.pinTop(to: contentView.topAnchor, Constants.nameStackTopMargin)
+        nameStack.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        nameStack.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+    }
+    
+    private func configureBenefitsStack() {
         contentView.addSubview(benefitsStack)
-        benefitsStack.pinTop(to: nameStack.bottomAnchor, 5)
-        benefitsStack.pinLeft(to: contentView.leadingAnchor, 20)
-        benefitsStack.pinRight(to: contentView.trailingAnchor, 20)
-        benefitsStack.pinBottom(to: contentView.bottomAnchor, 10)
+        benefitsStack.pinTop(to: nameStack.bottomAnchor, Constants.benefitStackTopMargin)
+        benefitsStack.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        benefitsStack.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+        benefitsStack.pinBottom(to: contentView.bottomAnchor, Constants.benefitStackBottompMargin)
         benefitsStack.distribution = .fillEqually
         benefitsStack.axis = .vertical
-        benefitsStack.spacing = 10
-        
+        benefitsStack.spacing = Constants.benefitStackBottompSpacing
+    }
+    
+    private func configureSeparatorView() {
         contentView.addSubview(separatorView)
-        separatorView.pinLeft(to: contentView.leadingAnchor, 20)
-        separatorView.pinRight(to: contentView.trailingAnchor, 20)
+        separatorView.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        separatorView.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
         separatorView.pinBottom(to: contentView.bottomAnchor)
-        separatorView.setHeight(1)
-        separatorView.backgroundColor = UIColor(hex: "#D9D9D9")
+        separatorView.setHeight(Common.Dimensions.separatorHeight)
+        separatorView.backgroundColor = Common.Colors.separator
     }
     
     func configure(with viewModel: ProgramWithBenefitsViewModel, indexPath: IndexPath) {

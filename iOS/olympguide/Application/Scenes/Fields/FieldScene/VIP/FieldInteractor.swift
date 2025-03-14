@@ -6,12 +6,25 @@
 //
 
 import Foundation
+import Combine
 
-final class FieldInteractor: FieldBusinessLogic, FieldDataStore {
+final class FieldInteractor : FieldDataStore {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     var presenter: FieldPresentationLogic?
     var worker: FieldWorkerLogic?
     var programs: [ProgramsByUniversityModel]?
     
+    init() {
+        setupProgramsBindings()
+    }
+}
+
+// MARK: - FieldBusinessLogic
+extension FieldInteractor: FieldBusinessLogic {
     func loadPrograms(with request: Field.LoadPrograms.Request) {
         let params: [Param] = request.params.flatMap { key, value in
             value.array
@@ -32,16 +45,37 @@ final class FieldInteractor: FieldBusinessLogic, FieldDataStore {
         }
     }
     
-    func restoreFavorite(at indexPath: IndexPath) -> Bool {
-        programs?[indexPath.section].programs[indexPath.row].like ?? false
+    func getProgram(at indexPath: IndexPath) -> ProgramShortModel? {
+        programs?[indexPath.section].programs[indexPath.row]
     }
     
-    func setFavorite(to programId: Int, isFavorite: Bool) {
-        guard
-            let indexPath = getIndexPath(to: programId)
-        else { return }
-        
-        programs?[indexPath.section].programs[indexPath.row].like = isFavorite
+    func getUniversity(at index: Int) -> UniversityModel? {
+        programs?[index].univer
+    }
+}
+
+// MARK: - Combine
+extension FieldInteractor {
+    private func setupProgramsBindings() {
+        favoritesManager.programEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self else { return }
+                guard let indexPath = getIndexPath(to: event.programId) else { return }
+                switch event {
+                case .added:
+                    presenter?.presentSetFavorite(at: indexPath, true)
+                case .removed:
+                    presenter?.presentSetFavorite(at: indexPath, false)
+                case .error:
+                    guard
+                        let isFavorite = programs?[indexPath.section].programs[indexPath.row].like
+                    else { return }
+                    presenter?.presentSetFavorite(at: indexPath, isFavorite)
+                case .access(_, let isFavorite):
+                    programs?[indexPath.section].programs[indexPath.row].like = isFavorite
+                }
+            }.store(in: &cancellables)
     }
     
     func getIndexPath(to programId: Int) -> IndexPath? {
@@ -55,11 +89,5 @@ final class FieldInteractor: FieldBusinessLogic, FieldDataStore {
         return IndexPath(row: programIndex, section: uniIndex)
     }
     
-    func getProgram(at indexPath: IndexPath) -> ProgramShortModel? {
-        programs?[indexPath.section].programs[indexPath.row]
-    }
-    func getUniversity(at index: Int) -> UniversityModel? {
-        programs?[index].univer
-    }
 }
 

@@ -8,8 +8,7 @@
 import Combine
 import Foundation
 
-final class SearchInteractor<Strategy: SearchStrategy>: SearchBusinessLogic, SearchDataStore {
-    
+final class SearchInteractor<Strategy: SearchStrategy> : SearchBusinessLogic, SearchDataStore {
     var presenter: SearchPresentationLogic?
     private let worker: GenericSearchWorker<Strategy>
     
@@ -35,7 +34,7 @@ final class SearchInteractor<Strategy: SearchStrategy>: SearchBusinessLogic, Sea
                         self.currentItems = items
                         
                         let response = Search.TextDidChange.Response(items: items)
-                        self.presenter?.presentTextDidChange(response: response)
+                        self.presenter?.presentTextDidChange(with: response)
                     }
                     .store(in: &self.cancellables)
             }
@@ -43,7 +42,7 @@ final class SearchInteractor<Strategy: SearchStrategy>: SearchBusinessLogic, Sea
     }
     
     // MARK: - Business Logic
-    func textDidChange(request: Search.TextDidChange.Request) {
+    func textDidChange(with request: Search.TextDidChange.Request) {
         textSubject.send(request.query)
     }
 }

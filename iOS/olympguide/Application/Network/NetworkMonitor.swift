@@ -45,7 +45,7 @@ class NetworkMonitor {
         guard disconnectVC == nil, let topVC = topMostController() else { return }
         let disconnectVC = DisconnectViewController()
         disconnectVC.onReconnect = {
-            // MARK: Нужно прописать какую-нибудь логику
+            // TODO: Нужно прописать какую-нибудь логику
         }
         disconnectVC.modalPresentationStyle = .fullScreen
         topVC.present(disconnectVC, animated: true, completion: nil)

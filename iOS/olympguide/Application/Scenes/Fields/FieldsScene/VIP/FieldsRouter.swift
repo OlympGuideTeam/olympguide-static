@@ -7,12 +7,14 @@
 
 import UIKit
 
-final class FieldsRouter: FieldsRoutingLogic {
+final class FieldsRouter: FieldsRoutingLogic, FieldsDataPassing {
     weak var viewController: UIViewController?
-
-    func routeToDetails(for field: GroupOfFieldsModel.FieldModel) {
-        let detailsViewController = FieldAssembly.build(for: field) 
-        viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
+    var dataStore: FieldsDataStore?
+    
+    func routeToField(for indexPath: IndexPath) {
+        guard let field = dataStore?.groupsOfFields[indexPath.section].fields[indexPath.row] else { return }
+        let fieldVC = FieldAssembly.build(for: field)
+        viewController?.navigationController?.pushViewController(fieldVC, animated: true)
     }
     
     func routeToSearch() {

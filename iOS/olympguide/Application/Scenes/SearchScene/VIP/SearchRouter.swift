@@ -8,7 +8,7 @@
 
 import UIKit
 
-final class SearchRouter<Strategy: SearchStrategy>: SearchRoutingLogic, SearchDataPassing {
+final class SearchRouter<Strategy: SearchStrategy> : SearchRoutingLogic, SearchDataPassing {
     weak var viewController: UIViewController?
     var dataStore: SearchInteractor<Strategy>?
     var strategy: Strategy
@@ -34,7 +34,5 @@ final class SearchRouter<Strategy: SearchStrategy>: SearchRoutingLogic, SearchDa
         case .present:
             viewController?.present(detailVC, animated: true)
         }
-        
-        
     }
 }

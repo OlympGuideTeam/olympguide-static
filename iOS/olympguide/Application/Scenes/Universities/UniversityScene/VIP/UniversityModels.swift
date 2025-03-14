@@ -5,8 +5,6 @@
 //  Created by Tom Tim on 20.02.2025.
 //
 
-import Foundation
-
 enum University {
     enum Load {
         struct Request {

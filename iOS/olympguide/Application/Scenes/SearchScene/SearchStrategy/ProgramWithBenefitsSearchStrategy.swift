@@ -85,7 +85,9 @@ final class ProgramWithBenefitsSearchStrategy: SearchStrategy {
         }
         
         let universityId = model.program.universityID
-        guard let index = allUniversities.firstIndex(where: { $0.universityID == universityId}) else {
+        guard
+            let index = allUniversities.firstIndex(where: { $0.universityID == universityId})
+        else {
             return (nil, nil)
         }
         

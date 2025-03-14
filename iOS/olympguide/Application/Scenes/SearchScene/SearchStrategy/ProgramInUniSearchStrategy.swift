@@ -7,10 +7,6 @@
 
 import UIKit
 
-enum SearchProgramType {
-    case inUniversity(id: Int)
-}
-
 final class ProgramInUniSearchStrategy : SearchStrategy {
     var university: UniversityModel?
     
@@ -37,7 +33,12 @@ final class ProgramInUniSearchStrategy : SearchStrategy {
     }
     
     
-    func configureCell(tableView: UITableView, indexPath: IndexPath, viewMmodel: ProgramViewModel, isSeparatorHidden: Bool) -> UITableViewCell {
+    func configureCell(
+        tableView: UITableView,
+        indexPath: IndexPath,
+        viewMmodel: ProgramViewModel,
+        isSeparatorHidden: Bool
+    ) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: ProgramTableViewCell.identifier
         ) as? ProgramTableViewCell
@@ -47,6 +48,7 @@ final class ProgramInUniSearchStrategy : SearchStrategy {
         cell.isFavoriteButtonHidden = true
         cell.configure(with: viewMmodel)
         cell.hideSeparator(isSeparatorHidden)
+        cell.leftConstraint = 20
         return cell
     }
     

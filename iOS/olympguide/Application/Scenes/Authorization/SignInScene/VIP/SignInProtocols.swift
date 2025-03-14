@@ -7,17 +7,17 @@
 
 // MARK: - Business Logic
 protocol SignInBusinessLogic {
-    func signIn(_ request: SignInModels.SignIn.Request)
+    func signIn(with request: SignInModels.SignIn.Request)
 }
 
 // MARK: - Presentation Logic
 protocol SignInPresentationLogic {
-    func presentSignIn(_ response: SignInModels.SignIn.Response)
+    func presentSignIn(with response: SignInModels.SignIn.Response)
 }
 
 // MARK: - Display Logic
 protocol SignInDisplayLogic: AnyObject {
-    func displaySignInResult(_ viewModel: SignInModels.SignIn.ViewModel)
+    func displaySignInResult(with viewModel: SignInModels.SignIn.ViewModel)
 }
 
 // MARK: - Routing Logic

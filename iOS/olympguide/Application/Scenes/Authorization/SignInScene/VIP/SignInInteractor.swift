@@ -12,7 +12,7 @@ final class SignInInteractor: SignInBusinessLogic {
     @InjectSingleton
     var authManager: AuthManagerProtocol
     
-    func signIn(_ request: SignInModels.SignIn.Request) {
+    func signIn(with request: SignInModels.SignIn.Request) {
         let email = request.email
         let password = request.password
         guard !email.isEmpty, !password.isEmpty else {
@@ -30,7 +30,7 @@ final class SignInInteractor: SignInBusinessLogic {
                 error: AppError.validation(validationErrors)
             )
             
-            presenter?.presentSignIn(response)
+            presenter?.presentSignIn(with: response)
             return
         }
         
@@ -39,10 +39,10 @@ final class SignInInteractor: SignInBusinessLogic {
             switch result {
             case .success:
                 let response = SignInModels.SignIn.Response(success: true, error: nil)
-                self.presenter?.presentSignIn(response)
+                self.presenter?.presentSignIn(with: response)
             case .failure(let error):
                 let response = SignInModels.SignIn.Response(success: false, error: AppError.network(error))
-                self.presenter?.presentSignIn(response)
+                self.presenter?.presentSignIn(with: response)
             }
             
         }

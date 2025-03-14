@@ -7,10 +7,12 @@
 
 import UIKit
 
-final class FieldRouter: FieldRoutingLogic, FieldDataPassing {
+final class FieldRouter : FieldDataPassing {
     weak var viewController: UIViewController?
     var dataStore: FieldDataStore?
-    
+}
+
+extension FieldRouter : FieldRoutingLogic {
     func routeToProgram(indexPath: IndexPath) {
         guard let programs = dataStore?.programs else { return }
         

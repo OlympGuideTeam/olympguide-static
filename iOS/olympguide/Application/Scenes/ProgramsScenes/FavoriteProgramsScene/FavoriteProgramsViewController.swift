@@ -14,19 +14,20 @@ final class FavoriteProgramsViewController: UIViewController {
     
     var interactor: (FavoriteProgramsBusinessLogic & FavoriteProgramsDataStore)?
     var router: FavoriteProgramsRoutingLogic?
+
+    var programs: [ProgramsByUniversityViewModel] = []
     
     private var cancellables = Set<AnyCancellable>()
     
-    private let tableView: UITableView = UITableView()
+    private let tableView: UICustomTbleView = UICustomTbleView()
+    private let dataSource: FavoriteProgramsDataSource = FavoriteProgramsDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    private var programs: [ProgramsByUniversityViewModel] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         configureUI()
-        setupBindings()
         
         interactor?.loadPrograms(with: .init())
     }
@@ -53,7 +54,6 @@ final class FavoriteProgramsViewController: UIViewController {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(
             ProgramTableViewCell.self,
@@ -68,10 +68,7 @@ final class FavoriteProgramsViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
-        tableView.backgroundColor = .white
-        tableView.separatorStyle = .none
         tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
     }
     
     func getEmptyLabel() -> UILabel? {
@@ -144,10 +141,10 @@ extension FavoriteProgramsViewController : UITableViewDelegate {
         _ tableView: UITableView,
         viewForHeaderInSection section: Int
     ) -> UIView? {
-        
-        guard let header = tableView.dequeueReusableHeaderFooterView(
-            withIdentifier: UIUniversityHeader.identifier
-        ) as? UIUniversityHeader
+        guard
+            let header = tableView.dequeueReusableHeaderFooterView(
+                withIdentifier: UIUniversityHeader.identifier
+            ) as? UIUniversityHeader
         else { return nil }
         
         header.configure(
@@ -188,53 +185,29 @@ extension FavoriteProgramsViewController : FavoriteProgramsDisplayLogic {
             self.refreshControl.endRefreshing()
         }
     }
+    
+    func displaySetFavoriteResult(at indexPath: IndexPath) {
+        tableView.beginUpdates()
+        self.programs[indexPath.section].programs.remove(at: indexPath.row)
+        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+        if self.programs[indexPath.section].programs.isEmpty {
+            self.programs.remove(at: indexPath.section)
+            
+            self.tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
+        }
+        tableView.endUpdates()
+        self.tableView.backgroundView = self.getEmptyLabel()
+        if indexPath.row != 0 && indexPath.row == self.programs[indexPath.section].programs.count {
+            let indexPathToHide = IndexPath(row: indexPath.row - 1, section: indexPath.section)
+            if let cell = tableView.cellForRow(at: indexPathToHide) as? ProgramTableViewCell {
+                cell.hideSeparator(true)
+            }
+        }
+    }
 }
 
 // MARK: - Combine
 extension FavoriteProgramsViewController {
-    func setupBindings() {
-        favoritesManager.programEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self = self else { return }
-                switch event {
-                case .added(let univer, let program):
-                    self.interactor?.likeProgram(univer, program)
-                case .removed(let programID):
-                    if let index = self.findIndexPath(programID: programID) {
-                        tableView.beginUpdates()
-                        self.programs[index.section].programs.remove(at: index.row)
-                        self.interactor?.dislikeProgram(at: index)
-                        self.tableView.deleteRows(at: [index], with: .automatic)
-                        if self.programs[index.section].programs.isEmpty {
-                            self.programs.remove(at: index.section)
-                            
-                            self.tableView.deleteSections(IndexSet(integer: index.section), with: .automatic)
-                        }
-                        tableView.endUpdates()
-                        self.tableView.backgroundView = self.getEmptyLabel()
-                        if index.row != 0 && index.row == self.programs[index.section].programs.count {
-                            let indexPath = IndexPath(row: index.row - 1, section: index.section)
-                            if let cell = tableView.cellForRow(at: indexPath) as? ProgramTableViewCell {
-                                cell.hideSeparator(true)
-                            }
-                        }
-                    }
-                case .error(let programID):
-                    interactor?.handleBatchError(programID: programID)
-                case .access(let programID, let isFavorite):
-                    interactor?.handleBatchSuccess(programID: programID, isFavorite: isFavorite)
-                }
-            }.store(in: &cancellables)
-    }
-    
-    func isFavorite(programID: Int, serverValue: Bool) -> Bool {
-        favoritesManager.isProgramFavorited(
-            programID: programID,
-            serverValue: serverValue
-        )
-    }
-    
     private func findIndexPath(programID: Int) -> IndexPath? {
         for (section, program) in programs.enumerated() {
             if let index = program.programs.firstIndex(where: {

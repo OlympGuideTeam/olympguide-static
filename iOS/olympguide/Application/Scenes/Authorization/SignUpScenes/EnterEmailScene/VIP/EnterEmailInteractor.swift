@@ -15,15 +15,15 @@ final class EnterEmailInteractor: EnterEmailBusinessLogic, EnterEmailDataStore {
     var email: String?
     var time: Int?
     
-    func sendCode(request: EnterEmailModels.SendCode.Request) {
+    func sendCode(with request: EnterEmailModels.SendCode.Request) {
         self.email = request.email
         
         guard isValidEmail(request.email) else {
             let error = NSError(domain: "InvalidEmail", code: 400, userInfo: [
                 NSLocalizedDescriptionKey: "Некорректный адрес электронной почты"
             ])
-            let response = EnterEmailModels.SendCode.Response(success: false, error: error)
-            presenter?.presentSendCode(response: response)
+            let response = EnterEmailModels.SendCode.Response(error: error)
+            presenter?.presentSendCode(with: response)
             return
         }
         
@@ -33,28 +33,21 @@ final class EnterEmailInteractor: EnterEmailBusinessLogic, EnterEmailDataStore {
             switch result {
             case .success(let baseResponse):
                 self.time = baseResponse.time
-                let response = EnterEmailModels.SendCode.Response(
-                    success: true,
-                    error: nil
-                )
-                self.presenter?.presentSendCode(response: response)
+                let response = EnterEmailModels.SendCode.Response()
+                self.presenter?.presentSendCode(with: response)
                 
             case .failure(let networkError):
                 switch networkError {
                 case .previousCodeNotExpired(let time):
                     self.time = time
-                    let response = EnterEmailModels.SendCode.Response(
-                        success: true,
-                        error: nil
-                    )
-                    self.presenter?.presentSendCode(response: response)
+                    let response = EnterEmailModels.SendCode.Response()
+                    self.presenter?.presentSendCode(with: response)
                     
                 default:
                     let response = EnterEmailModels.SendCode.Response(
-                        success: false,
                         error: networkError as NSError
                     )
-                    self.presenter?.presentSendCode(response: response)
+                    self.presenter?.presentSendCode(with: response)
                 }
             }
         }

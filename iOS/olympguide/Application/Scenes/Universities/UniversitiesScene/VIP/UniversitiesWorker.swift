@@ -14,6 +14,7 @@ protocol UniversitiesWorkerLogic {
     )
 }
 
+
 final class UniversitiesWorker : UniversitiesWorkerLogic {
     @InjectSingleton
     var networkService: NetworkServiceProtocol

@@ -5,6 +5,8 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
+import Foundation
+
 enum Field {
     enum LoadPrograms {
         struct Request {

@@ -45,7 +45,6 @@ class HasSecondNameButton: UIButton {
     
     
     // MARK: - Public properties
-    
     var text: String? {
         didSet {
             cellTitleLabel.text = text
@@ -53,7 +52,6 @@ class HasSecondNameButton: UIButton {
     }
     
     // MARK: - Init
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -68,7 +66,6 @@ class HasSecondNameButton: UIButton {
     }
     
     // MARK: - Setup
-    
     private func setupView() {
         setTitle("", for: .normal)
     }

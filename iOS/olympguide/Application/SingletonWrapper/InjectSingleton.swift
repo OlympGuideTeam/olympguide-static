@@ -7,7 +7,6 @@
 
 @propertyWrapper
 struct InjectSingleton<T> {
-    
     private var instance: T
     
     init() {

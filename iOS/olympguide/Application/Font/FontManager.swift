@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FontManager {
+final class FontManager {
     static let shared = FontManager()
     
     var fontFamilyName: String = "MontserratAlternates"
@@ -22,7 +22,13 @@ class FontManager {
         size: CGFloat? = nil
     ) -> UIFont {
         let baseSize: CGFloat = style.fontSize
-        let finalSize = (size ?? baseSize) * globalFontScale
+        var finalSize = (size ?? baseSize)
+        switch style {
+        case .titleLbel, .largeTitleLabel/*, .emptyTableLabel*/:
+            finalSize = finalSize * globalFontScale
+        default:
+            break
+        }
         let weight = weight ?? style.fontWeight
         
         let fontName = "\(fontFamilyName)-\(weight.rawValue)"

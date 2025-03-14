@@ -10,10 +10,6 @@ import Foundation
 // MARK: - Business Logic
 protocol FavoriteProgramsBusinessLogic {
     func loadPrograms(with request: FavoritePrograms.Load.Request)
-    func likeProgram(_ univer: UniversityModel, _ program: ProgramShortModel)
-    func handleBatchError(programID: Int)
-    func handleBatchSuccess(programID: Int, isFavorite: Bool)
-    func dislikeProgram(at indexPath: IndexPath)
 }
 
 // MARK: - Data Store
@@ -24,11 +20,13 @@ protocol FavoriteProgramsDataStore {
 // MARK: - Presentation Logic
 protocol FavoriteProgramsPresentationLogic {
     func presentLoadPrograms(with response: FavoritePrograms.Load.Response)
+    func presentSetFavorite(at indexPath: IndexPath)
 }
 
 // MARK: - Display Logic
 protocol FavoriteProgramsDisplayLogic: AnyObject {
     func displayLoadProgramsResult(with viewModel: FavoritePrograms.Load.ViewModel)
+    func displaySetFavoriteResult(at indexPath: IndexPath)
 }
 
 // MARK: - Routing Logic

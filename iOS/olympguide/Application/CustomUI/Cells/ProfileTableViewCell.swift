@@ -8,34 +8,28 @@
 import UIKit 
 
 class ProfileTableViewCell: UITableViewCell {
+    typealias Constants = AllConstants.ProfileTableViewCell
+    typealias Common = AllConstants.Common
     
     static let reuseIdentifier = "ProfileTableViewCell"
     
     let label = UILabel()
     private let detailLabel = UILabel()
-    private let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+    private let chevronImageView = UIImageView(image: Constants.Images.chevronImage)
     private let separatorLine = UIView()
 
-    // MARK: - Инициализация
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         label.font = FontManager.shared.font(for: .commonInformation)
         
         detailLabel.font = FontManager.shared.font(for: .additionalInformation)
-        detailLabel.textColor = .gray
+        detailLabel.textColor = Common.Colors.additionalText
         
-        chevronImageView.tintColor = .black
+        chevronImageView.tintColor = Constants.Colors.chevronColor
         
-        separatorLine.backgroundColor = UIColor(hex: "#E7E7E7")
-        
-        // Добавляем сабвью один раз
-        contentView.addSubview(label)
-        contentView.addSubview(detailLabel)
-        contentView.addSubview(chevronImageView)
-        contentView.addSubview(separatorLine)
-        
-        setupConstraints()
+        separatorLine.backgroundColor = Common.Colors.separator
+        configureConstraints()
     }
     
     @available(*, unavailable)
@@ -43,30 +37,34 @@ class ProfileTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Публичный метод для конфигурации
+    
+    private func configureConstraints() {
+        contentView.addSubview(label)
+        contentView.addSubview(detailLabel)
+        contentView.addSubview(chevronImageView)
+        contentView.addSubview(separatorLine)
+        
+        chevronImageView.pinCenterY(to: contentView.centerYAnchor)
+        chevronImageView.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+        chevronImageView.setWidth(Constants.Dimensions.chevronWidth)
+        chevronImageView.setHeight(Constants.Dimensions.chevronHeight)
+        
+        label.pinTop(to: contentView.topAnchor, Constants.Dimensions.verticalMargin)
+        label.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        
+        detailLabel.pinTop(to: label.bottomAnchor, Constants.Dimensions.itemSpacing)
+        detailLabel.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        detailLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.verticalMargin)
+        
+        separatorLine.pinLeft(to: contentView.leadingAnchor, Common.Dimensions.horizontalMargin)
+        separatorLine.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+        separatorLine.pinBottom(to: contentView.bottomAnchor)
+        separatorLine.setHeight(1)
+    }
+    
     func configure(title: String, detail: String? = nil) {
         label.text = title
         detailLabel.text = detail
-    }
-    
-    // MARK: - Пример метода для установки констрейнов
-    private func setupConstraints() {
-        chevronImageView.pinCenterY(to: contentView.centerYAnchor)
-        chevronImageView.pinRight(to: contentView.trailingAnchor, 20)
-        chevronImageView.setWidth(13)
-        chevronImageView.setHeight(22)
-        
-        label.pinTop(to: contentView.topAnchor, 21)
-        label.pinLeft(to: contentView.leadingAnchor, 20)
-        
-        detailLabel.pinTop(to: label.bottomAnchor, 4)
-        detailLabel.pinLeft(to: contentView.leadingAnchor, 20)
-        detailLabel.pinBottom(to: contentView.bottomAnchor, 21)
-        
-        separatorLine.pinLeft(to: contentView.leadingAnchor, 20)
-        separatorLine.pinRight(to: contentView.trailingAnchor, 20)
-        separatorLine.pinBottom(to: contentView.bottomAnchor)
-        separatorLine.setHeight(1)
     }
     
     func hideSeparator(_ hide: Bool) {

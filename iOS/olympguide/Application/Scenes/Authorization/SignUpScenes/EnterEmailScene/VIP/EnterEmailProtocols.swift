@@ -7,11 +7,10 @@
 
 // MARK: - Business Logic
 protocol EnterEmailBusinessLogic {
-    func sendCode(request: EnterEmailModels.SendCode.Request)
+    func sendCode(with request: EnterEmailModels.SendCode.Request)
 }
 
 // MARK: - Data Store
-// Храним данные, которые могут потребоваться при переходе на другой экран
 protocol EnterEmailDataStore {
     var email: String? { get set }
     var time: Int? { get set }
@@ -19,12 +18,12 @@ protocol EnterEmailDataStore {
 
 // MARK: - Presentation Logic
 protocol EnterEmailPresentationLogic {
-    func presentSendCode(response: EnterEmailModels.SendCode.Response)
+    func presentSendCode(with response: EnterEmailModels.SendCode.Response)
 }
 
 // MARK: - Display Logic
 protocol EnterEmailDisplayLogic: AnyObject {
-    func displaySendCodeResult(viewModel: EnterEmailModels.SendCode.ViewModel)
+    func displaySendCodeResult(with viewModel: EnterEmailModels.SendCode.ViewModel)
 }
 
 // MARK: - Routing Logic

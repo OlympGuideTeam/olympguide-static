@@ -11,32 +11,38 @@ enum NetworkError: LocalizedError {
     case invalidURL
     case noData
     case decodingError
-    case serverError(message: String?)
-    case previousCodeNotExpired(time: Int)
+    case serverError
+    case internalServerError
+    case uniqueViolation
+    case userNotFound
+    case invalidPassword
+    case invalidCode
     case unknown(message: String?)
-    case internalServerError(message: String?)
-    case uniqueViolation(message: String?)
-    case userNotFound(message: String?)
-    case invalidPassword(message: String?)
+    case previousCodeNotExpired(time: Int)
+    
+    private static let errorMapping: [String: NetworkError] = [
+        "InvalidURL": .invalidURL,
+        "NoData": .noData,
+        "DecodingError": .decodingError,
+        "ServerError": .serverError,
+        "InternalServerError": .internalServerError,
+        "UniqueViolation": .uniqueViolation,
+        "UserNotFound": .userNotFound,
+        "InvalidPassword": .invalidPassword,
+        "InvalidCode": .invalidCode
+    ]
     
     init?(serverType: String, time: Int? = nil, message: String? = nil) {
-        switch serverType {
-        case "PreviousCodeNotExpired":
+        if serverType == "PreviousCodeNotExpired" {
             if let time = time {
                 self = .previousCodeNotExpired(time: time)
             } else {
                 self = .unknown(message: "PreviousCodeNotExpired without time")
             }
-        case "InternalServerError":
-            self = .internalServerError(message: message)
-        case "UniqueViolation":
-            self = .uniqueViolation(message: message)
-        case "UserNotFound":
-            self = .userNotFound(message: message)
-        case "InvalidPassword":
-            self = .invalidPassword(message: message)
-        default:
-            self = .serverError(message: message)
+        } else if let mappedError = NetworkError.errorMapping[serverType] {
+            self = mappedError
+        } else {
+            self = .unknown(message: message)
         }
     }
     
@@ -48,21 +54,22 @@ enum NetworkError: LocalizedError {
             return "No data from server"
         case .decodingError:
             return "Error while decoding server response"
-        case .serverError(let message):
-            return message ?? "Unknown server error"
+        case .serverError:
+            return "Потеряна связь с сервером"
         case .previousCodeNotExpired:
-            // Если хотим, чтобы в описании писалось время
             return "Previous code is still valid"
-        case .unknown(let message):
-            return message
-        case .internalServerError(message: let message):
-            return message
-        case .uniqueViolation(message: _):
+        case .internalServerError:
+            return "ААААААА СЕНЯЯ ПОЧИНИИИИИ\n(напишите пожалуйста о произошеддшем нам, мы всё починим...)"
+        case .uniqueViolation:
             return "Пользователь с такой почтой уже существует"
-        case .userNotFound(message: _):
+        case .userNotFound:
             return "Пользователь с такой почтой не найден"
-        case .invalidPassword(message: _):
+        case .invalidPassword:
             return "Неверный пароль"
+        case .invalidCode:
+            return "Неверный код"
+        case .unknown(let message):
+            return message ?? "Произошла неизвестная ошибка"
         }
     }
 }

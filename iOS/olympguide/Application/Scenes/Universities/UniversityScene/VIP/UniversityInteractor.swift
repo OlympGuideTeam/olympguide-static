@@ -6,18 +6,34 @@
 //
 
 import Foundation
+import Combine
 
+// MARK: - UniversityInteractor
 final class UniversityInteractor: UniversityDataStore, ProgramsDataStore {
-    var groupsOfPrograms: [GroupOfProgramsModel] = []
-    var university: UniversityModel?
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
     
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    var groupsOfPrograms: [GroupOfProgramsModel] = []
+    
+    var university: UniversityModel?
     var universityID: Int?
+    var isFavorite: Bool?
     
     var presenter: (UniversityPresentationLogic & ProgramsPresentationLogic)?
-    
     var worker = UniversityWorker()
+    
+    init() {
+        setupUniversityBindings()
+        setupProgramsBindings()
+    }
 }
 
+// MARK: - UniversityBusinessLogic
 extension UniversityInteractor : UniversityBusinessLogic {
     func loadUniversity(with request: University.Load.Request) {
         universityID = request.universityID
@@ -50,20 +66,17 @@ extension UniversityInteractor : UniversityBusinessLogic {
         ) { [weak self] result in
             switch result {
             case .success:
-                let response = University.Favorite.Response(
-                    error: nil
-                )
+                let response = University.Favorite.Response(error: nil)
                 self?.presenter?.presentToggleFavorite(with: response)
             case .failure(let error):
-                let response = University.Favorite.Response(
-                    error: error
-                )
+                let response = University.Favorite.Response(error: error)
                 self?.presenter?.presentToggleFavorite(with: response)
             }
         }
     }
 }
     
+// MARK: - ProgramsBusinessLogic
 extension UniversityInteractor : ProgramsBusinessLogic {
     func loadPrograms(with request: Programs.Load.Request) {
         guard let university = request.university else {return}
@@ -87,15 +100,64 @@ extension UniversityInteractor : ProgramsBusinessLogic {
         }
     }
     
-    func restoreFavorite(at indexPath: IndexPath) -> Bool {
-        groupsOfPrograms[indexPath.section].programs[indexPath.row].like 
-    }
-    
-    func setFavorite(at indexPath: IndexPath, isFavorite: Bool) {
-        groupsOfPrograms[indexPath.section].programs[indexPath.row].like  = isFavorite
-    }
-    
     func program(at indexPath: IndexPath) -> ProgramShortModel {
         groupsOfPrograms[indexPath.section].programs[indexPath.row]
+    }
+}
+
+extension UniversityInteractor {
+    private func setupUniversityBindings() {
+        favoritesManager.universityEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                guard universityID == event.id else { return }
+                switch event {
+                case .added:
+                    presenter?.presentSetFavorite(to: true)
+                case .removed:
+                    presenter?.presentSetFavorite(to: false)
+                case .error:
+                    guard let isFavorite = isFavorite else { return }
+                    presenter?.presentSetFavorite(to: isFavorite)
+                case .access(_, let isFavorite):
+                    self.isFavorite = isFavorite
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func setupProgramsBindings() {
+        favoritesManager.programEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                guard
+                    let indexPath = getIndexPath(for: event.programId)
+                else { return }
+                switch event {
+                case .added:
+                    presenter?.presentSetFavorite(at: indexPath, isFavorite: true)
+                case .removed:
+                    presenter?.presentSetFavorite(at: indexPath, isFavorite: false)
+                case .error:
+                    let isFavorite = groupsOfPrograms[indexPath.section].programs[indexPath.row].like
+                    presenter?.presentSetFavorite(at: indexPath, isFavorite: isFavorite)
+                case .access(_, let isFavorite):
+                    groupsOfPrograms[indexPath.section].programs[indexPath.row].like  = isFavorite
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func getIndexPath(for programId: Int) -> IndexPath? {
+        guard
+            let groupIndex = groupsOfPrograms.firstIndex(where: { group in
+                group.programs.contains { $0.programID == programId }
+            })
+        else { return nil }
+        
+        return groupsOfPrograms[groupIndex].programs.firstIndex(where: { $0.programID == programId })
+            .map { IndexPath(row: $0, section: groupIndex) }
     }
 }

@@ -26,8 +26,10 @@ final class FieldViewController: UIViewController {
     
     private let field: GroupOfFieldsModel.FieldModel
     
-    private let informationStackView: UIStackView = UIStackView()
-    private let tableView: UITableView = UITableView()
+    private let informationStackView: InformationAboutFieldStack = InformationAboutFieldStack()
+    
+    private let tableView: UICustomTbleView = UICustomTbleView()
+    private let dataSource: FieldDataSource = FieldDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     var programs: [ProgramsByUniversityViewModel] = []
@@ -44,6 +46,7 @@ final class FieldViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setuoDataSource()
         setupFilterItems()
         setupFilterSortView()
         configureUI()
@@ -85,14 +88,8 @@ extension FieldViewController {
         view.backgroundColor = .white
         configureNavigationBar()
         configureInformationStackView()
-        configureNameLabel()
-        configureDegreeLabel()
-        configureProgramsTitleLabel()
-        configureFilterSortView()
-        configureLastSpace()
         configureRefreshControl()
         configureTableView()
-        configureLastSpace()
     }
     
     private func configureNavigationBar() {
@@ -108,87 +105,15 @@ extension FieldViewController {
     }
     
     private func configureInformationStackView() {
-        informationStackView.axis = .vertical
-        informationStackView.alignment = .fill
-        informationStackView.distribution = .fill
-        informationStackView.isLayoutMarginsRelativeArrangement = true
-        informationStackView.layoutMargins = UIEdgeInsets(
-            top: 10,
-            left: 20,
-            bottom: 0,
-            right: 20
+        informationStackView.configure(
+            with: field,
+            filterSortView: filterSortView
         )
-    }
-    
-    private func configureNameLabel() {
-        let nameLabel = UILabel()
-        nameLabel.textColor = .black
-        nameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
-        nameLabel.text = field.name
-        nameLabel.numberOfLines = 0
-        nameLabel.textAlignment = .left
-        nameLabel.lineBreakMode = .byWordWrapping
-        nameLabel.calculateHeight(with: view.frame.width - 20 - 20)
-        informationStackView.addArrangedSubview(nameLabel)
-    }
-    
-    private func configureDegreeLabel() {
-        informationStackView.pinToPrevious(17)
-        let degreeLabel = UILabel()
-        degreeLabel.textColor = .black
-        degreeLabel.font = FontManager.shared.font(for: .additionalInformation)
-        degreeLabel.text = "Степень: \(field.degree)"
-        degreeLabel.calculateHeight(with: view.frame.width - 20 - 20)
-        informationStackView.addArrangedSubview(degreeLabel)
-    }
-    
-    private func configureProgramsTitleLabel() {
-        informationStackView.pinToPrevious(17)
-        let programsTitleLabel: UILabel = UILabel()
-        programsTitleLabel.text = "Программы"
-        programsTitleLabel.font = FontManager.shared.font(for: .tableTitle)
-        programsTitleLabel.textColor = .black
-        programsTitleLabel.calculateHeight(with: view.frame.width - 20 - 20)
-        informationStackView.addArrangedSubview(programsTitleLabel)
         
-        let searchButton = getSearchButton()
-        
-        searchButton.action = { [weak self] in
+        informationStackView.searchTapped = { [weak self] in
             guard let self else { return }
-            self.router?.routeToSearch(fieldId: self.field.fieldId)
+            router?.routeToSearch(fieldId: field.fieldId)
         }
-        informationStackView.addSubview(searchButton)
-        searchButton.pinRight(to: informationStackView.trailingAnchor, 20)
-        searchButton.pinCenterY(to: programsTitleLabel)
-    }
-    
-    private func getSearchButton() -> UIClosureButton {
-        let searchButton = UIClosureButton()
-        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        searchButton.tintColor = .black
-        searchButton.contentHorizontalAlignment = .fill
-        searchButton.contentVerticalAlignment = .fill
-        searchButton.imageView?.contentMode = .scaleAspectFit
-        
-        
-        searchButton.setWidth(28)
-        searchButton.setHeight(28)
-        
-        return searchButton
-    }
-    
-    private func configureFilterSortView() {
-        informationStackView.pinToPrevious(13)
-        
-        informationStackView.addArrangedSubview(filterSortView)
-        filterSortView.pinLeft(to: informationStackView.leadingAnchor)
-    }
-    
-    private func configureLastSpace() {
-        let spaceView = UIView()
-        spaceView.setHeight(5)
-        
-        informationStackView.addArrangedSubview(spaceView)
     }
     
     private func configureRefreshControl() {
@@ -204,7 +129,6 @@ extension FieldViewController {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(
             ProgramTableViewCell.self,
@@ -212,37 +136,16 @@ extension FieldViewController {
         )
         
         tableView.register(
-            UIUniversityHeader.self,
-            forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
+            UIUniversityHeaderCell.self,
+            forCellReuseIdentifier: UIUniversityHeaderCell.identifier
         )
         
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.backgroundColor = .white
-        tableView.separatorStyle = .none
+        tableView.dataSource = dataSource
+        tableView.delegate = dataSource
+
         tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
-        
-        informationStackView.setNeedsLayout()
-        informationStackView.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let fittingSize = informationStackView.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-        
-        informationStackView.frame.size.height = fittingSize.height
-        
-        tableView.tableHeaderView = informationStackView
-        
-        if #available(iOS 15.0, *) {
-            tableView.sectionHeaderTopPadding = 0
-        }
+
+        tableView.addHeaderView(informationStackView)
     }
     
     // MARK: - Actions
@@ -257,95 +160,44 @@ extension FieldViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension FieldViewController : UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return programs.count
-    }
-    
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int {
-        programs[section].isExpanded ? programs[section].programs.count : 0
-    }
-    
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: ProgramTableViewCell.identifier
-        ) as? ProgramTableViewCell
-        else { return UITableViewCell() }
+extension FieldViewController {
+    private func setuoDataSource() {
+        dataSource.viewController = self
         
-        cell.configure(with: programs[indexPath.section].programs[indexPath.row])
-        cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
-            if !isFavorite {
-                self?.favoritesManager.removeProgramFromFavorites(programID: sender.tag)
-            } else {
-                guard
-                    let self,
-                    let university = self.interactor?.getUniversity(at: indexPath.row),
-                    let program = self.interactor?.getProgram(at: indexPath)
-                else { return }
-                favoritesManager.addProgramToFavorites(university, program)
-            }
+        dataSource.onFavoriteProgramTapped = { [weak self] indexPath, isFavorite in
+            self?.favoriteButtonTapped(indexPath, isFavorite)
         }
-        cell.hideSeparator(indexPath.row == programs[indexPath.section].programs.count - 1)
-        return cell
-    }
-}
-
-// MARK: - UITableViewDelegate
-extension FieldViewController : UITableViewDelegate {
-    func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        router?.routeToProgram(indexPath: indexPath)
+        
+        dataSource.routeToProgram = { [weak self] indexPath in
+            self?.router?.routeToProgram(indexPath: indexPath)
+        }
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        viewForHeaderInSection section: Int
-    ) -> UIView? {
+    func favoriteButtonTapped(_ indexPath: IndexPath, _ isFavorite: Bool) {
+        programs[indexPath.section].programs[indexPath.row].like = isFavorite
         
-        guard let header = tableView.dequeueReusableHeaderFooterView(
-            withIdentifier: UIUniversityHeader.identifier
-        ) as? UIUniversityHeader
-        else { return nil }
-        
-        header.configure(
-            with: programs[section].university,
-            isExpanded: programs[section].isExpanded
-        )
-        
-        header.tag = section
-        
-        header.toggleSection = { [weak self] section in
-            guard let self = self else { return }
-            var currentOffset = tableView.contentOffset
-            let headerRectBefore = tableView.rectForHeader(inSection: section)
-            
-            programs[section].isExpanded.toggle()
-            
-            UIView.performWithoutAnimation {
-                tableView.reloadSections(IndexSet(integer: section), with: .none)
-                tableView.layoutIfNeeded()
-            }
-            let headerRectAfter = tableView.rectForHeader(inSection: section)
-            
-            let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
-            currentOffset.y += deltaY
-            tableView.setContentOffset(currentOffset, animated: false)
+        let program = programs[indexPath.section].programs[indexPath.row]
+        if !isFavorite {
+            favoritesManager.removeProgramFromFavorites(programID: program.programID)
+        } else {
+            guard
+                let university = interactor?.getUniversity(at: indexPath.section),
+                let program = interactor?.getProgram(at: indexPath)
+            else { return }
+            favoritesManager.addProgramToFavorites(university, program)
         }
-        return header
     }
 }
 
 // MARK: - FieldDisplayLogic
 extension FieldViewController : FieldDisplayLogic {
+    func displaySetFavoriteResult(at indexPath: IndexPath, _ isFavorite: Bool) {
+        if programs[indexPath.section].programs[indexPath.row].like == isFavorite { return }
+        programs[indexPath.section].programs[indexPath.row].like = isFavorite
+        
+        self.tableView.reloadData()
+    }
+    
     func displayLoadProgramsResult(with viewModel: Field.LoadPrograms.ViewModel) {
         programs = viewModel.programs
         
@@ -356,6 +208,7 @@ extension FieldViewController : FieldDisplayLogic {
     }
 }
 
+// MARK: - OptionsViewControllerDelegate
 extension FieldViewController: OptionsViewControllerDelegate {
     func didSelectOption(
         _ indices: Set<Int>,
@@ -383,7 +236,7 @@ extension FieldViewController: OptionsViewControllerDelegate {
     }
 }
 
-
+// MARK: - Filterble
 extension FieldViewController : Filterble {
     func deleteFilter(forItemAt index: Int) {
         let item = filterItems[index]
@@ -400,47 +253,6 @@ extension FieldViewController {
             .sink { [weak self] isAuth in
                 if isAuth {
                     self?.loadPrograms()
-                }
-            }.store(in: &cancellables)
-    }
-    
-    private func setupProgramsBindings() {
-        favoritesManager.programEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self else { return }
-                switch event {
-                case .added(_, let program):
-                    guard
-                        let indexPath = interactor?.getIndexPath(to: program.programID)
-                    else { return }
-                    if programs[indexPath.section].programs[indexPath.row].like == true { return }
-                    programs[indexPath.section].programs[indexPath.row].like = true
-        
-                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
-                    
-                case .removed(let programId):
-                    guard
-                        let indexPath = interactor?.getIndexPath(to: programId)
-                    else { return }
-                    
-                    if programs[indexPath.section].programs[indexPath.row].like == false { return }
-                    programs[indexPath.section].programs[indexPath.row].like = false
-        
-                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
-                case .error(let programId):
-                    guard
-                        let indexPath = interactor?.getIndexPath(to: programId)
-                    else { return }
-
-                    if programs[indexPath.section].programs[indexPath.row].like == interactor?.restoreFavorite(at: indexPath) {
-                        return
-                    }
-                    programs[indexPath.section].programs[indexPath.row].like = interactor?.restoreFavorite(at: indexPath) ?? false
-                    
-                    
-                case .access(let programId, let isFavorite):
-                    interactor?.setFavorite(to: programId, isFavorite: isFavorite)
                 }
             }.store(in: &cancellables)
     }

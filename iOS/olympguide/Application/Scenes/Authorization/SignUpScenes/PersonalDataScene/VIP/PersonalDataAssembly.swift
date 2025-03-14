@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 class PersonalDataAssembly {
     static func build(email: String) -> UIViewController {
         let presenter = PersonalDataPresenter()
@@ -16,7 +17,7 @@ class PersonalDataAssembly {
         let router = PersonalDataRouter()
         router.viewController = view
         view.router = router
-        presenter.view = view
+        presenter.viewController = view
         return view
     }
 }

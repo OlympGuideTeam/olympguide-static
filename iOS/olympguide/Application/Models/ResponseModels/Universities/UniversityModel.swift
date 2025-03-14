@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 06.03.2025.
 //
 
-struct UniversityModel: Codable {
+struct UniversityModel : Codable {
     let email: String?
     let site: String?
     let description: String?
@@ -19,7 +19,7 @@ struct UniversityModel: Codable {
     // TODO: - Why there is optional?...
     var like: Bool?
     
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys : String, CodingKey {
         case universityID = "university_id"
         case shortName = "short_name"
         case name, logo, region, like, email, site, description, phone

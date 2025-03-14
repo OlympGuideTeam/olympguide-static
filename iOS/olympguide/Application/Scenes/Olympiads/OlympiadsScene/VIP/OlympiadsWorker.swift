@@ -10,7 +10,7 @@ import Foundation
 protocol OlympiadsWorkerLogic {
     func fetchOlympiads(
         with params: [Param],
-        completion: @escaping (Result<[OlympiadModel]?, Error>) -> Void
+        completion: @escaping (Result<[OlympiadModel], Error>) -> Void
     )
 }
 
@@ -21,7 +21,7 @@ final class OlympiadsWorker : OlympiadsWorkerLogic {
 
     func fetchOlympiads(
         with params: [Param],
-        completion: @escaping (Result<[OlympiadModel]?, Error>) -> Void
+        completion: @escaping (Result<[OlympiadModel], Error>) -> Void
     ) {
         var queryItems: [URLQueryItem] = []
 
@@ -38,7 +38,7 @@ final class OlympiadsWorker : OlympiadsWorkerLogic {
         ) { (result: Result<[OlympiadModel]?, NetworkError>) in
             switch result {
             case .success(let olympiads):
-                completion(.success(olympiads))
+                completion(.success(olympiads ?? []))
             case .failure(let error):
                 completion(.failure(error))
             }

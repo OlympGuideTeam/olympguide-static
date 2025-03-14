@@ -20,18 +20,14 @@ final class OlympiadPresenter : OlympiadPresentationLogic {
             return
         }
         
-        let universitiesViewModel = universitites.map {university in
-            UniversityViewModel(
-                universityID: university.universityID,
-                name: university.name,
-                logoURL: university.logo,
-                region: university.region,
-                like: university.like ?? false
-            )
-        }
+        let universitiesViewModel = universitites.map { $0.toViewModel() }
         
         let viewModel = Olympiad.LoadUniversities.ViewModel(universities: universitiesViewModel)
         viewController?.displayLoadUniversitiesResult(with: viewModel)
+    }
+    
+    func presentSetFavorite(to isFavorite: Bool) {
+        viewController?.displaySetFavorite(to: isFavorite)
     }
 }
 

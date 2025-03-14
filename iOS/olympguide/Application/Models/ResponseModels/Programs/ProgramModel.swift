@@ -16,14 +16,29 @@ struct ProgramModel : Codable {
     let optionalSubjects: [String]
     var like: Bool
     let university: UniversityModel
-    let link: String?
+    let link: String
     
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys : String, CodingKey {
         case programID = "program_id"
         case budgetPlaces = "budget_places"
         case paidPlaces = "paid_places"
         case requiredSubjects = "required_subjects"
         case optionalSubjects = "optional_subjects"
         case name, field, cost, like, link, university
+    }
+    
+    func toShortModel() -> ProgramShortModel {
+        ProgramShortModel(
+            programID: programID,
+            name: name,
+            field: field,
+            budgetPlaces: budgetPlaces,
+            paidPlaces: paidPlaces,
+            cost: cost,
+            requiredSubjects: requiredSubjects,
+            optionalSubjects: optionalSubjects,
+            like: like,
+            link: link
+        )
     }
 }

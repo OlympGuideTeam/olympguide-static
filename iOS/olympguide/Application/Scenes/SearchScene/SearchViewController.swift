@@ -82,29 +82,38 @@ final class SearchViewController<Strategy: SearchStrategy>: UIViewController, No
         tableView.pinBottom(to: view.bottomAnchor)
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         return rawModels.count
     }
     
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            guard let strategy = self.strategy else {
-                let cell = UITableViewCell(
-                    style: .default,
-                    reuseIdentifier: "cell"
-                )
-                return cell
-            }
-            
-            let viewModel = rawModels[indexPath.row]
-            return strategy.configureCell(
-                tableView: tableView,
-                indexPath: indexPath,
-                viewMmodel: viewModel,
-                isSeparatorHidden: indexPath.row == rawModels.count - 1
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
+        guard let strategy = self.strategy else {
+            let cell = UITableViewCell(
+                style: .default,
+                reuseIdentifier: "cell"
             )
+            return cell
         }
+        
+        let viewModel = rawModels[indexPath.row]
+        return strategy.configureCell(
+            tableView: tableView,
+            indexPath: indexPath,
+            viewMmodel: viewModel,
+            isSeparatorHidden: indexPath.row == rawModels.count - 1
+        )
+    }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
         router?.routeToDetails(to: indexPath.row)
     }
@@ -112,7 +121,7 @@ final class SearchViewController<Strategy: SearchStrategy>: UIViewController, No
 
 // MARK: - SearchDisplayLogic
 extension SearchViewController: SearchDisplayLogic {
-    func displayTextDidChange<ViewModel>(viewModel: Search.TextDidChange.ViewModel<ViewModel>) {
+    func displayTextDidChange<ViewModel>(with viewModel: Search.TextDidChange.ViewModel<ViewModel>) {
         guard let items = viewModel.items as? [Strategy.ViewModelType] else {
             return
         }
@@ -123,9 +132,12 @@ extension SearchViewController: SearchDisplayLogic {
 
 // MARK: - CustomTextFieldDelegate
 extension SearchViewController: CustomTextFieldDelegate {
-    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(
+        _ searchBar: CustomTextField,
+        textDidChange text: String
+    ) {
         let request = Search.TextDidChange.Request(query: text)
-        interactor?.textDidChange(request: request)
+        interactor?.textDidChange(with: request)
     }
 }
 

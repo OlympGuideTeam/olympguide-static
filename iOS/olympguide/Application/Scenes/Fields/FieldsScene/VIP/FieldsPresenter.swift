@@ -8,28 +8,16 @@
 import UIKit
 
 final class FieldsPresenter: FieldsPresentationLogic {
+    weak var viewController: (FieldsDisplayLogic & UIViewController)?
     
-    weak var viewController: FieldsDisplayLogic?
-    
-    func presentFields(response: Fields.Load.Response) {
-        let viewModels = response.groupsOfFields.map { groupOfFields in
-            GroupOfFieldsViewModel(
-                name: groupOfFields.name,
-                code: groupOfFields.code,
-                fields: groupOfFields.fields.map { field in
-                    GroupOfFieldsViewModel.FieldViewModel(
-                        name: field.name,
-                        code: field.code
-                    )
-                }
-            )
+    func presentFields(with response: Fields.Load.Response) {
+        if let error = response.error {
+            viewController?.showAlert(with: error.localizedDescription)
         }
+        guard let groupsOfFields = response.groupsOfFields else { return }
+        let viewModels = groupsOfFields.map { $0.toViewModel() }
         
         let viewModel = Fields.Load.ViewModel(groupsOfFields: viewModels)
-        viewController?.displayFields(viewModel: viewModel)
-    }
-    
-    func presentError(message: String) {
-        viewController?.displayError(message: message)
+        viewController?.displayFields(with: viewModel)
     }
 }

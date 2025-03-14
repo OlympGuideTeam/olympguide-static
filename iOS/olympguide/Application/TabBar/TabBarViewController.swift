@@ -20,7 +20,13 @@ final class TabBarViewController: UITabBarController {
         // Icons
         static let universitiesIcon = "graduationcap"
         static let olympiadsIcon = "trophy"
-        static let destinationIcon = "book.pages"
+        static var destinationIcon: String {
+            if #available(iOS 17.0, *) {
+                return "book.pages"
+            } else {
+                return "menucard"
+            }
+        }
         static let profileIcon = "person.crop.circle"
         
         // CustomTabBar layout
@@ -37,6 +43,8 @@ final class TabBarViewController: UITabBarController {
         static let shadowOffset = CGSize(width: 5, height: 5)
         static let shadowRadius: CGFloat = 10
     }
+    
+    static var isMiniScreen: Bool = false
     
     // MARK: - Properties
     let presenter = UniversitiesPresenter()
@@ -132,15 +140,53 @@ final class TabBarViewController: UITabBarController {
         let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
         
         setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
-        configureTabBar()
-        setupCustomTabBar()
-        setupShadow()
         
-        if #available(iOS 18.0, *) {
-            isTabBarHidden = true
-        } else { }
-        
-        setupDoubleTapRecognizers()
+        if TabBarViewController.isMiniScreen {
+            configureCommonTabBar()
+        } else {
+            configureTabBar()
+            setupCustomTabBar()
+            setupShadow()
+            if #available(iOS 18.0, *) {
+                isTabBarHidden = true
+            }
+            turnOffCommonTabBar()
+        }
+    }
+    
+    private func configureCommonTabBar() {
+        if #available(iOS 15.0, *) {
+                let appearance = UITabBarAppearance()
+                appearance.configureWithOpaqueBackground()
+                appearance.backgroundColor = UIColor(hex: "#E0E8FE")
+                tabBar.standardAppearance = appearance
+                tabBar.scrollEdgeAppearance = appearance
+            }
+        tabBar.barTintColor = Constants.customTabBarBackgroundColor
+        tabBar.tintColor = .black
+        additionalSafeAreaInsets.bottom = 0
+        if let vcs = viewControllers {
+            vcs[0].tabBarItem = UITabBarItem(
+                title: Constants.universitiesTitle,
+                image: UIImage(systemName: Constants.universitiesIcon),
+                tag: 0
+            )
+            vcs[1].tabBarItem = UITabBarItem(
+                title: Constants.olympiadsTitle,
+                image: UIImage(systemName: Constants.olympiadsIcon),
+                tag: 1
+            )
+            vcs[2].tabBarItem = UITabBarItem(
+                title: Constants.destinationTitle,
+                image: UIImage(systemName: Constants.destinationIcon),
+                tag: 2
+            )
+            vcs[3].tabBarItem = UITabBarItem(
+                title: Constants.profileTitle,
+                image: UIImage(systemName: Constants.profileIcon),
+                tag: 3
+            )
+        }
     }
     
     // MARK: - Configuration
@@ -166,6 +212,12 @@ final class TabBarViewController: UITabBarController {
         customTabBar.layer.masksToBounds = false
     }
     
+    private func turnOffCommonTabBar() {
+        if let vcs = viewControllers {
+            vcs.forEach { $0.tabBarItem.isEnabled = false }
+        }
+    }
+    
     // MARK: - Helpers
     private func setIcons(tag: Int) {
         [universitiesBtn, olympiadsBtn, destinationBtn, profileBtn].forEach { button in
@@ -173,27 +225,6 @@ final class TabBarViewController: UITabBarController {
             if button.getTag() == tag {
                 button.fillIcon()
             }
-        }
-    }
-    
-    private func setupDoubleTapRecognizers() {
-        customTabBar.arrangedSubviews.forEach { view in
-            let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
-            doubleTap.numberOfTapsRequired = 1
-            doubleTap.cancelsTouchesInView = false
-            doubleTap.delaysTouchesBegan = false
-            doubleTap.delaysTouchesEnded = false
-            view.addGestureRecognizer(doubleTap)
-        }
-    }
-    
-    @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
-        guard let tappedView = sender.view as? TabButton else { return }
-        let tappedTag = tappedView.getTag()
-        
-        if selectedIndex == tappedTag,
-           let navController = viewControllers?[tappedTag] as? UINavigationController {
-            navController.popToRootViewController(animated: true)
         }
     }
 }

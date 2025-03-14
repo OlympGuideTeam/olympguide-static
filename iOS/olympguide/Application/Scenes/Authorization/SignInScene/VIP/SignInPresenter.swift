@@ -10,10 +10,10 @@ import Foundation
 final class SignInPresenter : SignInPresentationLogic {
     weak var viewController: (SignInDisplayLogic & SignInValidationErrorDisplayable)?
     
-    func presentSignIn(_ response: SignInModels.SignIn.Response) {
+    func presentSignIn(with response: SignInModels.SignIn.Response) {
         if response.success {
             let viewModel = SignInModels.SignIn.ViewModel(success: true, errorMessages: nil)
-            viewController?.displaySignInResult(viewModel)
+            viewController?.displaySignInResult(with: viewModel)
             return
         }
         
@@ -23,7 +23,7 @@ final class SignInPresenter : SignInPresentationLogic {
             switch error {
             case .network(let networkError):
                 errorMessages.append(networkError.localizedDescription)
-            case .validation(let validationErrors):
+            case .validation:
                 break
             }
             highlightValidationErrors(error)
@@ -35,7 +35,7 @@ final class SignInPresenter : SignInPresentationLogic {
             success: false,
             errorMessages: errorMessages
         )
-        viewController?.displaySignInResult(viewModel)
+        viewController?.displaySignInResult(with: viewModel)
     }
     
     

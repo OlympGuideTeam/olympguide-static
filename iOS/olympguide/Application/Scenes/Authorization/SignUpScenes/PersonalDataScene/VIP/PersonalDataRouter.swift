@@ -22,7 +22,10 @@ final class PersonalDataRouter : PersonalDataRoutingLogic {
             switch result {
             case .failure:
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    previousViewController?.showAlert(title: "Поздравляем!" ,with: "Вы успешно зарегистрировались")
+                    previousViewController?.showAlert(
+                        title: "Поздравляем!" ,
+                        with: "Вы успешно зарегистрировались"
+                    )
                 }
             case .success:
                 break

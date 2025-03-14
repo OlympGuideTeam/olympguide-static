@@ -7,38 +7,12 @@
 
 import UIKit
 
-// MARK: - CellConstants
-fileprivate enum CellConstants {
-    enum Identifier {
-        static let cellIdentifier = "ProgramTableViewCell"
-    }
-    
-    enum Images {
-        static let bookmark = "bookmark"
-        static let bookmarkFill = "bookmark.fill"
-        static let placeholder = "photo"
-    }
-    
-    enum Colors {
-        static let separatorColor = UIColor(hex: "#E7E7E7")
-        static let regionTextColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
-    }
-    
-    enum Fonts {
-        static let nameLabelFont = FontManager.shared.font(for: .commonInformation)
-        static let regionLabelFont = FontManager.shared.font(for: .region)
-    }
-    
-    enum Dimensions {
-        static let interItemSpacing: CGFloat = 15
-        static let favoriteButtonSize: CGFloat = 22
-    }
-}
-
 final class ProgramTableViewCell: UICellWithFavoriteButton {
+    typealias Constants = AllConstants.ProgramTableViewCell
+    typealias Common = AllConstants.Common
     
     // MARK: - Variables
-    static let identifier = CellConstants.Identifier.cellIdentifier
+    static let identifier = "ProgramTableViewCell"
     
     private let informationStack: UIStackView = UIStackView()
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
@@ -47,6 +21,16 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
     private let subjectsStack: SubjectsStack = SubjectsStack()
     private let separatorLine: UIView = UIView()
     
+    var leftConstraint: CGFloat = Constants.Dimensions.leadingMargin {
+        didSet {
+            for constraint in contentView.constraints {
+                if constraint.firstAttribute == .leading || constraint.firstAttribute == .left {
+                    constraint.constant = leftConstraint
+                }
+            }
+            contentView.layoutIfNeeded()
+        }
+    }
     
     // MARK: - Lifecycle
     override init(
@@ -79,9 +63,12 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         
         contentView.addSubview(informationStack)
         
-        informationStack.pinTop(to: contentView.topAnchor, 5)
-        informationStack.pinLeft(to: contentView.leadingAnchor, 40)
-        informationStack.pinRight(to: contentView.trailingAnchor, 57)
+        informationStack.pinTop(to: contentView.topAnchor, Constants.Dimensions.informationTopMargin)
+        informationStack.pinLeft(to: contentView.leadingAnchor, leftConstraint)
+        informationStack.pinRight(
+            to: contentView.trailingAnchor,
+            Common.Dimensions.horizontalMargin + Common.Dimensions.favoriteButtonSize + Constants.Dimensions.informationRightMargin
+        )
     }
     
     private func configureFavoriteButton() {
@@ -89,57 +76,57 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         favoriteButton.contentHorizontalAlignment = .fill
         favoriteButton.contentVerticalAlignment = .fill
         favoriteButton.imageView?.contentMode = .scaleAspectFit
-        favoriteButton.setImage(UIImage(systemName: "bookmark"), for: .normal)
+        favoriteButton.setImage(Common.Images.unlike, for: .normal)
         
         contentView.addSubview(favoriteButton)
         
-        favoriteButton.pinTop(to: contentView.topAnchor, 6)
-        favoriteButton.pinRight(to: contentView.trailingAnchor, 20)
-        favoriteButton.setWidth(CellConstants.Dimensions.favoriteButtonSize)
-        favoriteButton.setHeight(CellConstants.Dimensions.favoriteButtonSize)
+        favoriteButton.pinTop(to: contentView.topAnchor, Constants.Dimensions.informationTopMargin)
+        favoriteButton.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
+        favoriteButton.setWidth(Common.Dimensions.favoriteButtonSize)
+        favoriteButton.setHeight(Common.Dimensions.favoriteButtonSize)
     }
     
     private func configureBudgetLabel() {
-        budgtetLabel.setText(regular: "Бюджетных мест  ")
+        budgtetLabel.setText(regular: Constants.Strings.budgetText)
         
         contentView.addSubview(budgtetLabel)
         
-        budgtetLabel.pinTop(to: informationStack.bottomAnchor, 11)
-        budgtetLabel.pinLeft(to: contentView.leadingAnchor, 40)
+        budgtetLabel.pinTop(to: informationStack.bottomAnchor, Constants.Dimensions.blocksSpacing)
+        budgtetLabel.pinLeft(to: contentView.leadingAnchor, leftConstraint)
     }
     
     private func configurePaidLabel() {
-        paidLabel.setText(regular: "Платных мест  ")
+        paidLabel.setText(regular: Constants.Strings.paidText)
         
         contentView.addSubview(paidLabel)
         
-        paidLabel.pinTop(to: budgtetLabel.bottomAnchor, 7)
-        paidLabel.pinLeft(to: contentView.leadingAnchor, 40)
+        paidLabel.pinTop(to: budgtetLabel.bottomAnchor, Constants.Dimensions.spacing)
+        paidLabel.pinLeft(to: contentView.leadingAnchor, leftConstraint)
     }
     
     private func configureCostLabel() {
-        costLabel.setText(regular: "Стоимость  ")
+        costLabel.setText(regular: Constants.Strings.costText)
         
         contentView.addSubview(costLabel)
         
-        costLabel.pinTop(to: paidLabel.bottomAnchor, 7)
-        costLabel.pinLeft(to: contentView.leadingAnchor, 40)
+        costLabel.pinTop(to: paidLabel.bottomAnchor, Constants.Dimensions.spacing)
+        costLabel.pinLeft(to: contentView.leadingAnchor, leftConstraint)
     }
     
     private func configureSubjectsStack() {
         contentView.addSubview(subjectsStack)
         
-        subjectsStack.pinTop(to: costLabel.bottomAnchor, 11)
-        subjectsStack.pinLeft(to: contentView.leadingAnchor, 40)
+        subjectsStack.pinTop(to: costLabel.bottomAnchor, Constants.Dimensions.blocksSpacing)
+        subjectsStack.pinLeft(to: contentView.leadingAnchor, leftConstraint)
     }
     
     private func configureSeparatorLine() {
-        separatorLine.backgroundColor = UIColor(hex: "#D9D9D9")
+        separatorLine.backgroundColor = Common.Colors.separator
         
         contentView.addSubview(separatorLine)
-        separatorLine.pinTop(to: subjectsStack.bottomAnchor, 11)
-        separatorLine.pinLeft(to: contentView.leadingAnchor, 40)
-        separatorLine.pinRight(to: contentView.trailingAnchor, 20)
+        separatorLine.pinTop(to: subjectsStack.bottomAnchor, Constants.Dimensions.blocksSpacing)
+        separatorLine.pinLeft(to: contentView.leadingAnchor, leftConstraint)
+        separatorLine.pinRight(to: contentView.trailingAnchor, Common.Dimensions.horizontalMargin)
         separatorLine.setHeight(1)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
     }
@@ -147,44 +134,11 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
     func configure(
         with viewModel: ProgramViewModel
     ) {
-        informationStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let code = viewModel.code
-        for char in code {
-            let label = UILabel()
-            label.text = String(char)
-            label.font = CellConstants.Fonts.nameLabelFont
-            label.textColor = .black
-            label.textAlignment = .center
-            if char == "." {
-                label.setWidth(3)
-            } else {
-                label.setWidth(11)
-            }
-            informationStack.addArrangedSubview(label)
-        }
-        
-        let spaceLabel1 = UILabel()
-        spaceLabel1.setWidth(4)
-        let spaceLabel2 = UILabel()
-        spaceLabel2.setWidth(2)
-        informationStack.addArrangedSubview(spaceLabel1)
-        let dashLabel = UILabel()
-        dashLabel.text = "-"
-        dashLabel.font = CellConstants.Fonts.nameLabelFont
-        dashLabel.textColor = .black
-        dashLabel.textAlignment = .center
-        dashLabel.setWidth(11)
-        informationStack.addArrangedSubview(dashLabel)
-        informationStack.addArrangedSubview(spaceLabel2)
-        
-        let nameLabel = UILabel()
-        nameLabel.text = viewModel.name
-        nameLabel.font = CellConstants.Fonts.nameLabelFont
-        nameLabel.textColor = .black
-        nameLabel.numberOfLines = 0
-        nameLabel.textAlignment = .left
-        nameLabel.lineBreakMode = .byWordWrapping
-        informationStack.addArrangedSubview(nameLabel)
+        informationStack.configure(
+            with: viewModel.code,
+            and: viewModel.name,
+            width: nil
+        )
         
         budgtetLabel.setBoldText(String(viewModel.budgetPlaces))
         paidLabel.setBoldText(String(viewModel.paidPlaces))
@@ -195,11 +149,11 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         )
         
         let isFavorite = viewModel.like
-        let newImageName = isFavorite ? "bookmark.fill" : "bookmark"
+        let newImage = isFavorite ? Common.Images.like : Common.Images.unlike
         
         favoriteButton.tag = viewModel.programID
         
-        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        favoriteButton.setImage(newImage, for: .normal)
         
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
         
@@ -221,9 +175,9 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
     
     // MARK: - Objc funcs
     @objc private func favoriteButtonTapped(_ sender: UIButton) {
-        let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: "bookmark.fill")
-        let newImageName = isFavorite ? "bookmark" : "bookmark.fill"
-        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        let isFavorite = favoriteButton.image(for: .normal) == Common.Images.like
+        let newImage = isFavorite ? Common.Images.unlike : Common.Images.like
+        favoriteButton.setImage(newImage, for: .normal)
         favoriteButtonTapped?(sender, !isFavorite)
     }
 }

@@ -7,23 +7,17 @@
 
 // MARK: - Business Logic
 protocol PersonalDataBusinessLogic {
-    func signUp(request: PersonalData.SignUp.Request)
+    func signUp(with request: PersonalData.SignUp.Request)
 }
-
-//// MARK: - Data Store
-//protocol PersonalDataEmailDataStore {
-//    var email: String? { get set }
-//    var time: Int? { get set }
-//}
 
 // MARK: - Presentation Logic
 protocol PersonalDataPresentationLogic {
-    func presentSignUp(response: PersonalData.SignUp.Response)
+    func presentSignUp(with response: PersonalData.SignUp.Response)
 }
 
 // MARK: - Display Logic
 protocol PersonalDataDisplayLogic: AnyObject {
-    func displaySignUp(viewModel: PersonalData.SignUp.ViewModel)
+    func displaySignUp(with viewModel: PersonalData.SignUp.ViewModel)
 }
 
 // MARK: - Routing Logic

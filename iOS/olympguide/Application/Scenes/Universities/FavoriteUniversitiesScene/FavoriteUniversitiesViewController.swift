@@ -35,7 +35,7 @@ fileprivate enum Constants {
     }
 }
 
-class FavoriteUniversitiesViewController: UIViewController {
+class FavoriteUniversitiesViewController : UIViewController {
     @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
@@ -58,30 +58,13 @@ class FavoriteUniversitiesViewController: UIViewController {
         configureRefreshControl()
         configureTableView()
         
-        interactor?.loadUniversities(
-            Universities.Load.Request(params: .init())
-        )
+        let request = Universities.Load.Request(params: .init())
+        interactor?.loadUniversities(with: request)
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
-        setupBindings()
     }
-    
-//    override func viewDidDisappear(_ animated: Bool) {
-//        super.viewDidDisappear(animated)
-//        universities = universities.map { university in
-//            var modifiedUniversity = university
-//            modifiedUniversity.like = isFavorite(
-//                univesityID: university.universityID,
-//                serverValue: university.like
-//            )
-//            return modifiedUniversity
-//        }.filter { $0.like }
-//
-//        tableView.reloadData()
-//        tableView.backgroundView = getEmptyLabel()
-//    }
-    
+
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.universitiesTitle
         
@@ -120,9 +103,8 @@ class FavoriteUniversitiesViewController: UIViewController {
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.interactor?.loadUniversities(
-                Universities.Load.Request(params: .init())
-            )
+            let request = Universities.Load.Request(params: .init())
+            self.interactor?.loadUniversities(with: request)
             self.refreshControl.endRefreshing()
         }
     }
@@ -170,18 +152,13 @@ extension FavoriteUniversitiesViewController : UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let universityModel = interactor?.universities[indexPath.row] else { return }
-        router?.routeToDetails(for: universityModel)
+        router?.routeToUniversity(for: indexPath.row)
     }
 }
 
 // MARK: - UniversitiesDisplayLogic
 extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
-    func displayError(message: String) {
-        
-    }
-    
-    func displayUniversities(viewModel: Universities.Load.ViewModel) {
+    func displayUniversities(with viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
         
         DispatchQueue.main.async { [weak self] in
@@ -205,52 +182,35 @@ extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
         
         return emptyLabel
     }
+ 
+    func displaySetFavorite(at index: Int, isFavorite: Bool) {
+        if isFavorite {
+            guard
+                var viewModel = interactor?.universityModel(at: index).toViewModel()
+            else { return }
+            
+            viewModel.like = true
+            universities.insert(viewModel, at: index)
+            let newIndex = IndexPath(row: index, section: 0)
+            tableView.insertRows(at: [newIndex], with: .automatic)
+            tableView.backgroundView = nil
+        } else {
+            universities.remove(at: index)
+            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            tableView.backgroundView = getEmptyLabel()
+            if index == universities.count && index != 0 {
+                let indexPath = IndexPath(row: index - 1, section: 0)
+                if let cell = tableView.cellForRow(at: indexPath) as? UniversityTableViewCell {
+                    cell.hideSeparator(true)
+                }
+            }
+        }
+    }
+    
 }
 
 // MARK: - Combine
 extension FavoriteUniversitiesViewController {
-    private func setupBindings() {
-        favoritesManager.universityEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self = self else { return }
-                switch event {
-                case .added(let university):
-                    if !self.universities.contains(where: { $0.universityID == university.universityID }) {
-                        var viewModel = university.toViewModel()
-                        viewModel.like = true
-                        
-                        let insertIndex = self.universities.firstIndex {$0.universityID > university.universityID} ?? self.universities.count
-                        
-                        self.interactor?.likeUniversity(university, at: insertIndex)
-                        self.universities.insert(viewModel, at: insertIndex)
-                        
-                        let newIndex = IndexPath(row: insertIndex, section: 0)
-                        self.tableView.insertRows(at: [newIndex], with: .automatic)
-                        self.tableView.backgroundView = nil
-                    }
-                case .removed(let universityID):
-                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        self.universities.remove(at: index)
-                        self.interactor?.dislikeUniversity(at: index)
-                        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-                        self.tableView.backgroundView = self.getEmptyLabel()
-                        if index == self.universities.count && index != 0 {
-                            let indexPath = IndexPath(row: index - 1, section: 0)
-                            if let cell = tableView.cellForRow(at: indexPath) as? UniversityTableViewCell {
-                                cell.hideSeparator(true)
-                            }
-                        }
-                    }
-                case .error(let universityID):
-                    interactor?.handleBatchError(universityID: universityID)
-                case .access(let universityID, let isFavorite):
-                    interactor?.handleBatchSuccess(universityID: universityID, isFavorite: isFavorite)
-                }
-            }
-            .store(in: &cancellables)
-    }
-    
     func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
         favoritesManager.isUniversityFavorited(
             universityID: univesityID,

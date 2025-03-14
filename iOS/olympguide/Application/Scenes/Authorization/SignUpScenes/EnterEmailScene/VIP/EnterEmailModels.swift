@@ -12,12 +12,9 @@ enum EnterEmailModels {
         }
         
         struct Response {
-            let success: Bool
-            let error: Error?
+            var error: Error? = nil
         }
         
-        struct ViewModel {
-            let errorMessage: String?
-        }
+        struct ViewModel { }
     }
 }

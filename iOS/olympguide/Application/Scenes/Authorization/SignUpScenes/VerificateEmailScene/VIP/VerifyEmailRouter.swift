@@ -12,8 +12,8 @@ final class VerifyEmailRouter: VerifyEmailRoutingLogic, VerifyEmailDataPassing {
     var dataStore: VerifyEmailDataStore?
     
     func routeToPersonalData() {
-        let email = dataStore?.email
-        let personalDataVC = PersonalDataAssembly.build(email: email ?? "")
+        guard let email = dataStore?.email else { return }
+        let personalDataVC = PersonalDataAssembly.build(email: email)
         
         viewController?.navigationController?.pushViewController(personalDataVC, animated: true)
     }

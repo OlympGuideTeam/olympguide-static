@@ -5,27 +5,19 @@
 //  Created by Tom Tim on 21.01.2025.
 //
 
-import Foundation
+import UIKit
 
 final class EnterEmailPresenter: EnterEmailPresentationLogic {
     
-    weak var viewController: EnterEmailDisplayLogic?
+    weak var viewController: (EnterEmailDisplayLogic & UIViewController)?
     
-    func presentSendCode(response: EnterEmailModels.SendCode.Response) {
-        if response.success {
-            let viewModel = EnterEmailModels.SendCode.ViewModel(errorMessage: nil)
-            viewController?.displaySendCodeResult(viewModel: viewModel)
-        } else {
-            let errorMessage: String
-            
-            if let error = response.error {
-                errorMessage = error.localizedDescription
-            } else {
-                errorMessage = "Произошла неизвестная ошибка"
-            }
-            
-            let viewModel = EnterEmailModels.SendCode.ViewModel(errorMessage: errorMessage)
-            viewController?.displaySendCodeResult(viewModel: viewModel)
+    func presentSendCode(with response: EnterEmailModels.SendCode.Response) {
+        if let error = response.error {
+            viewController?.showAlert(with: error.localizedDescription)
+            return
         }
+        
+        let viewModel = EnterEmailModels.SendCode.ViewModel()
+        viewController?.displaySendCodeResult(with: viewModel)
     }
 }

@@ -15,7 +15,8 @@ enum Olympiads {
         }
         
         struct Response {
-            let olympiads: [OlympiadModel]
+            var olympiads: [OlympiadModel]? = nil
+            var error: Error? = nil
         }
         
         struct ViewModel {

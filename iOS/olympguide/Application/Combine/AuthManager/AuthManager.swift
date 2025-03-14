@@ -8,26 +8,10 @@
 import Foundation
 import Combine
 
-protocol AuthManagerProtocol {
-    var isAuthenticatedPublisher: AnyPublisher<Bool, Never> { get }
-    var isAuthenticated: Bool { get }
-    
-    func login(
-        email: String,
-        password: String,
-        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
-    )
-    
-    func checkSession()
-    
-    func logout(completion: ((Result<BaseServerResponse, NetworkError>) -> Void)?)
-}
-
 class AuthManager : AuthManagerProtocol {
-    static let shared = AuthManager()
+    typealias Constants = AllConstants.AuthManager
     
-//    @InjectSingleton(defaultValue: NetworkService.shared)
-//    var networkService: NetworkServiceProtocol
+    static let shared = AuthManager()
     
     lazy var networkService: NetworkServiceProtocol = NetworkService.shared
     
@@ -58,7 +42,7 @@ class AuthManager : AuthManagerProtocol {
         ]
         
         networkService.request(
-            endpoint: "/auth/login",
+            endpoint: Constants.loginEndpoint,
             method: .post,
             queryItems: nil,
             body: body,
@@ -75,7 +59,7 @@ class AuthManager : AuthManagerProtocol {
     
     func checkSession() {
         networkService.request(
-            endpoint: "/auth/check-session",
+            endpoint: Constants.checkEndpoint,
             method: .get,
             queryItems: nil,
             body: nil,
@@ -92,7 +76,7 @@ class AuthManager : AuthManagerProtocol {
     
     func logout(completion: ((Result<BaseServerResponse, NetworkError>) -> Void)? = nil) {
         networkService.request(
-            endpoint: "/auth/logout",
+            endpoint: Constants.logoutEndpoint,
             method: .post,
             queryItems: nil,
             body: nil,

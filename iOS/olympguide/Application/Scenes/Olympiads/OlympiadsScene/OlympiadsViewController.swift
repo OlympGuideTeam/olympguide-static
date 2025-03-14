@@ -51,28 +51,30 @@ final class OlympiadsViewController: UIViewController, WithSearchButton {
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Variables
-    private let tableView = UITableView()
+    private let tableView = UICustomTbleView()
+    private let dataSource = OlympiadsDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     lazy var filterSortView: FilterSortView = FilterSortView()
     
-    private var olympiads: [OlympiadViewModel] = []
+    var olympiads: [OlympiadViewModel] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupFilterItems()
+        setupDataSource()
+        
         configureUI()
         
         loadOlympiads()
         
-        setupBindings()
         setupAuthBindings()
     }
     
     private func loadOlympiads() {
         let request = Olympiads.Load.Request(params: selectedParams)
-        interactor?.loadOlympiads(request)
+        interactor?.loadOlympiads(with: request)
     }
     
     private func setupFilterItems() {
@@ -126,10 +128,6 @@ extension OlympiadsViewController {
         configureTableView()
     }
     
-    func displayError(message: String) {
-        print("Error: \(message)")
-    }
-    
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.olympiadsTitle
         
@@ -159,18 +157,13 @@ extension OlympiadsViewController {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(
             OlympiadTableViewCell.self,
             forCellReuseIdentifier: OlympiadTableViewCell.identifier
         )
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.backgroundColor = Constants.Colors.tableViewBackground
-        tableView.separatorStyle = .none
-        tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
+        tableView.dataSource = dataSource
+        tableView.delegate = dataSource
         
         let headerContainer = UIView()
         headerContainer.backgroundColor = .white
@@ -182,22 +175,7 @@ extension OlympiadsViewController {
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor, 10)
         
-        headerContainer.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let height = headerContainer.systemLayoutSizeFitting(targetSize).height
-        
-        headerContainer.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: tableView.bounds.width,
-            height: height
-        )
-        
-        tableView.tableHeaderView = headerContainer
+        tableView.addHeaderView(headerContainer)
     }
     
     @objc
@@ -211,73 +189,50 @@ extension OlympiadsViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension OlympiadsViewController: UITableViewDataSource {
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int {
-        return (olympiads.count != 0) ? olympiads.count : 10
+extension OlympiadsViewController {
+    private func setupDataSource() {
+        dataSource.viewController = self
+        dataSource.onOlympiadSelect = { [weak self] index in
+            self?.router?.routeToOlympiad(with: index)
+        }
+        
+        dataSource.onFavoriteProgramTapped = { [weak self] index, isFavorite in
+            self?.favoriteProgramTapped(index, isFavorite)
+        }
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: OlympiadTableViewCell.identifier,
-            for: indexPath
-        ) as? OlympiadTableViewCell
-        else {
-            return UITableViewCell()
-        }
-        
-        if olympiads.count != 0 {
-            let olympiadViewModel = olympiads[indexPath.row]
-            cell.configure(with: olympiadViewModel)
-            cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
-                guard let self = self else { return }
-                if isFavorite {
-                    self.olympiads[indexPath.row].like = true
-                    guard
-                        let model = self.interactor?.olympiadModel(at: indexPath.row)
-                    else { return }
-                    
-                    favoritesManager.addOlympiadToFavorites(model: model)
-                } else {
-                    self.olympiads[indexPath.row].like = false
-                    favoritesManager.removeOlympiadFromFavorites(olympiadId: sender.tag)
-                }
-            }
+    private func favoriteProgramTapped(_ index: Int, _ isFavorite: Bool) {
+        if isFavorite {
+            olympiads[index].like = true
+            guard
+                let model = interactor?.olympiadModel(at: index)
+            else { return }
             
-            cell.hideSeparator(indexPath.row == olympiads.count - 1)
+            favoritesManager.addOlympiadToFavorites(model: model)
         } else {
-            cell.configureShimmer()
+            olympiads[index].like = false
+            favoritesManager.removeOlympiadFromFavorites(olympiadId: olympiads[index].olympiadId)
         }
-        
-        
-        return cell
-    }
-}
-
-// MARK: - UITableViewDelegate
-extension OlympiadsViewController: UITableViewDelegate {
-    func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        router?.routeToOlympiad(with: indexPath.row)
     }
 }
 
 // MARK: - OlympiadsDisplayLogic
 extension OlympiadsViewController : OlympiadsDisplayLogic {
-    func displayOlympiads(_ viewModel: Olympiads.Load.ViewModel) {
+    func displayOlympiads(with viewModel: Olympiads.Load.ViewModel) {
         olympiads = viewModel.olympiads
         DispatchQueue.main.async {
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+    
+    func displaySetFavorite(at index: Int, _ isFavorite: Bool) {
+        if self.olympiads[index].like == isFavorite { return }
+        self.olympiads[index].like = isFavorite
+        self.tableView.reloadRows(
+            at: [IndexPath(row: index, section: 0)],
+            with: .automatic
+        )
     }
 }
 
@@ -321,44 +276,6 @@ extension OlympiadsViewController: Filterble {
 
 // MARK: - Combine
 extension OlympiadsViewController {
-    private func setupBindings() {
-        favoritesManager.olympiadEventSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                guard let self = self else { return }
-                switch event {
-                case .added(let olympiad):
-                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiad.olympiadID} ) {
-                        if self.olympiads[index].like == true { break }
-                        self.olympiads[index].like = true
-                        self.tableView.reloadRows(
-                            at: [IndexPath(row: index, section: 0)],
-                            with: .automatic
-                        )
-                    }
-                case .removed(let olympiadId):
-                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId} ) {
-                        if self.olympiads[index].like == false { break }
-                        self.olympiads[index].like = false
-                        self.tableView.reloadRows(
-                            at: [IndexPath(row: index, section: 0)],
-                            with: .automatic
-                        )
-                    }
-                case .error(let olympiadId):
-                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId} ) {
-                        if self.olympiads[index].like == interactor?.favoriteStatus(at: index) { break }
-                        self.olympiads[index].like = interactor?.favoriteStatus(at: index) ?? false
-                    }
-                case .access(let olympiadId, let isFavorite):
-                    if let index = self.olympiads.firstIndex(where: { $0.olympiadId == olympiadId} ) {
-                        interactor?.setFavoriteStatus(at: index, to: isFavorite)
-                    }
-                }
-                
-            }.store(in: &cancellables)
-    }
-    
     private func setupAuthBindings() {
         authManager.isAuthenticatedPublisher
             .receive(on: DispatchQueue.main)

@@ -97,8 +97,15 @@ class TabButton: UIView {
         
         let newSymbolName = currentSymbolName.replacingOccurrences(of: Constants.fillSuffix, with: "")
         
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: Constants.iconPointSize, weight: .regular)
-        let newIconImage = UIImage(systemName: newSymbolName, withConfiguration: symbolConfig)
+        let symbolConfig = UIImage.SymbolConfiguration(
+            pointSize: Constants.iconPointSize,
+            weight: .regular
+        )
+        let newIconImage = UIImage(
+            systemName: newSymbolName,
+            withConfiguration: symbolConfig
+        )
+        
         button.setImage(newIconImage, for: .normal)
         button.tintColor = Constants.defaultTintColor
         titleView.textColor = Constants.defaultTintColor
