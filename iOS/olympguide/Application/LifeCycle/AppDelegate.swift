@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if isMiniScreen(identifier: deviceIdentifier) {
             let scaleFactor: CGFloat = 0.85
             FontManager.shared.globalFontScale = scaleFactor
+            TabBarViewController.isMiniScreen = true
         }
         
         let backButtonAttributes: [NSAttributedString.Key: Any] = [
@@ -47,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+        // Use this method to release any resources that were specific to the discarded scenes, as they will not return..
     }
     
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
@@ -67,6 +68,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func isMiniScreen(identifier: String) -> Bool {
+        if UIScreen.main.bounds.width < 400 {
+            return true
+        }
         switch identifier {
         case "iPhone13,1", "iPhone14,4", "iPhone14,6", "iPhone10,1", "iPhone10,4":
             return true
