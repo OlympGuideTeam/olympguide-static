@@ -333,10 +333,9 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
             birthday: birthday,
             regionId: region
         )
-        interactor?.signUp(request: request)
+        interactor?.signUp(with: request)
     }
 }
-
 
 // MARK: - Делегаты для кастомных текстовых полей
 extension PersonalDataViewController: CustomTextFieldDelegate {
@@ -374,7 +373,7 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
 }
 
 extension PersonalDataViewController : PersonalDataDisplayLogic {
-    func displaySignUp(viewModel: PersonalData.SignUp.ViewModel) {
+    func displaySignUp(with viewModel: PersonalData.SignUp.ViewModel) {
         if let errorMesseges = viewModel.errorMessage {
             showAlert(with: errorMesseges.joined(separator: "\n"))
             return

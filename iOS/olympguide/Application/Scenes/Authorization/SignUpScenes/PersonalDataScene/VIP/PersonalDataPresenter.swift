@@ -6,13 +6,12 @@
 //
 
 final class PersonalDataPresenter : PersonalDataPresentationLogic {
+    weak var viewController: (PersonalDataDisplayLogic & ValidationErrorDisplayable)?
     
-    weak var view: (PersonalDataDisplayLogic & ValidationErrorDisplayable)?
-    
-    func presentSignUp(response: PersonalData.SignUp.Response) {
-        if response.success {
+    func presentSignUp(with response: PersonalData.SignUp.Response) {
+        if response.error == nil {
             let viewModel = PersonalData.SignUp.ViewModel(errorMessage: nil)
-            view?.displaySignUp(viewModel: viewModel)
+            viewController?.displaySignUp(with: viewModel)
             return
         }
         
@@ -31,7 +30,7 @@ final class PersonalDataPresenter : PersonalDataPresentationLogic {
         }
         
         let viewModel = PersonalData.SignUp.ViewModel(errorMessage: errorMessages)
-        view?.displaySignUp(viewModel: viewModel)
+        viewController?.displaySignUp(with: viewModel)
     }
     
     private func highlightValidationErrors(_ errors: [ValidationError]) {
@@ -39,20 +38,20 @@ final class PersonalDataPresenter : PersonalDataPresentationLogic {
             switch error {
             case .emptyField(let fieldName):
                 if fieldName.lowercased() == "пароль" {
-                    view?.passwordTextField.highlightError()
+                    viewController?.passwordTextField.highlightError()
                 }
             case .weakPassword, .shortPassword, .passwordWithoutLowercaseLetter, .passwordWithoutUpperrcaseLetter, .passwordWithoutDigit:
-                view?.passwordTextField.highlightError()
+                viewController?.passwordTextField.highlightError()
             case .invalidLastName:
-                view?.lastNameTextField.highlightError()
+                viewController?.lastNameTextField.highlightError()
             case .invalidFirstName:
-                view?.nameTextField.highlightError()
+                viewController?.nameTextField.highlightError()
             case .invalidSecondName:
-                view?.secondNameTextField.highlightError()
+                viewController?.secondNameTextField.highlightError()
             case .invalidBirthay:
-                view?.birthdayPicker.highlightError()
+                viewController?.birthdayPicker.highlightError()
             case .invalidRegion:
-                view?.regionTextField.highlightError()
+                viewController?.regionTextField.highlightError()
             default:
                 break
             }

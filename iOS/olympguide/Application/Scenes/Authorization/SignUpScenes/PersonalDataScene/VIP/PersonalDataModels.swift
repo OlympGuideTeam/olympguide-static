@@ -18,8 +18,7 @@ enum PersonalData {
         }
         
         struct Response {
-            let success: Bool
-            let error: Error?
+            var error: Error? = nil
         }
         
         struct ViewModel {

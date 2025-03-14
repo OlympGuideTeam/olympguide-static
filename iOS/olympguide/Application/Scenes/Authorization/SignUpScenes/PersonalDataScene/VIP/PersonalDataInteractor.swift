@@ -11,7 +11,7 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
     var presenter: PersonalDataPresentationLogic?
     private let worker = PersonalDataWorker()
     
-    func signUp(request: PersonalData.SignUp.Request) {
+    func signUp(with request: PersonalData.SignUp.Request) {
         guard
             let email = request.email?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
             let password = request.password?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty,
@@ -45,12 +45,12 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             if request.regionId == nil {
                 validationErrors.append(.invalidRegion)
             }
+            
             let response = PersonalData.SignUp.Response(
-                success: false,
                 error: AppError.validation(validationErrors) as NSError
             )
             
-            self.presenter?.presentSignUp(response: response)
+            self.presenter?.presentSignUp(with: response)
             
             return
         }
@@ -61,10 +61,9 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             var validationErrors: [ValidationError] = []
             validationErrors.append(.invalidSecondName)
             let response = PersonalData.SignUp.Response(
-                success: false,
                 error: AppError.validation(validationErrors) as NSError
             )
-            self.presenter?.presentSignUp(response: response)
+            self.presenter?.presentSignUp(with: response)
             return
         }
         
@@ -82,18 +81,14 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             
             switch result {
             case .success:
-                let response = PersonalData.SignUp.Response(
-                    success: true,
-                    error: nil
-                )
+                let response = PersonalData.SignUp.Response()
                 
-                self.presenter?.presentSignUp(response: response)
+                self.presenter?.presentSignUp(with: response)
             case .failure(let networkError):
             let response = PersonalData.SignUp.Response(
-                    success: false,
                     error: AppError.network(networkError) as NSError
                 )
-                self.presenter?.presentSignUp(response: response)
+                self.presenter?.presentSignUp(with: response)
             }
         }
     }
