@@ -43,13 +43,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		F32EEE1F2D876F4E00E6D548 /* Exceptions for "PasswordManagerExtension" folder in "PasswordManagerExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = F32EEE0B2D876F4E00E6D548 /* PasswordManagerExtension */;
-		};
 		F3D861F82D17851900809C5A /* Exceptions for "olympguide" folder in "olympguide" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -62,9 +55,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F32EEE102D876F4E00E6D548 /* PasswordManagerExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				F32EEE1F2D876F4E00E6D548 /* Exceptions for "PasswordManagerExtension" folder in "PasswordManagerExtension" target */,
-			);
 			path = PasswordManagerExtension;
 			sourceTree = "<group>";
 		};
