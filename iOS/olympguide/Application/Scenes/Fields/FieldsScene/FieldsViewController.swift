@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 //
 //  FieldsViewController.swift
 //  olympguide
@@ -225,4 +223,3 @@ extension FieldsViewController : OptionsViewControllerDelegate {
         interactor?.loadFields(with: request)
     }
 }
->>>>>>> Stashed changes
