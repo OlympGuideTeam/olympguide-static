@@ -7,6 +7,8 @@
 
 import UIKit
 import Combine
+import AuthenticationServices
+
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -64,6 +66,14 @@ class UniversitiesViewController : UIViewController, WithSearchButton {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+                ASCredentialIdentityStore.shared.getState { state in
+                    print("📊 AutoFill State: \(state)")
+                    if state.isEnabled {
+                        print("✅ AutoFill включен!")
+                    } else {
+                        print("❌ AutoFill выключен!")
+                    }
+                }
         
         setupFilterItems()
         setupDataSource()

@@ -22,6 +22,10 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     var filterItems: [FilterItem] = []
     var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
+    
+    var groups: [UniWithProgramsWithBenefits] = []
+    
+    
     private var cancellables = Set<AnyCancellable>()
     
     private let olympiad: OlympiadModel
@@ -176,19 +180,8 @@ extension OlympiadViewController {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-                
-        tableView.register(
-            UIProgramWithBenefitsCell.self,
-            forCellReuseIdentifier: UIProgramWithBenefitsCell.identifier
-        )
-        
-        tableView.register(
-            UIUniversityHeader.self,
-            forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
-        )
-        
-        tableView.dataSource = dataSource
-        tableView.delegate = dataSource
+    
+        dataSource.register(in: tableView)
         
         tableView.refreshControl = refreshControl
 
@@ -225,18 +218,18 @@ extension OlympiadViewController {
     }
     
     private func toggleSection(at index: Int) {
-        isExpanded[index].toggle()
+        groups[index].isExpanded.toggle()
         
-        if isExpanded[index] {
+        if groups[index].isExpanded {
             let request = BenefitsByPrograms.Load.Request(
                 olympiadID: olympiad.olympiadID,
-                universityID: universities[index].universityID,
+                universityID: groups[index].university.universityID,
                 section: index,
                 params: selectedParams
             )
             interactor?.loadBenefits(with: request)
         } else {
-            reloadSectionWithoutAnimation(index)
+//            reloadSectionWithoutAnimation(index)
         }
     }
 }
@@ -244,9 +237,13 @@ extension OlympiadViewController {
 // MARK: - OlympiadDisplayLogic
 extension OlympiadViewController : OlympiadDisplayLogic {
     func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel) {
-        universities = viewModel.universities
-        isExpanded = [Bool](repeating: false, count: universities.count)
-        programs = [[ProgramWithBenefitsViewModel]] (repeating: [], count: universities.count)
+        groups = viewModel.universities.map {
+            UniWithProgramsWithBenefits(university: $0)
+        }
+        
+//        universities = viewModel.universities
+//        isExpanded = [Bool](repeating: false, count: universities.count)
+//        programs = [[ProgramWithBenefitsViewModel]] (repeating: [], count: universities.count)
         informationStackView.searchButton.isEnabled = true
         
         DispatchQueue.main.async { [weak self] in
@@ -263,25 +260,28 @@ extension OlympiadViewController : OlympiadDisplayLogic {
 // MARK: - BenefitsByProgramsDisplayLogic
 extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
     func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel) {
-        programs[viewModel.section] = viewModel.benefits
+        groups[viewModel.section].programs = viewModel.benefits
+        let id = groups[viewModel.section].university.universityID
+        dataSource.toggle(to: id, in: tableView)
+//        programs[viewModel.section] = viewModel.benefits
         
-        reloadSectionWithoutAnimation(viewModel.section)
+//        reloadSectionWithoutAnimation(viewModel.section)
     }
     
-    private func reloadSectionWithoutAnimation(_ section: Int) {
-        var currentOffset = tableView.contentOffset
-        let headerRectBefore = tableView.rectForHeader(inSection: section)
-        
-        UIView.performWithoutAnimation {
-            tableView.reloadSections(IndexSet(integer: section), with: .none)
-            tableView.layoutIfNeeded()
-        }
-        
-        let headerRectAfter = tableView.rectForHeader(inSection: section)
-        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
-        currentOffset.y += deltaY
-        tableView.setContentOffset(currentOffset, animated: false)
-    }
+//    private func reloadSectionWithoutAnimation(_ section: Int) {
+//        var currentOffset = tableView.contentOffset
+//        let headerRectBefore = tableView.rectForHeader(inSection: section)
+//        
+//        UIView.performWithoutAnimation {
+//            tableView.reloadSections(IndexSet(integer: section), with: .none)
+//            tableView.layoutIfNeeded()
+//        }
+//        
+//        let headerRectAfter = tableView.rectForHeader(inSection: section)
+//        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+//        currentOffset.y += deltaY
+//        tableView.setContentOffset(currentOffset, animated: false)
+//    }
 }
 
 extension OlympiadViewController : OptionsViewControllerDelegate {

@@ -7,83 +7,145 @@
 
 import UIKit
 
-final class OlympiadDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
+class UniWithProgramsWithBenefits {
+    let university: UniversityViewModel
+    var programs: [ProgramWithBenefitsViewModel] = []
+    var isExpanded: Bool = false
+    
+    init(university: UniversityViewModel) {
+        self.university = university
+    }
+}
+
+enum ProgramWithBenefitItem {
+    case header(UniWithProgramsWithBenefits, Int)
+    case cell(ProgramWithBenefitsViewModel, IndexPath)
+}
+
+final class OlympiadDataSource: NSObject, UITableViewDelegate {
     weak var viewController: OlympiadViewController?
     
     var onProgramSelect: ((IndexPath) -> Void)?
     var onSectionToggle: ((Int) -> Void)?
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        guard let universities = viewController?.universities else {
-            return 0
+    var programItems: [ProgramWithBenefitItem] {
+        guard let groups = viewController?.groups else { return [] }
+        var result: [ProgramWithBenefitItem] = []
+        for (grouIndex, group) in groups.enumerated() {
+            result.append(.header(group, grouIndex))
+            guard group.isExpanded else { continue }
+            for (programIndex, program) in group.programs.enumerated() {
+                autoreleasepool {
+                    let indexParh = IndexPath(row: programIndex, section: grouIndex)
+                    result.append(.cell(program, indexParh))
+                }
+            }
         }
-        return universities.count
+        return result
     }
     
+    func register(in tableView: UITableView) {
+        tableView.delegate = self
+        tableView.dataSource = self
+        
+        tableView.register(
+            UIProgramWithBenefitsCell.self,
+            forCellReuseIdentifier: UIProgramWithBenefitsCell.identifier
+        )
+        
+        tableView.register(
+            UIUniversityHeaderCell.self,
+            forCellReuseIdentifier: UIUniversityHeaderCell.identifier
+        )
+    }
+}
+
+// MARK: - UITableViewDataSource
+extension OlympiadDataSource: UITableViewDataSource {
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        guard
-            let isExpanded = viewController?.isExpanded,
-            let programs = viewController?.programs
-        else { return 0 }
-        return isExpanded[section] ? programs[section].count : 0
+        return programItems.count
     }
     
     func tableView(
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
+        
+        let item = programItems[indexPath.row]
+        
+        switch item {
+        case .header(let group, _):
+            return configureHeader(tableView, cellForRowAt: indexPath, group: group)
+        case .cell(let program, let realIndexPath):
+            return configureCell(
+                tableView,
+                cellForRowAt: indexPath,
+                program: program,
+                realIndexPath: realIndexPath
+            )
+        }
+    }
+    
+    private func configureHeader(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath,
+        group: UniWithProgramsWithBenefits
+    ) -> UITableViewCell {
+        guard
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: UIUniversityHeaderCell.identifier,
+                for: indexPath
+            ) as? UIUniversityHeaderCell
+        else { return UITableViewCell() }
+        
+        cell.configure(
+            with: group.university,
+            isExpanded: group.isExpanded
+        )
+        
+        return cell
+    }
+    
+    private func configureCell(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath,
+        program: ProgramWithBenefitsViewModel,
+        realIndexPath: IndexPath
+    ) -> UITableViewCell {
         guard
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: UIProgramWithBenefitsCell.identifier
-            ) as? UIProgramWithBenefitsCell,
-            let programs = viewController?.programs
+            ) as? UIProgramWithBenefitsCell
         else {
             return UITableViewCell()
         }
         
-        cell.configure(with: programs[indexPath.section][indexPath.row], indexPath: indexPath)
+        cell.configure(with: program, indexPath: realIndexPath)
         for view in cell.benefitsStack.arrangedSubviews {
             guard let subview = view as? BenefitStackView else { continue }
             subview.createPreviewVC = { indexPath, index in
-                let program = programs[indexPath.section][indexPath.row]
+                let program = program
                 let previewVC = BenefitViewController(with: program, index: index)
                 return previewVC
             }
         }
+        cell.hideSeparator(isSeparatorHidden(indexPath))
         
-        cell.hideSeparator(indexPath.row == programs[indexPath.section].count - 1)
         return cell
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        viewForHeaderInSection section: Int
-    ) -> UIView? {
-        guard
-            let headerView = tableView.dequeueReusableHeaderFooterView(
-                withIdentifier: UIUniversityHeader.identifier
-            ) as? UIUniversityHeader,
-            let universities = viewController?.universities,
-            let isExpanded = viewController?.isExpanded
-        else {
-            return nil
+    
+    func isSeparatorHidden(_ indexPath: IndexPath) -> Bool {
+        guard indexPath.row < programItems.count - 1 else { return true }
+
+        if case .header = programItems[indexPath.row + 1] {
+            return true
         }
-        
-        headerView.configure(
-            with: universities[section],
-            isExpanded: isExpanded[section]
-        )
-        
-        headerView.tag = section
-        
-        headerView.toggleSection = { [weak self] section in
-            self?.onSectionToggle?(section)
-        }
-        
-        return headerView
+
+        return false
     }
     
     func tableView(
@@ -91,6 +153,71 @@ final class OlympiadDataSource: NSObject, UITableViewDataSource, UITableViewDele
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        onProgramSelect?(indexPath)
+
+        let item = programItems[indexPath.row]
+        
+        switch item {
+        case .header(let group, let section):
+            toggleSection(
+                at: indexPath,
+                group: group,
+                section: section,
+                in: tableView
+            )
+        case .cell(_, let realIndexPath):
+            tableView.deselectRow(at: indexPath, animated: true)
+            onProgramSelect?(realIndexPath)
+        }
+    }
+    
+    func toggleSection(
+        at indexPath: IndexPath,
+        group: UniWithProgramsWithBenefits,
+        section: Int,
+        in tableView: UITableView
+    ) {
+        let toggleIndex = indexPath.row
+        let programsCount = group.programs.count
+        
+        tableView.beginUpdates()
+        
+        if group.isExpanded {
+            group.isExpanded = false
+            var indexPathsToDelete: [IndexPath] = []
+            
+            for i in 1...programsCount {
+                indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
+            }
+            
+            tableView.reloadRows(at: [indexPath], with: .none)
+            tableView.endUpdates()
+        } else {
+            onSectionToggle?(section)
+        }
+
+    }
+    
+    func toggle(to id: Int, in tableView: UITableView) {
+        
+        for (toggleIndex, item) in programItems.enumerated() {
+            switch item {
+            case .header(let group, _):
+                guard group.university.universityID == id else { continue }
+                group.isExpanded = true
+                let programsCount = group.programs.count
+                    var indexPathsToInsert: [IndexPath] = []
+                    for i in 1...programsCount {
+                        indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
+                    }
+                    tableView.insertRows(at: indexPathsToInsert, with: .fade)
+                let indexPath = IndexPath(row: toggleIndex, section: 0)
+                tableView.reloadRows(at: [indexPath], with: .none)
+                tableView.endUpdates()
+                break
+                
+            case .cell:
+                continue
+            }
+        }
     }
 }

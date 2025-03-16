@@ -36,7 +36,7 @@ final class UniversityViewController : UIViewController, WithBookMarkButton {
     private let university: UniversityModel
     private var selectedSegmentIndex = 0
     
-    var groupsOfProgramsViewModel : [GroupOfProgramsViewModel] = []
+    var groupsOfPrograms : [GroupOfProgramsViewModel] = []
     
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     private let tableView = UICustomTbleView(frame: .zero, style: .plain)
@@ -221,7 +221,13 @@ extension UniversityViewController : UniversityDisplayLogic {
 // MARK: - ProgramsDisplayLogic
 extension UniversityViewController : ProgramsDisplayLogic {
     func displayLoadProgramsResult(with viewModel: Programs.Load.ViewModel) {
-        groupsOfProgramsViewModel = viewModel.groupsOfPrograms
+        let expended: Set<String> = Set(groupsOfPrograms.compactMap { $0.isExpanded ? $0.field.code : nil })
+        groupsOfPrograms = viewModel.groupsOfPrograms
+        groupsOfPrograms.forEach {
+            if expended.contains($0.field.code) {
+                $0.isExpanded = true
+            }
+        }
         dataSource.isShimmering = false
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()
@@ -231,8 +237,8 @@ extension UniversityViewController : ProgramsDisplayLogic {
     
     func displaySetFavorite(at indexPath: IndexPath, _ isFavorite: Bool) {
         let (groupIndex, programIndex) = (indexPath.section, indexPath.row)
-        if groupsOfProgramsViewModel[groupIndex].programs[programIndex].like != isFavorite {
-            groupsOfProgramsViewModel[groupIndex].programs[programIndex].like = isFavorite
+        if groupsOfPrograms[groupIndex].programs[programIndex].like != isFavorite {
+            groupsOfPrograms[groupIndex].programs[programIndex].like = isFavorite
             self.tableView.reloadRows(
                 at: [IndexPath(row: programIndex, section: groupIndex)],
                 with: .automatic
@@ -256,15 +262,15 @@ extension UniversityViewController {
     }
     
     private func favoriteProgramTapped(_ indexPath: IndexPath, _ isFavorite: Bool) {
-        groupsOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = isFavorite
-        let viewModel = groupsOfProgramsViewModel[indexPath.section].programs[indexPath.row]
+        groupsOfPrograms[indexPath.section].programs[indexPath.row].like = isFavorite
+        let viewModel = groupsOfPrograms[indexPath.section].programs[indexPath.row]
         if isFavorite {
             guard
                 let model = interactor?.program(at: indexPath)
             else { return }
             favoritesManager.addProgramToFavorites(university, model)
         } else {
-            groupsOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = false
+            groupsOfPrograms[indexPath.section].programs[indexPath.row].like = false
             favoritesManager.removeProgramFromFavorites(programID: viewModel.programID)
         }
     }

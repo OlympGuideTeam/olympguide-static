@@ -20,7 +20,7 @@ final class UniversityDataSource: NSObject {
     var isShimmering: Bool = true
     
     var programItems: [ProgramByFieldItem] {
-        guard let groups = viewController?.groupsOfProgramsViewModel else {
+        guard let groups = viewController?.groupsOfPrograms else {
             return []
         }
         var result: [ProgramByFieldItem] = []
