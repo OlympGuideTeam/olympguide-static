@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AuthenticationServices
 
 final class PersonalDataViewController: UIViewController, ValidationErrorDisplayable, NonTabBarVC {
     
@@ -134,6 +135,8 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         hiddenUsernameField.text = userEmail
         hiddenUsernameField.textContentType = .username
         hiddenUsernameField.isHidden = true
+        hiddenUsernameField.autocapitalizationType = .none
+        hiddenUsernameField.autocorrectionType = .no
         view.addSubview(hiddenUsernameField)
     }
     
@@ -324,6 +327,27 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     // MARK: - Actions
     @objc
     private func didTapNextButton() {
+        let credential = ASPasswordCredential(user: userEmail, password: password)
+        let authContext = ASCredentialIdentityStore.shared
+        
+        ASCredentialIdentityStore.shared.getState { state in
+            if state.isEnabled {
+                let serviceIdentifier = ASCredentialServiceIdentifier(identifier: "sundayti.olympguide", type: .domain)
+                let identity = ASPasswordCredentialIdentity(serviceIdentifier: serviceIdentifier, user: self.userEmail, recordIdentifier: nil)
+                
+                authContext.saveCredentialIdentities([identity]) { success, error in
+                    DispatchQueue.main.async {
+                        if success {
+                            print("✅ Пароль сохранен в Keychain")
+                        } else {
+                            print("⚠️ Ошибка сохранения: \(error?.localizedDescription ?? "неизвестная ошибка")")
+                        }
+                    }
+                }
+            } else {
+                print("❌ AutoFill выключен у пользователя")
+            }
+        }
         let request = PersonalData.SignUp.Request(
             email: userEmail,
             password: password,

@@ -32,7 +32,7 @@ final class FieldViewController: UIViewController {
     private let dataSource: FieldDataSource = FieldDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
-    var programs: [ProgramsByUniversityViewModel] = []
+    var         groupsOfPrograms: [ProgramsByUniversityViewModel] = []
     
     init(for field: GroupOfFieldsModel.FieldModel) {
         self.field = field
@@ -142,9 +142,9 @@ extension FieldViewController {
         
         tableView.dataSource = dataSource
         tableView.delegate = dataSource
-
+        
         tableView.refreshControl = refreshControl
-
+        
         tableView.addHeaderView(informationStackView)
     }
     
@@ -174,9 +174,9 @@ extension FieldViewController {
     }
     
     func favoriteButtonTapped(_ indexPath: IndexPath, _ isFavorite: Bool) {
-        programs[indexPath.section].programs[indexPath.row].like = isFavorite
+        groupsOfPrograms[indexPath.section].programs[indexPath.row].like = isFavorite
         
-        let program = programs[indexPath.section].programs[indexPath.row]
+        let program =         groupsOfPrograms[indexPath.section].programs[indexPath.row]
         if !isFavorite {
             favoritesManager.removeProgramFromFavorites(programID: program.programID)
         } else {
@@ -192,14 +192,20 @@ extension FieldViewController {
 // MARK: - FieldDisplayLogic
 extension FieldViewController : FieldDisplayLogic {
     func displaySetFavoriteResult(at indexPath: IndexPath, _ isFavorite: Bool) {
-        if programs[indexPath.section].programs[indexPath.row].like == isFavorite { return }
-        programs[indexPath.section].programs[indexPath.row].like = isFavorite
+        if         groupsOfPrograms[indexPath.section].programs[indexPath.row].like == isFavorite { return }
+        groupsOfPrograms[indexPath.section].programs[indexPath.row].like = isFavorite
         
         self.tableView.reloadData()
     }
     
     func displayLoadProgramsResult(with viewModel: Field.LoadPrograms.ViewModel) {
-        programs = viewModel.programs
+        let expended: Set<Int> = Set(groupsOfPrograms.compactMap { $0.isExpanded ? $0.university.universityID : nil })
+        groupsOfPrograms = viewModel.programs
+        groupsOfPrograms.forEach {
+            if expended.contains($0.university.universityID) {
+                $0.isExpanded = true
+            }
+        }
         
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()

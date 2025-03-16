@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AuthenticationServices
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -13,6 +14,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         customizeDependencies()
+        ASCredentialIdentityStore.shared.getState { state in
+            print("📊 AutoFill State: \(state)")
+            if state.isEnabled {
+                print("✅ AutoFill включен!")
+            } else {
+                print("❌ AutoFill выключен!")
+            }
+        }
         
         let deviceIdentifier = getDeviceIdentifier()
         if isMiniScreen(identifier: deviceIdentifier) {
@@ -68,9 +77,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func isMiniScreen(identifier: String) -> Bool {
-        if UIScreen.main.bounds.width < 400 {
-            return true
-        }
         switch identifier {
         case "iPhone13,1", "iPhone14,4", "iPhone14,6", "iPhone10,1", "iPhone10,4":
             return true

@@ -6,12 +6,50 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F32EEE0F2D876F4E00E6D548 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F32EEE0E2D876F4E00E6D548 /* AuthenticationServices.framework */; };
+		F32EEE1A2D876F4E00E6D548 /* PasswordManagerExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F32EEE0C2D876F4E00E6D548 /* PasswordManagerExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F32EEE182D876F4E00E6D548 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3D861DE2D17851800809C5A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F32EEE0B2D876F4E00E6D548;
+			remoteInfo = PasswordManagerExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F32EEE1B2D876F4E00E6D548 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F32EEE1A2D876F4E00E6D548 /* PasswordManagerExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		F32EEE0C2D876F4E00E6D548 /* PasswordManagerExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PasswordManagerExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F32EEE0E2D876F4E00E6D548 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 		F37DB2382D315AB6005E5508 /* olympguide.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = olympguide.xcodeproj; path = olympguide/Application/FilterAndSort/olympguide.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F3D861E62D17851800809C5A /* olympguide.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = olympguide.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F32EEE1F2D876F4E00E6D548 /* Exceptions for "PasswordManagerExtension" folder in "PasswordManagerExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F32EEE0B2D876F4E00E6D548 /* PasswordManagerExtension */;
+		};
 		F3D861F82D17851900809C5A /* Exceptions for "olympguide" folder in "olympguide" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -22,6 +60,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		F32EEE102D876F4E00E6D548 /* PasswordManagerExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F32EEE1F2D876F4E00E6D548 /* Exceptions for "PasswordManagerExtension" folder in "PasswordManagerExtension" target */,
+			);
+			path = PasswordManagerExtension;
+			sourceTree = "<group>";
+		};
 		F3D861E82D17851800809C5A /* olympguide */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -33,6 +79,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F32EEE092D876F4E00E6D548 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F32EEE0F2D876F4E00E6D548 /* AuthenticationServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F3D861E32D17851800809C5A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -43,6 +97,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F32EEE0D2D876F4E00E6D548 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F32EEE0E2D876F4E00E6D548 /* AuthenticationServices.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		F37DB23B2D315AB6005E5508 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -54,6 +116,8 @@
 			isa = PBXGroup;
 			children = (
 				F3D861E82D17851800809C5A /* olympguide */,
+				F32EEE102D876F4E00E6D548 /* PasswordManagerExtension */,
+				F32EEE0D2D876F4E00E6D548 /* Frameworks */,
 				F3D861E72D17851800809C5A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +126,7 @@
 			isa = PBXGroup;
 			children = (
 				F3D861E62D17851800809C5A /* olympguide.app */,
+				F32EEE0C2D876F4E00E6D548 /* PasswordManagerExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,6 +134,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		F32EEE0B2D876F4E00E6D548 /* PasswordManagerExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F32EEE1E2D876F4E00E6D548 /* Build configuration list for PBXNativeTarget "PasswordManagerExtension" */;
+			buildPhases = (
+				F32EEE082D876F4E00E6D548 /* Sources */,
+				F32EEE092D876F4E00E6D548 /* Frameworks */,
+				F32EEE0A2D876F4E00E6D548 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F32EEE102D876F4E00E6D548 /* PasswordManagerExtension */,
+			);
+			name = PasswordManagerExtension;
+			packageProductDependencies = (
+			);
+			productName = PasswordManagerExtension;
+			productReference = F32EEE0C2D876F4E00E6D548 /* PasswordManagerExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		F3D861E52D17851800809C5A /* olympguide */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F3D861F92D17851900809C5A /* Build configuration list for PBXNativeTarget "olympguide" */;
@@ -76,10 +163,12 @@
 				F3D861E22D17851800809C5A /* Sources */,
 				F3D861E32D17851800809C5A /* Frameworks */,
 				F3D861E42D17851800809C5A /* Resources */,
+				F32EEE1B2D876F4E00E6D548 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F32EEE192D876F4E00E6D548 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F3D861E82D17851800809C5A /* olympguide */,
@@ -98,9 +187,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					F32EEE0B2D876F4E00E6D548 = {
+						CreatedOnToolsVersion = 16.2;
+					};
 					F3D861E52D17851800809C5A = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -127,11 +219,19 @@
 			projectRoot = "";
 			targets = (
 				F3D861E52D17851800809C5A /* olympguide */,
+				F32EEE0B2D876F4E00E6D548 /* PasswordManagerExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		F32EEE0A2D876F4E00E6D548 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F3D861E42D17851800809C5A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -142,6 +242,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F32EEE082D876F4E00E6D548 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F3D861E22D17851800809C5A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -151,7 +258,69 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		F32EEE192D876F4E00E6D548 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F32EEE0B2D876F4E00E6D548 /* PasswordManagerExtension */;
+			targetProxy = F32EEE182D876F4E00E6D548 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		F32EEE1C2D876F4E00E6D548 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PasswordManagerExtension/PasswordManagerExtensionDebug.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FUD5CPHJR9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PasswordManagerExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PasswordManagerExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sundayti.olympguide.PasswordManagerExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F32EEE1D2D876F4E00E6D548 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PasswordManagerExtension/PasswordManagerExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NW3XPQMXRW;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PasswordManagerExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PasswordManagerExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sundayti.olympguide.PasswordManagerExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		F3D861FA2D17851900809C5A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = F3D861E82D17851800809C5A /* olympguide */;
@@ -339,6 +508,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F32EEE1E2D876F4E00E6D548 /* Build configuration list for PBXNativeTarget "PasswordManagerExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F32EEE1C2D876F4E00E6D548 /* Debug */,
+				F32EEE1D2D876F4E00E6D548 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		F3D861E12D17851800809C5A /* Build configuration list for PBXProject "olympguide" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

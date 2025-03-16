@@ -19,7 +19,7 @@ final class FieldDataSource : NSObject {
     var onFavoriteProgramTapped: ((IndexPath, Bool) -> Void)?
     
     var programItems: [ProgramByUniItem] {
-        guard let groupsOfPrograms = viewController?.programs else { return [] }
+        guard let groupsOfPrograms = viewController?.groupsOfPrograms else { return [] }
         var result: [ProgramByUniItem] = []
         for (groupIndex, group) in groupsOfPrograms.enumerated() {
             result.append(.header(group))
