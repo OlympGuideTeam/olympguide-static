@@ -110,7 +110,6 @@
 			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
 				ru,
 			);
@@ -160,9 +159,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = olympguide/olympguideDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NW3XPQMXRW;
+				DEVELOPMENT_TEAM = FUD5CPHJR9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "olympguide/Supporting Files/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
