@@ -19,41 +19,34 @@ protocol RegionDelegateOwner: AnyObject {
 
 final class RegionTextField: CustomTextField, HighlightableField, RegionDelegateOwner {
     typealias Constants = AllConstants.RegionTextField.Strings
-
-    var isWrong: Bool = false
     
+    var isWrong: Bool = false
     weak var regionDelegate: RegionTextFieldDelegate?
     var selectedIndecies: Set<Int> = []
     private var endPoint: String = ""
-    
+
     init(with title: String, endPoint: String) {
         self.endPoint = endPoint
         super.init(with: title)
-        isUserInteractionEnabled(false)
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
-    
-    override func didTapDeleteButton() {
-        super.didTapDeleteButton()
-        selectedIndecies.removeAll()
-    }
-    
-    override func didTapSearchBar() {
-        let hasText = isEmty()
-        guard !hasText else { return }
-        
+
+    override func textFieldDidBeginEditing(_ textField: UITextField) {
+        super.textFieldDidBeginEditing(textField)
         regionDelegate?.dissmissKeyboard()
-        isActive.toggle()
-        updateAppereance()
-        if isActive{
-            presentOptions()
+        textField.resignFirstResponder()
+        
+        if !isActive {
+            isActive = true
+            updateAppereance()
         }
+        presentOptions()
     }
-    
+
     private func presentOptions() {
         let optionVC = OptionsAssembly.build(
             title: Constants.optionVCTitle,
@@ -64,10 +57,15 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
         optionVC.delegate = self
         regionDelegate?.regionTextFieldWillSelect(with: optionVC)
     }
-    
+
+    override func didTapDeleteButton() {
+        super.didTapDeleteButton()
+        selectedIndecies.removeAll()
+    }
 }
 
-extension RegionTextField : OptionsViewControllerDelegate {
+// MARK: - OptionsViewControllerDelegate
+extension RegionTextField: OptionsViewControllerDelegate {
     func didSelectOption(
         _ optionsIndicies: Set<Int>,
         _ optionsNames: [OptionViewModel],
@@ -82,7 +80,7 @@ extension RegionTextField : OptionsViewControllerDelegate {
         }
         textFieldSendAction(for: .editingChanged)
     }
-    
+
     func didCancle() {
         textFieldSendAction(for: .editingChanged)
     }

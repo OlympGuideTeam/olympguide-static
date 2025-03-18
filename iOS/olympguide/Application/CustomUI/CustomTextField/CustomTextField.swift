@@ -83,10 +83,12 @@ class CustomTextField: UIView {
         toolbar.sizeToFit()
         
         let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let closeButton = UIBarButtonItem(title: Constants.Strings.closeButtonTitle,
-                                          style: .done,
-                                          target: self,
-                                          action: #selector(closeInputView))
+        let closeButton = UIBarButtonItem(
+            title: Constants.Strings.closeButtonTitle,
+            style: .done,
+            target: self,
+            action: #selector(closeInputView)
+        )
         toolbar.items = [flexSpace, closeButton]
         textField.inputAccessoryView = toolbar
     }
