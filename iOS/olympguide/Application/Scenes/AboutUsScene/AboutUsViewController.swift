@@ -23,8 +23,9 @@ final class AboutUsViewController : UIViewController {
         configureNavigationBar()
         
         configureInformationStack()
-        configureAboutUsLabel()
+//        configureAboutUsLabel()
         configureContactButton()
+        configureIOSButton()
     }
     
     private func configureNavigationBar() {
@@ -34,7 +35,8 @@ final class AboutUsViewController : UIViewController {
     
     private func configureInformationStack() {
         informationStackView.axis = .vertical
-        informationStackView.spacing = 20
+        informationStackView.spacing = 10
+//        informationStackView.spacing = 20
         informationStackView.distribution = .fill
         informationStackView.alignment = .leading
         
@@ -58,12 +60,35 @@ final class AboutUsViewController : UIViewController {
     }
     
     private func configureContactButton() {
-        let contactButton: UIButton = UIButton()
-        contactButton.setTitle("@easyeeeye", for: .normal)
-        contactButton.setTitleColor(.black, for: .normal)
-        contactButton.titleLabel?.font = FontManager.shared.font(for: .bigButton)
+        let contactButton = UIButton()
+        let title = NSAttributedString(
+            string: "GitHub Backend",
+            attributes: [
+                .foregroundColor: UIColor.blue,
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .font: FontManager.shared.font(for: .bigButton)
+            ]
+        )
+        contactButton.setAttributedTitle(title, for: .normal)
         
-        contactButton.addTarget(self, action: #selector(openWebPage), for: .touchUpInside)
+        contactButton.addTarget(self, action: #selector(openBack), for: .touchUpInside)
+        
+        informationStackView.addArrangedSubview(contactButton)
+    }
+
+    private func configureIOSButton() {
+        let contactButton = UIButton()
+        let title = NSAttributedString(
+            string: "GitHub iOS",
+            attributes: [
+                .foregroundColor: UIColor.black,
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .font: FontManager.shared.font(for: .bigButton)
+            ]
+        )
+        contactButton.setAttributedTitle(title, for: .normal)
+        
+        contactButton.addTarget(self, action: #selector(openIOS), for: .touchUpInside)
         
         informationStackView.addArrangedSubview(contactButton)
     }
@@ -76,4 +101,19 @@ final class AboutUsViewController : UIViewController {
         safariVC.modalPresentationStyle = .pageSheet
         present(safariVC, animated: true, completion: nil)
     }
+    
+    @objc func openBack(sender: UIButton) {
+        guard let url = URL(string: "https://github.com/OlympGuideTeam/olympguide-backend") else { return }
+        let safariVC = SFSafariViewController(url: url)
+        safariVC.modalPresentationStyle = .pageSheet
+        present(safariVC, animated: true, completion: nil)
+    }
+    
+    @objc func openIOS(sender: UIButton) {
+        guard let url = URL(string: "https://github.com/OlympGuideTeam/olympguide-static") else { return }
+        let safariVC = SFSafariViewController(url: url)
+        safariVC.modalPresentationStyle = .pageSheet
+        present(safariVC, animated: true, completion: nil)
+    }
+
 }
