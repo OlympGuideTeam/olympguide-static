@@ -45,7 +45,7 @@ class ProfileViewController: UIViewController {
     
     var router: ProfileRoutingLogic?
     let authLabels: [String] = [
-        "Личные данные",
+//        "Личные данные",
 //        "Мои дипломы",
         "Избранные ВУЗы",
         "Избранные программы",

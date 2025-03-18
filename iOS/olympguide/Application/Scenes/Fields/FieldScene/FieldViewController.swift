@@ -10,6 +10,9 @@ import Combine
 
 final class FieldViewController: UIViewController {
     @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
+    
+    @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
     @InjectSingleton
@@ -54,19 +57,7 @@ final class FieldViewController: UIViewController {
     }
     
     private func setupFilterItems() {
-        let regionFilterItem = FilterItem(
-            paramType: .degree,
-            title: "Формат обучения",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "Бакалавриат"),
-                OptionViewModel(id: 2, name: "Специалитет")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        filterItems = [
-            regionFilterItem
-        ]
+        filterItems = filtersManager.getData(for: type(of: self))
         
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)

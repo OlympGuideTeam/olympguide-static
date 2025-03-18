@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 06.03.2025.
 //
 
-struct ProgramWithBenefitsViewModel {
+class ProgramWithBenefitsViewModel {
     struct Program {
         let programID: Int
         let programName: String
@@ -24,4 +24,9 @@ struct ProgramWithBenefitsViewModel {
     
     let program: Program
     let benefitInformation: [BenefitInformationViewModel]
+    
+    init(program: Program, benefitInformation: [BenefitInformationViewModel]) {
+        self.program = program
+        self.benefitInformation = benefitInformation
+    }
 }

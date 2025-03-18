@@ -12,6 +12,10 @@ import Combine
 
 // MARK: - UniversityViewController
 final class UniversityViewController : UIViewController, WithBookMarkButton {
+    
+    @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
+    
     @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
@@ -118,19 +122,8 @@ final class UniversityViewController : UIViewController, WithBookMarkButton {
     }
     
     private func setupFilterItems() {
-        let regionFilterItem = FilterItem(
-            paramType: .degree,
-            title: "Формат обучения",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "Бакалавриат"),
-                OptionViewModel(id: 2, name: "Специалитет")
-            ]),
-            isMultipleChoice: true
-        )
+        filterItems = filtersManager.getData(for: type(of: self))
         
-        filterItems = [
-            regionFilterItem
-        ]
         
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)

@@ -38,6 +38,8 @@ fileprivate enum Constants {
 }
 
 class FieldsViewController: UIViewController, WithSearchButton {
+    @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
     
     // MARK: - VIP
     var interactor: (FieldsDataStore & FieldsBusinessLogic)?
@@ -82,20 +84,7 @@ class FieldsViewController: UIViewController, WithSearchButton {
     }
     
     private func setupFilterItems() {
-        let regionFilterItem = FilterItem(
-            paramType: .degree,
-            title: "Формат обучения",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "Бакалавриат"),
-                OptionViewModel(id: 2, name: "Специалитет")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        filterItems = [
-            regionFilterItem
-        ]
-        
+        filterItems = filtersManager.getData(for: type(of: self))
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
