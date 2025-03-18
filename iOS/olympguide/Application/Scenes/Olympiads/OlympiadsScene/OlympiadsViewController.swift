@@ -36,6 +36,9 @@ fileprivate enum Constants {
 
 final class OlympiadsViewController: UIViewController, WithSearchButton {
     @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
+    
+    @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
     @InjectSingleton
@@ -78,40 +81,7 @@ final class OlympiadsViewController: UIViewController, WithSearchButton {
     }
     
     private func setupFilterItems() {
-        let sortItem = FilterItem(
-            paramType: .sort,
-            title: "Сортировать",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "По уровню"),
-                OptionViewModel(id: 2, name: "По профилю"),
-                OptionViewModel(id: 3, name: "По имени")
-            ]),
-            isMultipleChoice: false
-        )
-        
-        let levelFilterItem = FilterItem(
-            paramType: .olympiadLevel,
-            title: "Уровень",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "I уровень"),
-                OptionViewModel(id: 2, name: "II уровень"),
-                OptionViewModel(id: 3, name: "III уровень")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        let profileFilterItem = FilterItem(
-            paramType: .olympiadProfile,
-            title: "Профиль",
-            initMethod: .endpoint("/meta/olympiad-profiles"),
-            isMultipleChoice: true
-        )
-        
-        filterItems = [
-            sortItem,
-            levelFilterItem,
-            profileFilterItem
-        ]
+        filterItems = filtersManager.getData(for: type(of: self))
         
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)

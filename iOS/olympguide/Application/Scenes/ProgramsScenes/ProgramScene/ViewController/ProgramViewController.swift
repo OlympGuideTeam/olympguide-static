@@ -34,6 +34,9 @@ fileprivate enum Constants {
 
 final class ProgramViewController : UIViewController, WithBookMarkButton {
     @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
+    
+    @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
     var interactor: (ProgramBusinessLogic & BenefitsByOlympiadsBusinessLogic)?
@@ -48,7 +51,6 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     var benefits: [OlympiadWithBenefitViewModel] = []
     
     private let programId: Int
-    private var startIsFavorite: Bool?
     private var isFavorite: Bool?
     private let university: UniversityModel
     private var program: ProgramShortModel?
@@ -80,7 +82,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     init (
         for program: ProgramModel
     ) {
-        self.startIsFavorite = program.like
+        self.interactor?.isFavorite = program.like
         self.programId = program.programID
         self.university = program.university
         self.program = program.toShortModel()
@@ -105,7 +107,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         by university: UniversityModel
     ) {
         self.isFavorite = program.like
-        self.startIsFavorite = program.like
+        self.interactor?.isFavorite = program.like
         self.university = university
         self.program = program
         self.programId = program.programID
@@ -150,6 +152,14 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         configureFavoriteButton()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        guard
+            let navigationController = navigationController as? NavigationBarViewController
+        else { return }
+        navigationController.bookMarkButton.isEnabled = true
+    }
+    
     private func setupIsFavorite() {
         if let program = program {
             self.isFavorite = favoritesManager.isProgramFavorited(
@@ -178,73 +188,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     }
     
     private func setupFilterItems() {
-        let sortItem = FilterItem(
-            paramType: .sort,
-            title: "Сортировать",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "По уровню олимпиады"),
-                OptionViewModel(id: 2, name: "По профилю олимпиады")
-            ]),
-            isMultipleChoice: false
-        )
-        
-        let levelFilterItem = FilterItem(
-            paramType: .olympiadLevel,
-            title: "Уровень",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "I уровень"),
-                OptionViewModel(id: 2, name: "II уровень"),
-                OptionViewModel(id: 3, name: "III уровень")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        let profileFilterItem = FilterItem(
-            paramType: .olympiadProfile,
-            title: "Профиль олимпиады",
-            initMethod: .endpoint("/meta/olympiad-profiles"),
-            isMultipleChoice: true
-        )
-        
-        let benefitFilterItem = FilterItem(
-            paramType: .benefit,
-            title: "Льгота",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "БВИ"),
-                OptionViewModel(id: 2, name: "100 баллов")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        let minDiplomaLevelFilterItem = FilterItem(
-            paramType: .minClass,
-            title: "Минимальный класс диплома",
-            initMethod: .models([
-                OptionViewModel(id: 10, name: "10 класс"),
-                OptionViewModel(id: 11, name: "11 класс")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        let diplomaLevelFilterItem = FilterItem(
-            paramType: .minDiplomaLevel,
-            title: "Степень диплома",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "Победитель"),
-                OptionViewModel(id: 3, name: "Призёр")
-            ]),
-            isMultipleChoice: true
-        )
-            
-        
-        filterItems = [
-            sortItem,
-            levelFilterItem,
-            profileFilterItem,
-            benefitFilterItem,
-            minDiplomaLevelFilterItem,
-            diplomaLevelFilterItem
-        ]
+        filterItems = filtersManager.getData(for: type(of: self))
         
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
@@ -263,7 +207,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             navigationController.bookMarkButton.isEnabled = false
             return
         }
-
+        navigationController.bookMarkButton.isEnabled = true
         let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
         navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
         navigationController.bookMarkButtonPressed = {[weak self] sender in
@@ -272,9 +216,10 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
                 let isFavorite = self.isFavorite,
                 let program = self.program
             else { return }
+            
             self.isFavorite = !isFavorite
             // TODO: -
-//            self?.isFavorite.toggle()
+            // self?.isFavorite.toggle()
             let newImageName = self.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
             sender.setImage(UIImage(systemName: newImageName), for: .normal)
             
@@ -345,6 +290,7 @@ extension ProgramViewController {
     }
 }
 
+// MARK: - DataSource
 extension ProgramViewController {
     private func setupDataSource() {
         dataSource.viewController = self
@@ -376,10 +322,10 @@ extension ProgramViewController : ProgramDisplayLogic {
             .replacingOccurrences(of: "https://www.", with: "")
             .replacingOccurrences(of: "https://", with: "")
         self.link = link
-        startIsFavorite = viewModel.program.like
+        interactor?.isFavorite = viewModel.program.like
         informationStack.setInformation(viewModel.program)
         program = viewModel.program
-        isFavorite = startIsFavorite
+        isFavorite = viewModel.program.like
         
         tableView.addHeaderView(informationStack)
         
@@ -394,6 +340,7 @@ extension ProgramViewController : ProgramDisplayLogic {
     }
 }
 
+// MARK: - OptionsViewControllerDelegate
 extension ProgramViewController : OptionsViewControllerDelegate {
     func didSelectOption(
         _ indices: Set<Int>,

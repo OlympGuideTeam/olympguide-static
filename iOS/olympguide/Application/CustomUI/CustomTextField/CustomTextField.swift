@@ -206,26 +206,16 @@ class CustomTextField: UIView {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        
-        guard let touch = touches.first else { return }
-        guard !textField.isFirstResponder else { return }
-        
-        let point = touch.location(in: self)
-        
-        let buttonFrame = actionButton.convert(actionButton.bounds, to: self)
-        
-        if !buttonFrame.contains(point) {
-            didTapSearchBar()
+        let touch = touches.first
+        let point = touch?.location(in: self) ?? .zero
+        if !actionButton.frame.contains(point) {
+            textField.becomeFirstResponder()
         }
     }
 }
 
 // MARK: - UITextFieldDelegate
 extension CustomTextField: UITextFieldDelegate {
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        didTapSearchBar()
-    }
-    
     func setTextFieldType(_ keyboardType: UIKeyboardType = .default, _ textContentType: UITextContentType) {
         textField.keyboardType = keyboardType
         textField.textContentType = textContentType
@@ -281,5 +271,29 @@ extension CustomTextField {
         for event: UIControl.Event = .editingChanged
     ) {
         actionButton.addTarget(target, action: action, for: event)
+    }
+}
+
+extension CustomTextField {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        guard !isActive else { return }
+        isActive = true
+        updateAppereance()
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField.text?.isEmpty ?? true {
+            isActive = false
+            updateAppereance()
+        }
+    }
+    
+    func textField(
+        _ textField: UITextField,
+        shouldChangeCharactersIn range: NSRange,
+        replacementString string: String
+    ) -> Bool {
+        // TODO: - Отследить «вставку» пароля
+        return true
     }
 }

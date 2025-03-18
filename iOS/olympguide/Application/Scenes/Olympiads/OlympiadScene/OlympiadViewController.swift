@@ -10,6 +10,9 @@ import Combine
 
 final class OlympiadViewController: UIViewController, WithBookMarkButton {
     @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
+    
+    @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
     @InjectSingleton
@@ -22,6 +25,8 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     var filterItems: [FilterItem] = []
     var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
+    var groups: [UniWithProgramsWithBenefits] = []
+    
     private var cancellables = Set<AnyCancellable>()
     
     private let olympiad: OlympiadModel
@@ -30,10 +35,6 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     private let tableView: UICustomTbleView = UICustomTbleView()
     private let dataSource: OlympiadDataSource = OlympiadDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
-    
-    var universities: [UniversityViewModel] = []
-    var isExpanded: [Bool] = []
-    var programs: [[ProgramWithBenefitsViewModel]] = []
     
     private var isFavorite: Bool = false
     
@@ -82,11 +83,11 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     }
     
     private func loadPrograms() {
-        for (section, expand) in self.isExpanded.enumerated() {
-            if expand {
+        for (section, group) in groups.enumerated() {
+            if group.isExpanded {
                 let request = BenefitsByPrograms.Load.Request(
                     olympiadID: olympiad.olympiadID,
-                    universityID: universities[section].universityID,
+                    universityID: groups[section].university.universityID,
                     section: section,
                     params: selectedParams
                 )
@@ -96,42 +97,7 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     }
     
     private func setupFilterItems() {
-        let benefitFilterItem = FilterItem(
-            paramType: .benefit,
-            title: "Льгота",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "БВИ"),
-                OptionViewModel(id: 2, name: "100 баллов")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        let minDiplomaLevelFilterItem = FilterItem(
-            paramType: .minClass,
-            title: "Минимальный класс диплома",
-            initMethod: .models([
-                OptionViewModel(id: 10, name: "10 класс"),
-                OptionViewModel(id: 11, name: "11 класс")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        let diplomaLevelFilterItem = FilterItem(
-            paramType: .minDiplomaLevel,
-            title: "Степень диплома",
-            initMethod: .models([
-                OptionViewModel(id: 1, name: "Победитель"),
-                OptionViewModel(id: 3, name: "Призёр")
-            ]),
-            isMultipleChoice: true
-        )
-        
-        filterItems = [
-            benefitFilterItem,
-            minDiplomaLevelFilterItem,
-            diplomaLevelFilterItem
-        ]
-        
+        filterItems = filtersManager.getData(for: type(of: self))
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
@@ -176,19 +142,8 @@ extension OlympiadViewController {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
-                
-        tableView.register(
-            UIProgramWithBenefitsCell.self,
-            forCellReuseIdentifier: UIProgramWithBenefitsCell.identifier
-        )
-        
-        tableView.register(
-            UIUniversityHeader.self,
-            forHeaderFooterViewReuseIdentifier: UIUniversityHeader.identifier
-        )
-        
-        tableView.dataSource = dataSource
-        tableView.delegate = dataSource
+    
+        dataSource.register(in: tableView)
         
         tableView.refreshControl = refreshControl
 
@@ -225,18 +180,18 @@ extension OlympiadViewController {
     }
     
     private func toggleSection(at index: Int) {
-        isExpanded[index].toggle()
+        groups[index].isExpanded.toggle()
         
-        if isExpanded[index] {
+        if groups[index].isExpanded {
             let request = BenefitsByPrograms.Load.Request(
                 olympiadID: olympiad.olympiadID,
-                universityID: universities[index].universityID,
+                universityID: groups[index].university.universityID,
                 section: index,
                 params: selectedParams
             )
             interactor?.loadBenefits(with: request)
         } else {
-            reloadSectionWithoutAnimation(index)
+//            reloadSectionWithoutAnimation(index)
         }
     }
 }
@@ -244,9 +199,10 @@ extension OlympiadViewController {
 // MARK: - OlympiadDisplayLogic
 extension OlympiadViewController : OlympiadDisplayLogic {
     func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel) {
-        universities = viewModel.universities
-        isExpanded = [Bool](repeating: false, count: universities.count)
-        programs = [[ProgramWithBenefitsViewModel]] (repeating: [], count: universities.count)
+        groups = viewModel.universities.map {
+            UniWithProgramsWithBenefits(university: $0)
+        }
+        
         informationStackView.searchButton.isEnabled = true
         
         DispatchQueue.main.async { [weak self] in
@@ -263,24 +219,9 @@ extension OlympiadViewController : OlympiadDisplayLogic {
 // MARK: - BenefitsByProgramsDisplayLogic
 extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
     func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel) {
-        programs[viewModel.section] = viewModel.benefits
-        
-        reloadSectionWithoutAnimation(viewModel.section)
-    }
-    
-    private func reloadSectionWithoutAnimation(_ section: Int) {
-        var currentOffset = tableView.contentOffset
-        let headerRectBefore = tableView.rectForHeader(inSection: section)
-        
-        UIView.performWithoutAnimation {
-            tableView.reloadSections(IndexSet(integer: section), with: .none)
-            tableView.layoutIfNeeded()
-        }
-        
-        let headerRectAfter = tableView.rectForHeader(inSection: section)
-        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
-        currentOffset.y += deltaY
-        tableView.setContentOffset(currentOffset, animated: false)
+        groups[viewModel.section].programs = viewModel.benefits
+        let id = groups[viewModel.section].university.universityID
+        dataSource.toggle(to: id, in: tableView)
     }
 }
 
@@ -307,17 +248,7 @@ extension OlympiadViewController : OptionsViewControllerDelegate {
             selectedParams[paramType]?.add(param)
         }
         
-        for (section, expand) in self.isExpanded.enumerated() {
-            if expand {
-                let request = BenefitsByPrograms.Load.Request(
-                    olympiadID: olympiad.olympiadID,
-                    universityID: universities[section].universityID,
-                    section: section,
-                    params: selectedParams
-                )
-                interactor?.loadBenefits(with: request)
-            }
-        }
+        loadPrograms()
     }
 }
 
@@ -328,9 +259,4 @@ extension OlympiadViewController : Filterble {
         
         loadPrograms()
     }
-}
-
-// MARK: - Combine
-extension OlympiadViewController {
-    
 }

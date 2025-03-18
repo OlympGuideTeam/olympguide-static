@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AuthenticationServices
 
 final class SignInViewController: UIViewController, SignInValidationErrorDisplayable, NonTabBarVC {
     typealias Constants = AllConstants.SignInViewController
@@ -165,9 +166,13 @@ extension SignInViewController {
 extension SignInViewController : SignInDisplayLogic {
     func displaySignInResult(with viewModel: SignInModels.SignIn.ViewModel) {
         if viewModel.success {
-            router?.routeToRoot()
-        } else if let errorMessages = viewModel.errorMessages, !errorMessages.isEmpty {
-            showAlert(with: errorMessages.joined(separator: "\n"))
-        }
+                let credential = ASPasswordCredential(user: email, password: password)
+                let authController = ASCredentialProviderViewController()
+                authController.extensionContext.completeRequest(withSelectedCredential: credential, completionHandler: nil)
+
+                router?.routeToRoot()
+            } else if let errorMessages = viewModel.errorMessages, !errorMessages.isEmpty {
+                showAlert(with: errorMessages.joined(separator: "\n"))
+            }
     }
 }

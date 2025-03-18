@@ -71,7 +71,6 @@ final class OptionsCoordinator: NSObject {
     
     
     func configureContainerView(count: Int) {
-        print(2)
         guard let containerView = self.containerView else {
             return
         }
@@ -95,7 +94,6 @@ final class OptionsCoordinator: NSObject {
     }
     
     func configureDimmingView() {
-        print(1)
         guard let dimmingView = self.dimmingView else {
             return
         }
@@ -124,7 +122,6 @@ final class OptionsCoordinator: NSObject {
     }
     
     func animateShow() {
-        print(3)
         UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
             self.containerView?.frame.origin.y = self.finalY
             self.containerView?.backgroundColor = .white

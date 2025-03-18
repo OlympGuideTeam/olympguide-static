@@ -37,6 +37,9 @@ fileprivate enum Constants {
 
 class UniversitiesViewController : UIViewController, WithSearchButton {
     @InjectSingleton
+    var filtersManager: FiltersManagerProtocol
+    
+    @InjectSingleton
     var favoritesManager: FavoritesManagerProtocol
     
     @InjectSingleton
@@ -92,16 +95,7 @@ class UniversitiesViewController : UIViewController, WithSearchButton {
     }
     
     private func setupFilterItems() {
-        let regionFilterItem = FilterItem(
-            paramType: .region,
-            title: "Регион",
-            initMethod: .endpoint("/meta/university-regions"),
-            isMultipleChoice: true
-        )
-        
-        filterItems = [
-            regionFilterItem
-        ]
+        filterItems = filtersManager.getData(for: type(of: self))
         
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)

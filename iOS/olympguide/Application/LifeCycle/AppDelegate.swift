@@ -36,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         serviceLocator.register(service: AuthManager.shared as AuthManagerProtocol)
         serviceLocator.register(service: NetworkService.shared as NetworkServiceProtocol)
         serviceLocator.register(service: FavoritesManager.shared as FavoritesManagerProtocol)
+        serviceLocator.register(service: FiltersManager.shared as FiltersManagerProtocol)
     }
     
     // MARK: UISceneSession Lifecycle
@@ -68,9 +69,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func isMiniScreen(identifier: String) -> Bool {
-        if UIScreen.main.bounds.width < 400 {
-            return true
-        }
         switch identifier {
         case "iPhone13,1", "iPhone14,4", "iPhone14,6", "iPhone10,1", "iPhone10,4":
             return true
