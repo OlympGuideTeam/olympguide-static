@@ -6,7 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F33E1A522D881A7B008CD42D /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = F33E1A502D881A7B008CD42D /* Debug.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		F33E1A502D881A7B008CD42D /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		F37DB2382D315AB6005E5508 /* olympguide.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = olympguide.xcodeproj; path = olympguide/Application/FilterAndSort/olympguide.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F3D861E62D17851800809C5A /* olympguide.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = olympguide.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -43,6 +48,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F33E1A512D881A7B008CD42D /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				F33E1A502D881A7B008CD42D /* Debug.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		F37DB23B2D315AB6005E5508 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -53,6 +66,7 @@
 		F3D861DD2D17851800809C5A = {
 			isa = PBXGroup;
 			children = (
+				F33E1A512D881A7B008CD42D /* Config */,
 				F3D861E82D17851800809C5A /* olympguide */,
 				F3D861E72D17851800809C5A /* Products */,
 			);
@@ -137,6 +151,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F33E1A522D881A7B008CD42D /* Debug.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,14 +170,14 @@
 /* Begin XCBuildConfiguration section */
 		F3D861FA2D17851900809C5A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = F3D861E82D17851800809C5A /* olympguide */;
-			baseConfigurationReferenceRelativePath = Config/Debug.xcconfig;
+			baseConfigurationReference = F33E1A502D881A7B008CD42D /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = olympguide/olympguide.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NW3XPQMXRW;
+				DEVELOPMENT_TEAM = FUD5CPHJR9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "olympguide/Supporting Files/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -189,9 +204,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = olympguide/olympguide.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NW3XPQMXRW;
+				DEVELOPMENT_TEAM = FUD5CPHJR9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "olympguide/Supporting Files/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -215,8 +231,7 @@
 		};
 		F3D861FC2D17851900809C5A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = F3D861E82D17851800809C5A /* olympguide */;
-			baseConfigurationReferenceRelativePath = Config/Debug.xcconfig;
+			baseConfigurationReference = F33E1A502D881A7B008CD42D /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
