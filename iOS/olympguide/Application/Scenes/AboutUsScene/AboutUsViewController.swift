@@ -64,7 +64,7 @@ final class AboutUsViewController : UIViewController {
         let title = NSAttributedString(
             string: "GitHub Backend",
             attributes: [
-                .foregroundColor: UIColor.blue,
+                .foregroundColor: UIColor.black,
                 .underlineStyle: NSUnderlineStyle.single.rawValue,
                 .font: FontManager.shared.font(for: .bigButton)
             ]
