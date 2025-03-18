@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AuthenticationServices
 
 final class PersonalDataViewController: UIViewController, ValidationErrorDisplayable, NonTabBarVC {
     
@@ -378,6 +379,10 @@ extension PersonalDataViewController : PersonalDataDisplayLogic {
             showAlert(with: errorMesseges.joined(separator: "\n"))
             return
         }
+        let credential = ASPasswordCredential(user: userEmail, password: password)
+        let authController = ASCredentialProviderViewController()
+        authController.extensionContext.completeRequest(withSelectedCredential: credential, completionHandler: nil)
+        
         router?.routeToRoot(email: userEmail, password: password)
     }
 }
