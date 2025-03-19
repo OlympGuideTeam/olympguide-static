@@ -33,6 +33,7 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
     }
     
     private func configureUI() {
+        backgroundColor = .white
         configureLevelAndProfileLabel()
         configureFavoriteButton()
         configureNameLabel()
@@ -45,6 +46,7 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         nameLabel.font = FontManager.shared.font(for: .commonInformation)
         nameLabel.numberOfLines = 0
         nameLabel.lineBreakMode = .byWordWrapping
+        nameLabel.textColor = .black
         
         contentView.addSubview(nameLabel)
         

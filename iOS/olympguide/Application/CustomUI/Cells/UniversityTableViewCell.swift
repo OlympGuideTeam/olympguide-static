@@ -35,6 +35,7 @@ class UniversityTableViewCell: UITableViewCell {
     
     // MARK: - Private funcs
     private func configureUI() {
+        backgroundColor = .white
         configureUniversityView()
         configureSeparatorLine()
         configureShimmerLayer()
