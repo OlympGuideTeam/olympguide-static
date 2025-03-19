@@ -138,6 +138,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         setupIsFavorite()
         setupDataSource()
         setupFilterItems()
+        setupInformationStack()
         configureUI()
         loadOlympiads()
         interactor?.programId = programId
@@ -158,6 +159,13 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             let navigationController = navigationController as? NavigationBarViewController
         else { return }
         navigationController.bookMarkButton.isEnabled = true
+    }
+    
+    private func setupInformationStack() {
+        informationStack.searchButtonAction = { [weak self] in
+            guard let self else { return }
+            router?.routeToSearch(programId: programId)
+        }
     }
     
     private func setupIsFavorite() {
