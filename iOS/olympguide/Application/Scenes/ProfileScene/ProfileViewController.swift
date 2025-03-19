@@ -95,10 +95,29 @@ class ProfileViewController: UIViewController {
         tableView.separatorStyle = .none
         tableView.frame = view.bounds
         
+        tableView.backgroundColor = .white
+        
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.dataSource = self
         tableView.delegate = self
+        
+        let footerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 40))
+        
+        let versionLabel = UILabel(frame: footerView.bounds)
+        versionLabel.textAlignment = .center
+        versionLabel.font = FontManager.shared.font(for: .additionalInformation)
+        versionLabel.textColor = .gray
+        
+        if
+            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+            let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+        {
+            versionLabel.text = "Версия приложения \(version) (\(build))"
+        }
+        
+        footerView.addSubview(versionLabel)
+        tableView.tableFooterView = footerView
     }
     
     // MARK: - Actions

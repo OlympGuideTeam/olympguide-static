@@ -77,6 +77,7 @@ final class UIUniversityView: UIView {
         nameLabel.font =  FontManager.shared.font(for: .commonInformation)
         nameLabel.numberOfLines = 0
         nameLabel.lineBreakMode = .byWordWrapping
+        nameLabel.textColor = .black
         
         regionLabel.font = FontManager.shared.font(for: .region)
         regionLabel.textColor = Common.Colors.additionalText

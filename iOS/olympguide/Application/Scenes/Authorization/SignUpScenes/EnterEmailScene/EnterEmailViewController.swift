@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 
 final class EnterEmailViewController: UIViewController, NonTabBarVC {
     typealias Constants = AllConstants.EnterEmailViewController
@@ -18,6 +19,20 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     // MARK: - UI
     private let emailTextField: CustomInputDataField = CustomInputDataField(with: "email")
     private let nextButton: UIButton = UIButton(type: .system)
+    
+    private let agreementTextView: UITextView = {
+        let tv = UITextView()
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        tv.isEditable = false
+        tv.isScrollEnabled = false
+        tv.backgroundColor = .clear
+        tv.textAlignment = .center
+        tv.dataDetectorTypes = .link
+        tv.textContainerInset = .zero
+        tv.textContainer.lineFragmentPadding = 0
+        return tv
+    }()
+    
     private var nextButtonBottomConstraint: NSLayoutConstraint?
     private var currentEmail: String = ""
     
@@ -55,6 +70,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
         view.backgroundColor = Constants.Colors.background
         configureEmailTextField()
         configureNextButton()
+        configureAgreementTextView()
     }
     
     private func configureEmailTextField() {
@@ -86,6 +102,33 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
     }
     
+    private func configureAgreementTextView() {
+        view.addSubview(agreementTextView)
+        
+        agreementTextView.delegate = self
+        
+        let fullText = "Нажимая «Продолжить», вы соглашаетесь с Условиями использования и Политикой конфиденциальности"
+        let attributedText = NSMutableAttributedString(string: fullText)
+        
+        if let termsRange = fullText.range(of: "Условиями использования"),
+           let privacyRange = fullText.range(of: "Политикой конфиденциальности") {
+            let nsTermsRange = NSRange(termsRange, in: fullText)
+            let nsPrivacyRange = NSRange(privacyRange, in: fullText)
+            
+            attributedText.addAttribute(.link, value: "https://olympguide.ru/terms", range: nsTermsRange)
+            attributedText.addAttribute(.link, value: "https://olympguide.ru/privacy", range: nsPrivacyRange)
+        }
+        
+        attributedText.addAttribute(.font, value: UIFont.systemFont(ofSize: 12), range: NSMakeRange(0, attributedText.length))
+        attributedText.addAttribute(.foregroundColor, value: UIColor.gray, range: NSMakeRange(0, attributedText.length))
+        
+        agreementTextView.attributedText = attributedText
+        
+        agreementTextView.pinLeft(to: view.leadingAnchor, Constants.Dimensions.horizontalMargin)
+        agreementTextView.pinRight(to: view.trailingAnchor, Constants.Dimensions.horizontalMargin)
+        agreementTextView.pinBottom(to: nextButton.topAnchor, 10)
+    }
+    
     // MARK: - Actions
     @objc
     private func didTapNextButton() {
@@ -94,9 +137,20 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
     }
 }
 
+// MARK: - CustomTextFieldDelegate
 extension EnterEmailViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
         currentEmail = text
+    }
+}
+
+// MARK: - UITextViewDelegate
+extension EnterEmailViewController: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        let safariVC = SFSafariViewController(url: URL)
+        safariVC.modalPresentationStyle = .pageSheet
+        present(safariVC, animated: true, completion: nil)
+        return false
     }
 }
 
@@ -123,7 +177,6 @@ extension EnterEmailViewController {
             name: UIResponder.keyboardWillShowNotification,
             object: nil
         )
-        
         NotificationCenter.default.removeObserver(
             self,
             name: UIResponder.keyboardWillHideNotification,
@@ -162,4 +215,3 @@ extension EnterEmailViewController: EnterEmailDisplayLogic {
         router?.routeToVerifyCode()
     }
 }
-

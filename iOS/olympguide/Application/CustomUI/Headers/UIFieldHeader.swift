@@ -37,7 +37,7 @@ final class UIFieldHeaderCell : UITableViewCell {
     }
     
     private func configureLayouts() {
-        tintColor = .white
+        backgroundColor = .white
         configureBackgroundView()
         configureFieldStackView()
         configureArrowImageView()
@@ -93,18 +93,14 @@ final class UIFieldHeaderCell : UITableViewCell {
     ) {
         self.isExpanded = isExpanded
         let capitalizeName = capitalizeFirstLetter(field.name)
-        if field.code.isEmpty {
-            fieldStackView.configure(
-                with: field.code,
-                and: capitalizeName,
-                width: nil
-            )
-        } else {
-            fieldStackView.configure(
-                with: field.code,
-                and: capitalizeName
-            )
-        }
+        let w = UIScreen.main.bounds.width - 40 - 20 - 11 * 7 - 6 - 6
+        
+        fieldStackView.configure(
+            with: field.code,
+            and: capitalizeName,
+            width: nil
+        )
+        
         updateApperance()
     }
     
