@@ -106,7 +106,7 @@ extension AllConstants {
             
             // benefitLabel
             static let benefitLabelTopMargin: CGFloat = 5.0
-            static let benefitLabelBottomMargin: CGFloat = 5.0
+            static let benefitLabelBottomMargin: CGFloat = 15.0
             
             // shimmerLayer
             static let shimmerHeight: CGFloat = 75.0
