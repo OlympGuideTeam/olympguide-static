@@ -6,12 +6,27 @@
 //
 
 import UIKit
-
+import UserNotifications
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     var serviceLocator = ServiceLocator.shared
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let center = UNUserNotificationCenter.current()
+                center.delegate = self
+                center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                    if let error = error {
+                        print("Ошибка запроса разрешения: \(error)")
+                        return
+                    }
+                    if granted {
+                        DispatchQueue.main.async {
+                            application.registerForRemoteNotifications()
+                        }
+                    } else {
+                        print("Пользователь отказал в разрешении на уведомления")
+                    }
+                }
         customizeDependencies()
         
         let deviceIdentifier = getDeviceIdentifier()
@@ -31,6 +46,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         return true
     }
+    
+    // Вызывается, когда APNs успешно выдал device token
+        func application(_ application: UIApplication,
+                         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+            let tokenParts = deviceToken.map { String(format: "%02.2hhx", $0) }
+            let token = tokenParts.joined()
+            print("Устройство зарегистрировано, token: \(token)")
+            // Отправьте этот token на ваш сервер для дальнейшей отправки уведомлений
+        }
+        
+        // Вызывается при ошибке регистрации для удалённых уведомлений
+        func application(_ application: UIApplication,
+                         didFailToRegisterForRemoteNotificationsWithError error: Error) {
+            print("Ошибка регистрации в APNs: \(error)")
+        }
+        
+        // Обработка уведомлений, когда приложение активно (на переднем плане)
+        func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                    willPresent notification: UNNotification,
+                                    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+            // Отобразить уведомление (alert и звук) даже если приложение активно
+            completionHandler([.banner, .sound])
+        }
+        
+        // Обработка действий, когда пользователь взаимодействует с уведомлением
+        func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                    didReceive response: UNNotificationResponse,
+                                    withCompletionHandler completionHandler: @escaping () -> Void) {
+            // Здесь можно реализовать дополнительную логику по обработке нажатия на уведомление
+            print("Пользователь открыл уведомление")
+            completionHandler()
+        }
     
     func customizeDependencies() {
         serviceLocator.register(service: AuthManager.shared as AuthManagerProtocol)

@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol SelectedBarDelegate: UIViewController {
+    func toggleCustomTextField()
+    func unselectOption(at index: Int)
+}
+
 final class SelectedScrollView: UIView {
     typealias Constants = AllConstants.SelectedScrollView
     // MARK: - Variables

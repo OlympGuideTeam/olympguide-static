@@ -77,4 +77,41 @@ extension UniversitiesDataSource : UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         onUniversitySelect?(indexPath.row)
     }
+    
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let interactor = viewController?.interactor else { return nil }
+        let university = interactor.universityModel(at: indexPath.row)
+
+        return UIContextMenuConfiguration(
+            identifier: nil,
+            previewProvider: {
+                let detailVC = UniversityAssembly.build(for: university)
+                return detailVC
+            },
+            actionProvider: { _ in
+                let favoriteAction = UIAction(
+                    title: "Добавить в избранное",
+                    image: UIImage(systemName: "star.fill"),
+                    handler: { _ in
+                        self.onFavoriteUniversityTapped?(indexPath, true)
+                    }
+                )
+
+                return UIMenu(title: "", children: [favoriteAction])
+            }
+        )
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration,
+        animator: UIContextMenuInteractionCommitAnimating
+    ) {
+        guard let indexPath = tableView.indexPathForSelectedRow else { return }
+        onUniversitySelect?(indexPath.row)
+    }
 }

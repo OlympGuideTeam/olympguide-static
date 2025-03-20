@@ -135,6 +135,8 @@ extension OlympiadsViewController {
         tableView.dataSource = dataSource
         tableView.delegate = dataSource
         
+        tableView.refreshControl = refreshControl
+        
         let headerContainer = UIView()
         headerContainer.backgroundColor = .white
         

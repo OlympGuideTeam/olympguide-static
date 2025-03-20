@@ -93,7 +93,6 @@ final class UIFieldHeaderCell : UITableViewCell {
     ) {
         self.isExpanded = isExpanded
         let capitalizeName = capitalizeFirstLetter(field.name)
-        let w = UIScreen.main.bounds.width - 40 - 20 - 11 * 7 - 6 - 6
         
         fieldStackView.configure(
             with: field.code,
