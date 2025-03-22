@@ -5,6 +5,8 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
+import Foundation
+
 // MARK: - FieldsInteractor
 final class FieldsInteractor: FieldsBusinessLogic, FieldsDataStore {
     var presenter: FieldsPresentationLogic?
@@ -29,6 +31,10 @@ final class FieldsInteractor: FieldsBusinessLogic, FieldsDataStore {
                 self?.presenter?.presentFields(with: response)
             }
         }
+    }
+    
+    func field(at indexPath: IndexPath) -> GroupOfFieldsModel.FieldModel {
+        return groupsOfFields[indexPath.section].fields[indexPath.row]
     }
 }
 

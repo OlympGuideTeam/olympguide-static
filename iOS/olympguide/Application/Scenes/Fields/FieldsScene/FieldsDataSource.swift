@@ -9,10 +9,13 @@ import UIKit
 
 enum FieldItem {
     case header(GroupOfFieldsViewModel)
-    case field(FieldViewModel, IndexPath)
+    case cell(FieldViewModel, IndexPath)
 }
 
 final class FieldsDataSource : NSObject {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     weak var viewController: FieldsViewController?
     
     var routeToField: ((IndexPath) -> Void)?
@@ -28,15 +31,13 @@ final class FieldsDataSource : NSObject {
                 for (fieldIndex, subField) in group.fields.enumerated() {
                     autoreleasepool {
                         let indexPath = IndexPath(row: fieldIndex, section: groupIndex)
-                        result.append(.field(subField, indexPath))
+                        result.append(.cell(subField, indexPath))
                     }
                 }
             }
         }
         return result
     }
-    
-    
 }
 
 // MARK: - UITableViewDataSource
@@ -71,7 +72,7 @@ extension FieldsDataSource : UITableViewDataSource {
             )
             
             return cell
-        case .field(let field, _):
+        case .cell(let field, _):
             guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: FieldTableViewCell.identifier,
                 for: indexPath
@@ -97,7 +98,7 @@ extension FieldsDataSource : UITableViewDelegate {
         switch item {
         case .header(let group):
             toggleSection(at: indexPath, group: group, in: tableView)
-        case .field(_, let realIndexPath):
+        case .cell(_, let realIndexPath):
             tableView.deselectRow(at: indexPath, animated: true)
             routeToField?(realIndexPath)
         }
@@ -138,4 +139,42 @@ extension FieldsDataSource : UITableViewDelegate {
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    func tableView(
+            _ tableView: UITableView,
+            contextMenuConfigurationForRowAt indexPath: IndexPath,
+            point: CGPoint
+        ) -> UIContextMenuConfiguration? {
+            guard
+                let interactor = viewController?.interactor,
+//                let university = interactor.university,
+                case .cell(_, let realIndexPath) = fieldItems[indexPath.row]
+            else { return nil }
+            let field = interactor.field(at: realIndexPath)
+
+            return UIContextMenuConfiguration(
+                identifier: realIndexPath as NSCopying,
+                previewProvider: {
+                    let detailVC = FieldAssembly.build(for: field)
+                    return detailVC
+                },
+                actionProvider: {_ in
+                    return nil
+                }
+            )
+        }
+
+        func tableView(
+            _ tableView: UITableView,
+            willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration,
+            animator: UIContextMenuInteractionCommitAnimating
+        ) {
+            animator.addCompletion { [weak self] in
+                guard
+                    let self = self,
+                    let indexPath = configuration.identifier as? IndexPath
+                else { return }
+                routeToField?(indexPath)
+            }
+        }
 }

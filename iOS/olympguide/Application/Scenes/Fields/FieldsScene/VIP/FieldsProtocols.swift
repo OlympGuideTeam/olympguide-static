@@ -9,6 +9,7 @@ import Foundation
 
 protocol FieldsBusinessLogic {
     func loadFields(with request: Fields.Load.Request)
+    func field(at ndexPath: IndexPath) -> GroupOfFieldsModel.FieldModel
 }
 
 protocol FieldsPresentationLogic {
