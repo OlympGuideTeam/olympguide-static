@@ -13,6 +13,8 @@ enum ProgramByFieldItem {
 }
 
 final class UniversityDataSource: NSObject {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     weak var viewController: UniversityViewController?
     
     var onProgramSelect: ((IndexPath) -> Void)?
@@ -180,5 +182,62 @@ extension UniversityDataSource : UITableViewDelegate {
         tableView.endUpdates()
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard
+            let interactor = viewController?.interactor,
+            let university = interactor.university,
+            case .cell(let programViewModel, let realIndexPath) = programItems[indexPath.row]
+        else { return nil }
+        
+        let program = interactor.program(at: realIndexPath)
+
+        return UIContextMenuConfiguration(
+            identifier: realIndexPath as NSCopying,
+            previewProvider: {
+                let detailVC = ProgramAssembly.build(for: program, by: university)
+                return detailVC
+            },
+            actionProvider: { _ in
+                guard self.authManager.isAuthenticated else { return nil }
+                let image = programViewModel.like ?
+                AllConstants.Common.Images.unlike :
+                AllConstants.Common.Images.like
+                
+                let title = programViewModel.like ?
+                "Убрать из избранного" :
+                "Добавить в избранное"
+                
+                let favoriteAction = UIAction(
+                    title: title,
+                    image: image,
+                    handler: { _ in
+                        self.onFavoriteProgramTapped?(realIndexPath, !programViewModel.like)
+                        guard let cell = tableView.cellForRow(at: indexPath) as? ProgramTableViewCell else { return }
+                        cell.favoriteButton.setImage(image, for: .normal)
+                    }
+                )
+                return UIMenu(title: "", children: [favoriteAction])
+            }
+        )
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration,
+        animator: UIContextMenuInteractionCommitAnimating
+    ) {
+        animator.addCompletion { [weak self] in
+            guard
+                let self = self,
+                let indexPath = configuration.identifier as? IndexPath
+            else { return }
+            onProgramSelect?(indexPath)
+        }
     }
 }

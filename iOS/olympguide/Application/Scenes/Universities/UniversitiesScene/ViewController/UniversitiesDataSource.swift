@@ -8,6 +8,9 @@
 import UIKit
 
 final class UniversitiesDataSource : NSObject {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
+    
     weak var viewController: UniversitiesViewController?
     
     var onUniversitySelect: ((Int) -> Void)?
@@ -76,5 +79,59 @@ extension UniversitiesDataSource : UITableViewDelegate {
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
         onUniversitySelect?(indexPath.row)
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard
+            let interactor = viewController?.interactor,
+            let universitiyViewModel = viewController?.universities[indexPath.row]
+        else { return nil }
+        let university = interactor.universityModel(at: indexPath.row)
+
+        return UIContextMenuConfiguration(
+            identifier: indexPath as NSCopying,
+            previewProvider: {
+                let detailVC = UniversityAssembly.build(for: university)
+                return detailVC
+            },
+            actionProvider: { _ in
+                guard self.authManager.isAuthenticated else { return nil }
+                let image = universitiyViewModel.like ?
+                AllConstants.Common.Images.unlike :
+                AllConstants.Common.Images.like
+                
+                let title = universitiyViewModel.like ?
+                "Убрать из избранного" :
+                "Добавить в избранное"
+                
+                let favoriteAction = UIAction(
+                    title: title,
+                    image: image,
+                    handler: { _ in
+                        self.onFavoriteUniversityTapped?(indexPath, !universitiyViewModel.like)
+                        guard let cell = tableView.cellForRow(at: indexPath) as? UniversityTableViewCell else { return }
+                    }
+                )
+                return UIMenu(title: "", children: [favoriteAction])
+            }
+        )
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration,
+        animator: UIContextMenuInteractionCommitAnimating
+    ) {
+        animator.addCompletion { [weak self] in
+            guard
+                let self = self,
+                let indexPath = configuration.identifier as? IndexPath
+            else { return }
+            onUniversitySelect?(indexPath.row)
+        }
     }
 }

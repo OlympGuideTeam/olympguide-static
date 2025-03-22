@@ -273,6 +273,12 @@ final class OptionsViewController: UIViewController {
     func animateShowSafely() {
         if view.window != nil {
             configureUI()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {[weak self] in
+                guard let self else { return }
+                for index in selectedIndices {
+                    selectedScrollView.addButtonToStackView(with: options[index].name, tag: index)
+                }
+            }
             coordinator.animateShow()
         } else {
             DispatchQueue.main.async {
@@ -465,10 +471,9 @@ extension OptionsViewController: OptionsDisplayLogic {
         DispatchQueue.main.async {[weak self] in
             guard let self = self else { return }
             self.tableView.reloadData()
-            for index in currentSelectedIndices {
-                tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-                selectedScrollView.addButtonToStackView(with: options[index].name, tag: index)
-            }
+//            for index in selectedIndices {
+//                selectedScrollView.addButtonToStackView(with: options[index].name, tag: index)
+//            }
         }
         animateShowSafely()
     }

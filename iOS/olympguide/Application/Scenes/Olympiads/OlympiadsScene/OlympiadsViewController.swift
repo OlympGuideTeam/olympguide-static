@@ -135,6 +135,8 @@ extension OlympiadsViewController {
         tableView.dataSource = dataSource
         tableView.delegate = dataSource
         
+        tableView.refreshControl = refreshControl
+        
         let headerContainer = UIView()
         headerContainer.backgroundColor = .white
         
@@ -166,7 +168,7 @@ extension OlympiadsViewController {
             self?.router?.routeToOlympiad(with: index)
         }
         
-        dataSource.onFavoriteProgramTapped = { [weak self] index, isFavorite in
+        dataSource.onFavoriteOlympiadTapped = { [weak self] index, isFavorite in
             self?.favoriteProgramTapped(index, isFavorite)
         }
     }

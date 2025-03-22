@@ -148,9 +148,3 @@ final class FilterSortView: UIView {
         crossButtonTapped?(sender)
     }
 }
-
-
-protocol SelectedBarDelegate: UIViewController {
-    func toggleCustomTextField()
-    func unselectOption(at index: Int)
-}

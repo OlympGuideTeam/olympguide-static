@@ -16,7 +16,7 @@ class UniversityTableViewCell: UITableViewCell {
     // MARK: - Variables
     static let identifier = "UniversityTableViewCell"
     
-    private let universityView: UIUniversityView = UIUniversityView()
+    let universityView: UIUniversityView = UIUniversityView()
     
     private let shimmerLayer: UIShimmerView = UIShimmerView()
     

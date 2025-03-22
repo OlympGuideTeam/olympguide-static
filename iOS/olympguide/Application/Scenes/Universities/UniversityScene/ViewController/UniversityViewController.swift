@@ -124,7 +124,6 @@ final class UniversityViewController : UIViewController, WithBookMarkButton {
     private func setupFilterItems() {
         filterItems = filtersManager.getData(for: type(of: self))
         
-        
         for item in filterItems {
             selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
         }
@@ -226,10 +225,7 @@ extension UniversityViewController : ProgramsDisplayLogic {
         let (groupIndex, programIndex) = (indexPath.section, indexPath.row)
         if groupsOfProgramsViewModel[groupIndex].programs[programIndex].like != isFavorite {
             groupsOfProgramsViewModel[groupIndex].programs[programIndex].like = isFavorite
-            self.tableView.reloadRows(
-                at: [IndexPath(row: programIndex, section: groupIndex)],
-                with: .automatic
-            )
+            self.tableView.reloadData()
         }
     }
 }

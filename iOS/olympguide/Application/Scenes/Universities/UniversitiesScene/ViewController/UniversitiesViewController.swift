@@ -183,6 +183,7 @@ extension UniversitiesViewController {
     
 }
 
+// MARK: - UniversitiesDisplayLogic
 extension UniversitiesViewController : UniversitiesDisplayLogic {
     func displayUniversities(with viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
@@ -201,12 +202,22 @@ extension UniversitiesViewController : UniversitiesDisplayLogic {
     }
     
     func displaySetFavorite(at index: Int, isFavorite: Bool) {
-        if self.universities[index].like == isFavorite { return }
+        let image = isFavorite ?
+            AllConstants.Common.Images.like :
+            AllConstants.Common.Images.unlike
+        
+        let indexPath = IndexPath(row: index, section: 0)
         self.universities[index].like = isFavorite
-        self.tableView.reloadRows(
-            at: [IndexPath(row: index, section: 0)],
-            with: .automatic
-        )
+        
+        guard let cell = tableView.cellForRow(at: indexPath) as? UniversityTableViewCell else { return }
+        cell.universityView.favoriteButton.setImage(image, for: .normal)
+        
+//        if self.universities[index].like == isFavorite { return }
+//        self.universities[index].like = isFavorite
+//        self.tableView.reloadRows(
+//            at: [IndexPath(row: index, section: 0)],
+//            with: .automatic
+//        )
     }
 }
 
