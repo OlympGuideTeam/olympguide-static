@@ -51,6 +51,7 @@ final class FavoriteOlympiadsViewController : UIViewController {
         super.viewDidLoad()
         configureNavigationBar()
         configureRefreshControl()
+        setupDataSource()
         configureTableView()
         
         interactor?.loadOlympiads(

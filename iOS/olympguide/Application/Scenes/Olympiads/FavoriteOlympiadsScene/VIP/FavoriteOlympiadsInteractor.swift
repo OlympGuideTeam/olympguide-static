@@ -91,8 +91,10 @@ extension FavoriteOlympiadsInteractor {
     func likeOlympiad(_ olympiad: OlympiadModel) {
         guard getIndex(for: olympiad.olympiadID) == nil else { return }
         let insertIndex = getInsertIndex(for: olympiad.olympiadID)
-        olympiads.insert(olympiad, at: insertIndex)
-        removedOlympiads[olympiad.olympiadID] = nil
+        var modifiedOlympiad = olympiad
+        modifiedOlympiad.like = true
+        olympiads.insert(modifiedOlympiad, at: insertIndex)
+        removedOlympiads[modifiedOlympiad.olympiadID] = nil
         
         let response = Olympiads.Load.Response(olympiads: olympiads)
         presenter?.presentLoadOlympiads(with: response)

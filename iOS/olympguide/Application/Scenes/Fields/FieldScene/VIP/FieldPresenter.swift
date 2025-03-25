@@ -8,6 +8,9 @@
 import UIKit
 
 final class FieldPresenter : FieldPresentationLogic {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
     weak var viewController: (FieldDisplayLogic & UIViewController)?
     
     func presentLoadPrograms(with response: Field.LoadPrograms.Response) {
@@ -18,7 +21,17 @@ final class FieldPresenter : FieldPresentationLogic {
         
         guard let programs = response.programs else { return }
         
-        let viewModel = Field.LoadPrograms.ViewModel(programs: programs.map { $0.toViewModel()} )
+        let viewModel = Field.LoadPrograms.ViewModel(
+            programs: programs.map {    
+                let group = $0.toViewModel()
+                for program in group.programs {
+                    program.like = favoritesManager.isProgramFavorited(
+                        programID: program.programID,
+                        serverValue: program.like
+                    )
+                }
+                return group
+            })
         viewController?.displayLoadProgramsResult(with: viewModel)
     }
     
