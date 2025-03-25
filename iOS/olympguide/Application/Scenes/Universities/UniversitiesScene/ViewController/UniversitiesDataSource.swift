@@ -113,7 +113,6 @@ extension UniversitiesDataSource : UITableViewDelegate {
                     image: image,
                     handler: { _ in
                         self.onFavoriteUniversityTapped?(indexPath, !universitiyViewModel.like)
-                        guard let cell = tableView.cellForRow(at: indexPath) as? UniversityTableViewCell else { return }
                     }
                 )
                 return UIMenu(title: "", children: [favoriteAction])

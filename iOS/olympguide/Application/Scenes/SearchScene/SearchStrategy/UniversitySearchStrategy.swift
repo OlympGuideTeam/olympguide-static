@@ -29,6 +29,8 @@ final class UniversitySearchStrategy: SearchStrategy {
             return UITableViewCell()
         }
         
+        cell.universityView.favoriteButtonIsHidden = true
+        
         cell.configure(with: viewMmodel)
         cell.hideSeparator(isSeparatorHidden)
         return cell
