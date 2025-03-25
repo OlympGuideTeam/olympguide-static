@@ -46,7 +46,7 @@ class ProfileViewController: UIViewController {
     var router: ProfileRoutingLogic?
     let authLabels: [String] = [
 //        "Личные данные",
-//        "Мои дипломы",
+        "Мои дипломы",
         "Избранные ВУЗы",
         "Избранные программы",
         "Избранные олимпиады",
@@ -225,6 +225,8 @@ extension ProfileViewController : UITableViewDelegate {
             router?.routToFavoriteUniversities()
         case "Избранные программы":
             router?.routToFavoritePrograms()
+        case "Мои дипломы":
+            router?.routeToDiplomas()
         default:
             break
         }

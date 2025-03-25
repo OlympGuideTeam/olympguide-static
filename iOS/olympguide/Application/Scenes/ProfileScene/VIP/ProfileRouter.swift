@@ -40,5 +40,10 @@ final class ProfileRouter: ProfileRoutingLogic {
         let favoriteProgramsVC = FavoriteProgramsAssembly.build()
         viewController?.navigationController?.pushViewController(favoriteProgramsVC, animated: true)
     }
+    
+    func routeToDiplomas() {
+        let diplomasVC = DiplomasAssembly.build()
+        viewController?.navigationController?.pushViewController(diplomasVC, animated: true)
+    }
 }
 
