@@ -13,5 +13,6 @@ protocol ProfileRoutingLogic {
     func routToFavoriteOlympiads()
     func routToFavoriteUniversities()
     func routToFavoritePrograms()
+    func routeToDiplomas()
 }
 

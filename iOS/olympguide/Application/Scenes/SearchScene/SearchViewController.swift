@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class SearchViewController<Strategy: SearchStrategy>: UIViewController, NonTabBarVC, UITableViewDataSource, UITableViewDelegate {
+final class SearchViewController<Strategy: SearchStrategy> : UIViewController, NonTabBarVC, UITableViewDataSource, UITableViewDelegate {
     
     // MARK: - VIP
     var interactor: (SearchBusinessLogic)?
@@ -18,8 +18,9 @@ final class SearchViewController<Strategy: SearchStrategy>: UIViewController, No
     private let tableView = UITableView()
     
     private var rawModels: [Strategy.ViewModelType] = []
-    var strategy: Strategy?
     
+    var strategy: Strategy?
+    var onSelectItem: ((Strategy.ViewModelType) -> Void)?
     // MARK: - Lifecycle
     init() {
         self.customSearchBar = CustomTextField(with: Strategy.searchTitle)
@@ -115,6 +116,13 @@ final class SearchViewController<Strategy: SearchStrategy>: UIViewController, No
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        if let callback = onSelectItem {
+            callback(rawModels[indexPath.row])
+            navigationController?.popViewController(animated: true)
+            return
+        }
+        
         router?.routeToDetails(to: indexPath.row)
     }
 }
