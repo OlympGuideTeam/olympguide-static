@@ -8,6 +8,9 @@
 import UIKit
 
 final class UniversityPresenter {
+    @InjectSingleton
+    var favoritesManager: FavoritesManagerProtocol
+    
     weak var viewController: (ProgramsDisplayLogic & UniversityDisplayLogic & UIViewController)?
 }
 
@@ -47,7 +50,15 @@ extension UniversityPresenter : ProgramsPresentationLogic {
         
         if let groupsOfPrograms = response.groupsOfPrograms {
             let groupsOfProgramsViewModel = groupsOfPrograms.map {
-                $0.toViewModel()
+                let group = $0.toViewModel()
+                for program in group.programs {
+                    program.like = favoritesManager.isProgramFavorited(
+                        programID: program.programID,
+                        serverValue: program.like
+                    )
+                }
+                return group
+                
             }
             let viewModel = Programs.Load.ViewModel(groupsOfPrograms: groupsOfProgramsViewModel)
             viewController?.displayLoadProgramsResult(with: viewModel)
