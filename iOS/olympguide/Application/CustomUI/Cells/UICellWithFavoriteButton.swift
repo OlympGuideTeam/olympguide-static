@@ -15,7 +15,13 @@ class UICellWithFavoriteButton: UITableViewCell {
     var authManager: AuthManagerProtocol
     
     private var cancellables = Set<AnyCancellable>()
-    var isFavoriteButtonHidden: Bool = false
+    
+    var isFavoriteButtonHidden: Bool = false {
+        didSet {
+            favoriteButton.isHidden = isFavoriteButtonHidden
+        }
+    }
+    
     var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
     let favoriteButton: UIButton = UIButton()
     

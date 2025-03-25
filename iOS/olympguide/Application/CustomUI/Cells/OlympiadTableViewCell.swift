@@ -153,7 +153,25 @@ class OlympiadTableViewCell: UICellWithFavoriteButton {
         
         isUserInteractionEnabled = true
         
-        favoriteButton.isHidden = true
+        isFavoriteButtonHidden = true
+    }
+    
+    func configure(with viewModel: DiplomaViewModel) {
+        nameLabel.text = viewModel.olympiadName
+        let level = "\(String(repeating: "I", count: viewModel.olympiadLevel)) уровень"
+        levelAndProfileLabel.text = "\(level) | \(viewModel.olympiadProfile)"
+        let diploma = viewModel.level == 1
+            ? Constants.Strings.winnerText
+            : Constants.Strings.prizeText
+        benefitLabel.text = "\(viewModel.diplomaClass) класс | \(diploma)"
+        
+        shimmerLayer.isHidden = true
+        shimmerLayer.stopAnimating()
+        shimmerLayer.removeAllConstraints()
+        
+        isUserInteractionEnabled = true
+        
+        isFavoriteButtonHidden = true
     }
     
     func configureShimmer() {
