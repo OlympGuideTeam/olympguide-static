@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
+from Entities.EducationalProgram import EducationalProgram
 from hse_loader.educational_programs_loader.utils import fetch_html
 from clients.get_client import get_faculties
 import logging

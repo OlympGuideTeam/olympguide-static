@@ -33,7 +33,7 @@ build/
 Pods/
 *.lock
 !.gitignore
-*.xcconfig
+# *.xcconfig
 
 # Swift Package Manager
 .swiftpm/

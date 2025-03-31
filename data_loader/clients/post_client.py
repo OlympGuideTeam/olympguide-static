@@ -2,8 +2,8 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from hse_loader.benefits_loader.Benefit import Benefit
-from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
+from Entities.Benefit import Benefit
+from Entities.EducationalProgram import EducationalProgram
 load_dotenv()
 
 API_URL = os.getenv("API_URL")
@@ -14,7 +14,6 @@ HEADERS = {
     "Authorization": f"Bearer {BEARER_TOKEN}",
     "Content-Type": "application/json"
 }
-
 
 def create_university(name, email, site, region_id, logo, short_name):
     url = f"{API_URL}/university"
@@ -60,7 +59,8 @@ def upload_programs(university_id, program: EducationalProgram):
     if response.status_code != 201:
         print(response.text)
 
-
+session = requests.Session()
+# затем в цикле:
 def upload_benefit(benefit: Benefit):
     url = f"{API_URL}/benefit"
 
@@ -74,6 +74,6 @@ def upload_benefit(benefit: Benefit):
         "full_score_subjects": benefit.full_score_subjects
     }
 
-    response = requests.post(url, json=payload, headers=HEADERS)
+    response = session.post(url, json=payload, headers=HEADERS)
     if response.status_code != 201:
         print(response.text)

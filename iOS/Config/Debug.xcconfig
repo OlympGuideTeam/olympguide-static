@@ -1,0 +1,13 @@
+//
+//  AppConfig.xcconfig
+//  olympguide
+//
+//  Created by Tom Tim on 13.02.2025.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+BASE_URL = http:/5.34.212.145:8080/api/v1
+//BASE_URL = https:/olympguide.ru/api
+
