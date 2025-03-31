@@ -115,3 +115,33 @@ def get_profiles() -> set[str]:
         profiles.add(profile)
 
     return profiles
+
+def get_full_olympiads():
+    response = requests.get(f"{API_URL}/olympiads")
+    if response.status_code != 200:
+        logger.error('Cannot get olympiads')
+        return dict()
+
+    response.encoding = 'utf-8'
+    olympiads = {}
+    olympiads = {}
+    for olympiad in response.json():
+        olympiads.setdefault(olympiad['name'].lower(), {})[olympiad['profile'].lower()] = str(olympiad['level'])
+
+    return olympiads
+
+def get_programs_by_fields(university_id):
+    response = requests.get(f"{API_URL}/university/{university_id}/programs/by-field")
+    if response.status_code != 200:
+        logger.error('Cannot get regions')
+        return dict()
+
+    response.encoding = 'utf-8'
+
+    programs = {}
+
+    for field in response.json():
+        for program in field['programs']:
+            programs[program['field'.lower().strip()]] = program['program_id']
+
+    return programs
