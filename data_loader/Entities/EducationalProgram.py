@@ -7,8 +7,8 @@ class EducationalProgram:
         self.link = link.rstrip('/')
         self.cost = None
         self.fields = None
-        self.required_subjects = None
-        self.optional_subjects = None
+        self.required_subjects = []
+        self.optional_subjects = []
 
     def __repr__(self):
         return (f"EducationalProgram(name='{self.name}', budget_places={self.budget_places}, "
