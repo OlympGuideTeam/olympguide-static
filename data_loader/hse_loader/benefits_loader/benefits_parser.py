@@ -6,13 +6,12 @@ from clients.get_client import get_olympiads, get_subjects, get_programs
 import numpy as np
 import logging
 from logging_config.setup_logging import setup_logging
-from hse_loader.benefits_loader.Benefit import Benefit
+from Entities.Benefit import Benefit
 from hse_loader.benefits_loader.load_files import download_file, delete_file, get_links
 from clients.post_client import upload_benefit
-import time
+
 setup_logging()
 logger = logging.getLogger(__name__)
-
 
 
 def add_empty_columns_if_needed(df, required_columns=11):

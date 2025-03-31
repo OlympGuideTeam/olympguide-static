@@ -1,8 +1,8 @@
-from typing import Tuple, Any
+from typing import Any
 
 from bs4 import BeautifulSoup
 from hse_loader.educational_programs_loader.utils import fetch_html
-from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
+from Entities.EducationalProgram import EducationalProgram
 
 def extract_rows_second_source(soup: BeautifulSoup) -> list:
     table = soup.find('table')
