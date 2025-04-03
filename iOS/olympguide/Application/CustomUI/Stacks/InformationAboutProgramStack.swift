@@ -103,7 +103,6 @@ final class InformationAboutProgramStack: UIStackView {
     private func configureProgramNameLabel() {
         pinToPrevious(5)
         
-        let programNameLabel: UILabel = UILabel()
         programNameLabel.font = FontManager.shared.font(for: .commonInformation)
         programNameLabel.numberOfLines = 0
         programNameLabel.lineBreakMode = .byWordWrapping
