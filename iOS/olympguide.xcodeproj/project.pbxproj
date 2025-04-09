@@ -184,7 +184,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/newOutputFile",
+				"$(SRCROOT)/iOS/Config/Secrets.xcconfig",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
