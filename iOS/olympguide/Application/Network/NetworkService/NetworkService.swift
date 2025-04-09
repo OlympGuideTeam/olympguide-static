@@ -17,6 +17,16 @@ protocol NetworkServiceProtocol {
         shouldCache: Bool,
         completion: @escaping (Result<T, NetworkError>) -> Void
     )
+    
+    func requestWithBearer<T: Decodable>(
+        endpoint: String,
+        method: HTTPMethod,
+        queryItems: [URLQueryItem]?,
+        body: [String: Any]?,
+        bearerToken: String,
+        shouldCache: Bool,
+        completion: @escaping (Result<T, NetworkError>) -> Void
+    )
 }
 
 final class NetworkService: NetworkServiceProtocol {
@@ -144,6 +154,77 @@ final class NetworkService: NetworkServiceProtocol {
         completion: @escaping (Result<T, NetworkError>) -> Void
     ) {
         guard let request = prepareRequest(endpoint: endpoint, method: method, queryItems: queryItems, body: body) else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        if method == .get && shouldCache, let cachedData = cachedData(for: request) {
+            do {
+                let decodedData = try JSONDecoder().decode(T.self, from: cachedData)
+                completion(.success(decodedData))
+            } catch {
+                completion(.failure(.decodingError))
+            }
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            self.processResponse(
+                data: data,
+                response: response,
+                error: error,
+                for: request,
+                method: method,
+                shouldCache: shouldCache,
+                completion: completion
+            )
+        }
+        .resume()
+    }
+    
+    private func prepareRequestWithBearer(
+        endpoint: String,
+        method: HTTPMethod,
+        queryItems: [URLQueryItem]?,
+        body: [String: Any]?,
+        bearerToken: String
+    ) -> URLRequest? {
+        var urlComponents = URLComponents(string: baseURL + endpoint)
+        urlComponents?.queryItems = queryItems
+        guard let url = urlComponents?.url else { return nil }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
+        
+        if let body = body {
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+            } catch {
+                return nil
+            }
+        }
+        return request
+    }
+
+    func requestWithBearer<T: Decodable>(
+        endpoint: String,
+        method: HTTPMethod,
+        queryItems: [URLQueryItem]?,
+        body: [String: Any]?,
+        bearerToken: String,
+        shouldCache: Bool = true,
+        completion: @escaping (Result<T, NetworkError>) -> Void
+    ) {
+        guard let request = prepareRequestWithBearer(
+            endpoint: endpoint,
+            method: method,
+            queryItems: queryItems,
+            body: body,
+            bearerToken: bearerToken
+        ) else {
             completion(.failure(.invalidURL))
             return
         }

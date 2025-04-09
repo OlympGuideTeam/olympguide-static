@@ -10,7 +10,7 @@ import UserNotifications
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     var serviceLocator = ServiceLocator.shared
-    
+        
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self

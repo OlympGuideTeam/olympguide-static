@@ -9,10 +9,14 @@ import UIKit
 import AuthenticationServices
 
 final class PersonalDataViewController: UIViewController, ValidationErrorDisplayable, NonTabBarVC {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     
     // MARK: - Свойства
-    private var userEmail: String = ""
+    private var token: String = ""
     private var hasSecondName: Bool = true
+    
+    private let isGoogleSignUp: Bool
     
     private var toggleButtonTopConstraint: NSLayoutConstraint?
     private var birthdayTopConstraint: NSLayoutConstraint?
@@ -48,10 +52,10 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     var password: String = ""
     
     // MARK: - Инициализация
-    
-    init(email: String) {
+    init(token: String, isGoogleSignUp: Bool = false) {
+        self.isGoogleSignUp = isGoogleSignUp
         super.init(nibName: nil, bundle: nil)
-        self.userEmail = email
+        self.token = token
     }
     
     @available(*, unavailable)
@@ -128,11 +132,14 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         configureRegionTextField()
         // 7. Пароль
         configurePasswordTextField()
+        if isGoogleSignUp {
+            configurePasswordExplain()
+        }
         
         configureNextButton()
         
         let hiddenUsernameField = UITextField(frame: .zero)
-        hiddenUsernameField.text = userEmail
+        hiddenUsernameField.text = token
         hiddenUsernameField.textContentType = .username
         hiddenUsernameField.isHidden = true
         view.addSubview(hiddenUsernameField)
@@ -209,6 +216,26 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         passwordTextField.pinLeft(to: view.leadingAnchor, 20)
         
         passwordTextField.setTextFieldType(.default, .newPassword)
+        
+        if isGoogleSignUp {
+            passwordTextField.setTitle(to: "Пароль")
+        }
+    }
+    
+    private func configurePasswordExplain() {
+        let explainLabel: UILabel = UILabel()
+        explainLabel.font = FontManager.shared.font(for: .additionalInformation)
+        
+        explainLabel.textColor = .black
+        explainLabel.numberOfLines = 0
+        explainLabel.lineBreakMode = .byWordWrapping
+        explainLabel.text = "Придумайте пароль, чтобы была возможность заходить в свой аккаунт через почту"
+        
+        view.addSubview(explainLabel)
+        explainLabel.pinTop(to: passwordTextField.bottomAnchor, 12)
+        explainLabel.pinLeft(to: view.leadingAnchor, 20)
+        explainLabel.pinRight(to: view.trailingAnchor, 20)
+        
     }
     
     private func configureNextButton() {
@@ -228,9 +255,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
     }
     
-    
     // MARK: - Переключение поля «Отчество»
-    
     @objc private func toggleSecondNameTapped() {
         if hasSecondName {
             hasSecondName = false
@@ -326,13 +351,14 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     @objc
     private func didTapNextButton() {
         let request = PersonalData.SignUp.Request(
-            email: userEmail,
+            token: token,
             password: password,
             firstName: firstName,
             lastName: lastName,
             secondName: hasSecondName ? secondName : nil,
             birthday: birthday,
-            regionId: region
+            regionId: region,
+            isGoogleSignUp: isGoogleSignUp
         )
         interactor?.signUp(with: request)
     }
@@ -379,10 +405,10 @@ extension PersonalDataViewController : PersonalDataDisplayLogic {
             showAlert(with: errorMesseges.joined(separator: "\n"))
             return
         }
-        let credential = ASPasswordCredential(user: userEmail, password: password)
+        let credential = ASPasswordCredential(user: authManager.userEmail ?? "", password: password)
         let authController = ASCredentialProviderViewController()
         authController.extensionContext.completeRequest(withSelectedCredential: credential, completionHandler: nil)
         
-        router?.routeToRoot(email: userEmail, password: password)
+        router?.routeToRoot(email: authManager.userEmail ?? "", password: password, isGoogleSignUp)
     }
 }

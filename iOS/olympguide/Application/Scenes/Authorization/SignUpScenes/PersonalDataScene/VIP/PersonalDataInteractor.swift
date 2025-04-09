@@ -13,7 +13,7 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
     
     func signUp(with request: PersonalData.SignUp.Request) {
         guard
-            let email = request.email?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
+            let token = request.token?.trimmingCharacters(in: .whitespacesAndNewlines), !token.isEmpty,
             let password = request.password?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty,
             let firstName = request.firstName?.trimmingCharacters(in: .whitespacesAndNewlines), !firstName.isEmpty,
             let lastName = request.lastName?.trimmingCharacters(in: .whitespacesAndNewlines), !lastName.isEmpty,
@@ -21,10 +21,6 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             let regionId = request.regionId
         else {
             var validationErrors: [ValidationError] = []
-            
-            if request.email?.isEmpty ?? true {
-                validationErrors.append(.invalidEmail)
-            }
             
             if !isPasswordValid(with: request.password) {
                 validationErrors.append(.weakPassword)
@@ -68,13 +64,14 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
         }
         
         worker.signUp(
-            email: email,
+            token: token,
             password: password,
             firstName: firstName,
             lastName: lastName,
             secondName: secondName,
             birthday: birthday,
-            regionId: regionId
+            regionId: regionId,
+            isGoogleSignUp: request.isGoogleSignUp
         )
         { [weak self] result in
             guard let self = self else { return }
@@ -94,7 +91,7 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
     }
     
     func isPasswordValid(with password: String?) -> Bool {
-        let passwordRegex = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z0-9\-_]{8,}$"#
+        let passwordRegex = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z0-9\-_!?]{8,}$"#
         
         guard
             let password = password?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -105,5 +102,40 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
         }
         
         return true
+    }
+    
+    func generatePassword(length: Int) -> String {
+        guard length >= 3 else {
+            return "Пароль должен быть длиной не менее 3 символов"
+        }
+
+        let lowercase = "abcdefghijklmnopqrstuvwxyz"
+        let uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        let digits = "0123456789"
+        let symbols = "-_?!"
+
+        let allCharacters = lowercase + uppercase + digits + symbols
+        var passwordCharacters: [Character] = []
+
+        if let lower = lowercase.randomElement() {
+            passwordCharacters.append(lower)
+        }
+        if let upper = uppercase.randomElement() {
+            passwordCharacters.append(upper)
+        }
+        if let digit = digits.randomElement() {
+            passwordCharacters.append(digit)
+        }
+
+        let remainingCount = length - passwordCharacters.count
+        let allArray = Array(allCharacters)
+        for _ in 0..<remainingCount {
+            if let randomChar = allArray.randomElement() {
+                passwordCharacters.append(randomChar)
+            }
+        }
+        passwordCharacters.shuffle()
+
+        return String(passwordCharacters)
     }
 }

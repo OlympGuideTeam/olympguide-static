@@ -299,3 +299,9 @@ extension CustomTextField {
         return true
     }
 }
+
+extension CustomTextField {
+    func setTitle(to newTitle: String) {
+        titleLabel.text = newTitle
+    }
+}

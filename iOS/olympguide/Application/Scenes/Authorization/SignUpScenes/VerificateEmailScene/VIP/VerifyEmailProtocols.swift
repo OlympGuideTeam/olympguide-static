@@ -16,7 +16,7 @@ protocol VerifyEmailBusinessLogic {
 
 // MARK: - Data Store
 protocol VerifyEmailDataStore {
-    var email: String? { get set }
+    var token: String? { get set }
     var time: Int? { get set }
 }
 
