@@ -35,9 +35,7 @@ Pods/
 !.gitignore
 # *.xcconfig
 
-# Swift Package Manager
-.swiftpm/
-Package.resolved
+
 
 # Carthage
 Carthage/Build/
