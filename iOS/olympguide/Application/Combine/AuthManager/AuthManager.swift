@@ -153,4 +153,21 @@ class AuthManager : AuthManagerProtocol {
         }
     }
     
+    func deleteAccount(completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)) {
+        networkService.request(
+            endpoint: Constants.deleteAccountEndpoint,
+            method: .delete,
+            queryItems: nil,
+            body: nil,
+            shouldCache: false
+        ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let response):
+                self?.isAuthenticated = false
+                completion(.success(response))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 }

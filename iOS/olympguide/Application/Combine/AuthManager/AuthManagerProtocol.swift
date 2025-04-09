@@ -28,5 +28,8 @@ protocol AuthManagerProtocol {
         completion: @escaping (Result<String, NetworkError>) -> Void
     )
     
+    func deleteAccount(
+        completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)
+    )
 }
 
