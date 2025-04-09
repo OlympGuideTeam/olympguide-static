@@ -9,13 +9,13 @@
 /* Begin PBXBuildFile section */
 		F344C07B2DA12A62007D52F2 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = F344C07A2DA12A62007D52F2 /* GoogleSignIn */; };
 		F344C07D2DA12A62007D52F2 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = F344C07C2DA12A62007D52F2 /* GoogleSignInSwift */; };
-		F398DEB22DA5F6DA003BDEC1 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */; };
+		F398E1582DA60068003BDEC1 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = F398E1572DA60068003BDEC1 /* Secrets.xcconfig */; };
 		F3D6B78F2D90108E003106CC /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = F3D6B78D2D90108E003106CC /* Debug.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F37DB2382D315AB6005E5508 /* olympguide.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = olympguide.xcodeproj; path = olympguide/Application/FilterAndSort/olympguide.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
+		F398E1572DA60068003BDEC1 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		F3D6B78D2D90108E003106CC /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		F3D861E62D17851800809C5A /* olympguide.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = olympguide.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -65,7 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				F3D6B78D2D90108E003106CC /* Debug.xcconfig */,
-				F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */,
+				F398E1572DA60068003BDEC1 /* Secrets.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -165,7 +165,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F3D6B78F2D90108E003106CC /* Debug.xcconfig in Resources */,
-				F398DEB22DA5F6DA003BDEC1 /* Secrets.xcconfig in Resources */,
+				F398E1582DA60068003BDEC1 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,6 +184,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/newOutputFile",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -204,7 +205,7 @@
 /* Begin XCBuildConfiguration section */
 		F3D861FA2D17851900809C5A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */;
+			baseConfigurationReference = F398E1572DA60068003BDEC1 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -242,7 +243,7 @@
 		};
 		F3D861FB2D17851900809C5A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */;
+			baseConfigurationReference = F398E1572DA60068003BDEC1 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -280,7 +281,7 @@
 		};
 		F3D861FC2D17851900809C5A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */;
+			baseConfigurationReference = F398E1572DA60068003BDEC1 /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -345,7 +346,7 @@
 		};
 		F3D861FD2D17851900809C5A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F398DEB12DA5F6DA003BDEC1 /* Secrets.xcconfig */;
+			baseConfigurationReference = F398E1572DA60068003BDEC1 /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
