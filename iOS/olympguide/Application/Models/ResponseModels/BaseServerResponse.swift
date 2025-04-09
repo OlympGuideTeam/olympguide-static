@@ -9,9 +9,10 @@ struct BaseServerResponse : Decodable {
     let message: String?
     let type: String?
     let time: Int?
+    let token: String?
     
     enum CodingKeys : String, CodingKey {
         case time = "ttl"
-        case message, type
+        case message, type, token
     }
 }

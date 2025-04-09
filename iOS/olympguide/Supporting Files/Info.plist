@@ -4,6 +4,8 @@
 <dict>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
+    <key>CLIENT_ID</key>
+    <string>$(GOOGLE_CLIENT_ID)</string>
 	<key>BASE_URL</key>
 	<string>$(BASE_URL)</string>
 	<key>NSAppTransportSecurity</key>
@@ -44,5 +46,14 @@
 			</array>
 		</dict>
 	</dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_CLIENT_REVERSED_ID)</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -8,23 +8,27 @@
 import Foundation
 
 final class VerifyEmailInteractor: VerifyEmailBusinessLogic, VerifyEmailDataStore {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     
     // MARK: - External properties
     var presenter: VerifyEmailPresentationLogic?
     var worker: VerifyEmailWorkerLogic = VerifyEmailWorker()
     
     // MARK: - DataStore
-    var email: String?
+    var token: String?
     var time: Int?
+    
     // MARK: - VerifyEmailBusinessLogic
     func verifyCode(with request: VerifyEmailModels.VerifyCode.Request) {
-        self.email = request.email
+        authManager.userEmail = request.email
         
         worker.verifyCode(code: request.code, email: request.email) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
-            case .success:
+            case .success(let baseResponse):
+                self.token = baseResponse.token
                 let response = VerifyEmailModels.VerifyCode.Response(
                     success: true,
                     error: nil
@@ -42,7 +46,7 @@ final class VerifyEmailInteractor: VerifyEmailBusinessLogic, VerifyEmailDataStor
     }
     
     func resendCode(with request: VerifyEmailModels.ResendCode.Request) {
-        self.email = request.email
+        authManager.userEmail = request.email
         
         worker.resendCode(email: request.email) { [weak self] result in
             guard let self = self else { return }

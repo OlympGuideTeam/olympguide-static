@@ -8,13 +8,14 @@
 enum PersonalData {
     enum SignUp {
         struct Request {
-            let email: String?
+            let token: String?
             let password: String?
             let firstName: String?
             let lastName: String?
             let secondName: String?
             let birthday: String?
             let regionId: Int?
+            var isGoogleSignUp: Bool = false
         }
         
         struct Response {

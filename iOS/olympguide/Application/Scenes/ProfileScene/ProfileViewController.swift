@@ -130,21 +130,42 @@ class ProfileViewController: UIViewController {
     }
     
     @objc private func logoutButtonTapped() {
-        authManager.logout(completion: nil)
+        authManager.logout { [weak self] result in
+            if case .failure(let error) = result {
+                self?.showAlert(with: error.localizedDescription)
+            }
+        }
+    }
+    
+    @objc private func deleteButtonTapped() {
+        let alert = UIAlertController(title: "Вы уверены?", message: "Все данные будут удалены без возможности восстановления", preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Да", style: .default, handler: { _ in
+            self.authManager.deleteAccount { [weak self] result in
+                if case .failure(let error) = result {
+                    self?.showAlert(with: error.localizedDescription)
+                }
+            }
+        }))
+        
+        present(alert, animated: true, completion: nil)
     }
 }
 
+import GoogleSignIn
+
 // MARK: - UITableViewDataSource
-extension ProfileViewController : UITableViewDataSource {
+extension ProfileViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if authManager.isAuthenticated {
-            return authLabels.count + 1
+            return authLabels.count + 2
         } else {
-            return nonAuthLabels.count + 2
+            return nonAuthLabels.count + 3
         }
     }
     
@@ -176,21 +197,28 @@ extension ProfileViewController : UITableViewDataSource {
                     for: .touchUpInside
                 )
                 return cell
+            } else if indexPath.row == 2 {
+                let cell = GoogleSignInButtonTableViewCell()
+                cell.actionButton.addTarget(
+                        self,
+                        action: #selector(googleSignInButtonTapped),
+                        for: .touchUpInside
+                    )
+                    
+                    return cell
             } else {
                 let cell = ProfileTableViewCell()
-                cell.configure(title: nonAuthLabels[indexPath.row - 2])
-                cell.hideSeparator(indexPath.row == nonAuthLabels.count + 2 - 1)
+                cell.configure(title: nonAuthLabels[indexPath.row - 3])
+                cell.hideSeparator(indexPath.row == nonAuthLabels.count + 3 - 1)
                 return cell
             }
         } else {
             if indexPath.row <= authLabels.count - 1 {
                 let cell = ProfileTableViewCell()
                 cell.configure(title: authLabels[indexPath.row])
-
                 cell.hideSeparator(indexPath.row == authLabels.count - 1)
                 return cell
-            }
-            else {
+            } else if indexPath.row == authLabels.count {
                 let cell = ProfileButtonTableViewCell()
                 cell.configure(
                     title: "Выйти",
@@ -203,10 +231,37 @@ extension ProfileViewController : UITableViewDataSource {
                     for: .touchUpInside
                 )
                 return cell
+            } else {
+                let cell = ProfileButtonTableViewCell()
+                cell.configure(
+                    title: "Удалить аккаунт",
+                    borderColor: UIColor(hex: "#FF2D55"),
+                    textColor: .black
+                )
+                cell.actionButton.addTarget(
+                    self,
+                    action: #selector(deleteButtonTapped),
+                    for: .touchUpInside
+                )
+                return cell
+            }
+        }
+    }
+    
+    @objc func googleSignInButtonTapped() {
+        authManager.googleSignIn(
+            view: self
+        ) { [weak self] result in
+            switch result {
+            case .success(let token):
+                self?.router?.routeToGoogleSignIn(with: token)
+            case .failure(let error):
+                self?.showAlert(with: error.localizedDescription)
             }
         }
     }
 }
+
 
 // MARK: - UITableViewDelegate
 extension ProfileViewController : UITableViewDelegate {

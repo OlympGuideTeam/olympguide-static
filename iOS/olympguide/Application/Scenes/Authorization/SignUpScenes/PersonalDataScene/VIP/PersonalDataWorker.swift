@@ -12,19 +12,19 @@ final class PersonalDataWorker {
     var networkService: NetworkServiceProtocol
     
     func signUp(
-        email: String,
+        token: String,
         password: String,
         firstName: String,
         lastName: String,
         secondName: String,
         birthday: String,
         regionId: Int,
+        isGoogleSignUp: Bool,
         completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
     ) {
-        let endpoint = "/auth/sign-up"
+        let endpoint = isGoogleSignUp ? "/auth/complete-sign-up" : "/auth/sign-up"
         
         let body: [String: Any] = [
-            "email": email,
             "password" : password,
             "first_name" : firstName,
             "last_name" : lastName,
@@ -33,11 +33,12 @@ final class PersonalDataWorker {
             "region_id": regionId
         ]
         
-        networkService.request(
+        networkService.requestWithBearer(
             endpoint: endpoint,
             method: .post,
             queryItems: nil,
             body: body,
+            bearerToken: token,
             shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
