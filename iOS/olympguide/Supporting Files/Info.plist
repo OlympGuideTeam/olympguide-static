@@ -55,5 +55,9 @@
 			</array>
 		</dict>
 	</array>
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+        <string>webcredentials:olympguide.ru</string>
+    </array>
 </dict>
 </plist>

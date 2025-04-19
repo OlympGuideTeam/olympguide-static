@@ -18,7 +18,7 @@ class AuthManager : AuthManagerProtocol {
     
     var userEmail: String?
     
-    @Published private(set) var isAuthenticated: Bool = false
+    @Published var isAuthenticated: Bool = false
     
     var isAuthenticatedPublisher: AnyPublisher<Bool, Never> {
             $isAuthenticated.eraseToAnyPublisher()

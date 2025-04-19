@@ -1,28 +1,25 @@
 //
-//  GoogleSignInButtonTableViewCell.swift
+//  AppleSignInButtonCell.swift
 //  olympguide
 //
-//  Created by Tom Tim on 08.04.2025.
+//  Created by Tom Tim on 12.04.2025.
 //
 
+import AuthenticationServices
 import UIKit
 
-class GoogleSignInButtonTableViewCell: UITableViewCell {
+class AppleSignInButtonTableViewCell: UITableViewCell {
     typealias Constants = AllConstants.ProfileButtonTableViewCell
     
-    static let reuseIdentifier = "GoogleSignInButtonTableViewCell"
+    static let reuseIdentifier = "AppleSignInButtonTableViewCell"
     
     let actionButton: UIButton = {
         var configuration = UIButton.Configuration.plain()
-        configuration.baseBackgroundColor = .white
-        configuration.baseForegroundColor = .black
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 19, bottom: 10, trailing: 19)
         
-        configuration.imagePadding = 8
-        
-        configuration.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20)
-        
+        // Настройка текста
         let attributedString = AttributedString(
-            "Продолжить с Google",
+            "Продолжить с Apple",
             attributes: AttributeContainer([
                 .font: Constants.Font.button,
                 .foregroundColor: UIColor.black
@@ -30,16 +27,25 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
         )
         configuration.attributedTitle = attributedString
         
-        if let googleIcon = UIImage(named: "google_logo")?.withRenderingMode(.alwaysOriginal) {
-            configuration.image = googleIcon
-        }
+        // Настройка иконки Apple
+        let appleLogo = UIImage(systemName: "apple.logo")?
+            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 19, weight: .semibold))
+        configuration.image = appleLogo
+        configuration.imagePlacement = .leading
+        configuration.imagePadding = 8
         
+        // Создаем кнопку с конфигурацией
         let button = UIButton(configuration: configuration, primaryAction: nil)
-        
-        button.layer.cornerRadius = Constants.Dimensions.buttonRadius
-        button.layer.masksToBounds = true
-        button.layer.borderColor = UIColor.black.cgColor
+        button.backgroundColor = .white
         button.layer.borderWidth = Constants.Dimensions.buttonBorderWidth
+        button.layer.borderColor = UIColor.black.cgColor
+        button.layer.cornerRadius = Constants.Dimensions.buttonRadius
+        button.tintColor = .black
+        
+        // Поднимаем логотип на 3 пункта
+        button.configuration?.imagePlacement = .leading
+        button.configuration?.titleAlignment = .center
+        button.transform = CGAffineTransform(translationX: 0, y: -3)
         
         return button
     }()
@@ -56,12 +62,12 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
         actionButton.setHeight(54)
         
         actionButton.addTarget(
-            nil,
+            self,
             action: #selector(buttonTouchDown(_:)),
             for: .touchDown
         )
         actionButton.addTarget(
-            nil,
+            self,
             action: #selector(buttonTouchUp(_:)),
             for: [.touchUpInside, .touchDragExit, .touchCancel]
         )
@@ -79,10 +85,8 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
             delay: 0,
             options: [.curveEaseIn, .allowUserInteraction]
         ) {
-            sender.transform = CGAffineTransform(
-                scaleX: Constants.Dimensions.buttonScale,
-                y: Constants.Dimensions.buttonScale
-            )
+            sender.transform = CGAffineTransform(translationX: 0, y: -3)
+                .scaledBy(x: Constants.Dimensions.buttonScale, y: Constants.Dimensions.buttonScale)
         }
     }
     
@@ -93,7 +97,7 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
             delay: 0,
             options: [.curveEaseOut, .allowUserInteraction]
         ) {
-            sender.transform = .identity
+            sender.transform = CGAffineTransform(translationX: 0, y: -3)
         }
     }
 }

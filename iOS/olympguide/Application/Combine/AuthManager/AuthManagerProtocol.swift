@@ -10,7 +10,7 @@ import Combine
 
 protocol AuthManagerProtocol {
     var isAuthenticatedPublisher: AnyPublisher<Bool, Never> { get }
-    var isAuthenticated: Bool { get }
+    var isAuthenticated: Bool { get set }
     var userEmail: String? { get set }
     
     func login(

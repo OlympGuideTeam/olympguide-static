@@ -45,12 +45,12 @@ class ProfileViewController: UIViewController {
     
     var router: ProfileRoutingLogic?
     let authLabels: [String] = [
-//        "Личные данные",
+        //        "Личные данные",
         "Мои дипломы",
         "Избранные ВУЗы",
         "Избранные программы",
         "Избранные олимпиады",
-//        "Тема приложения",
+        //        "Тема приложения",
         "О нас"
     ]
     
@@ -165,7 +165,7 @@ extension ProfileViewController: UITableViewDataSource {
         if authManager.isAuthenticated {
             return authLabels.count + 2
         } else {
-            return nonAuthLabels.count + 3
+            return nonAuthLabels.count + 4
         }
     }
     
@@ -200,16 +200,25 @@ extension ProfileViewController: UITableViewDataSource {
             } else if indexPath.row == 2 {
                 let cell = GoogleSignInButtonTableViewCell()
                 cell.actionButton.addTarget(
-                        self,
-                        action: #selector(googleSignInButtonTapped),
-                        for: .touchUpInside
-                    )
-                    
-                    return cell
+                    self,
+                    action: #selector(googleSignInButtonTapped),
+                    for: .touchUpInside
+                )
+                
+                return cell
+            } else if indexPath.row == 3 {
+                let cell = AppleSignInButtonTableViewCell()
+                cell.actionButton.addTarget(
+                    self,
+                    action: #selector(googleSignInButtonTapped),
+                    for: .touchUpInside
+                )
+                
+                return cell
             } else {
                 let cell = ProfileTableViewCell()
-                cell.configure(title: nonAuthLabels[indexPath.row - 3])
-                cell.hideSeparator(indexPath.row == nonAuthLabels.count + 3 - 1)
+                cell.configure(title: nonAuthLabels[indexPath.row - 4])
+                cell.hideSeparator(indexPath.row == nonAuthLabels.count + 4 - 1)
                 return cell
             }
         } else {
@@ -285,6 +294,6 @@ extension ProfileViewController : UITableViewDelegate {
         default:
             break
         }
-
+        
     }
 }
