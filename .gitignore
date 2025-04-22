@@ -92,3 +92,4 @@ __pycache__/
 
 /.venv/
 *.xcconfig
+iOS/Config/Secrets.xcconfig
