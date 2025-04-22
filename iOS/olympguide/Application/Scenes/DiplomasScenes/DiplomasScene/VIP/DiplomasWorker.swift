@@ -16,6 +16,10 @@ protocol DiplomasWorkerLogic {
         id: Int,
         completion: @escaping (Result<BaseServerResponse, Error>) -> Void
     )
+    
+    func syncDiplomas(
+        completion: @escaping (Result<BaseServerResponse, Error>) -> Void
+    )
 }
 
 class DiplomasWorker : DiplomasWorkerLogic {
@@ -51,6 +55,25 @@ class DiplomasWorker : DiplomasWorkerLogic {
             queryItems: nil,
             body: nil,
             shouldCache: false
+        ) { (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let baseResponse):
+                completion(.success(baseResponse))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func syncDiplomas(
+        completion: @escaping (Result<BaseServerResponse, any Error>) -> Void
+    ) {
+        networkService.request(
+            endpoint: "/user/diplomas/sync",
+            method: .post,
+            queryItems: nil,
+            body: nil,
+            shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
             case .success(let baseResponse):

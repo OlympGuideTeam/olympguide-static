@@ -117,6 +117,18 @@ final class NetworkService: NetworkServiceProtocol {
             }
             
             do {
+                guard !data.isEmpty else {
+                    if T.self == BaseServerResponse.self,
+                       let emptyResponse = BaseServerResponse(message: nil, type: nil, time: nil, token: nil) as? T
+                    {
+                        completion(.success(emptyResponse))
+                    }
+                    else {
+                        completion(.failure(.decodingError))
+                    }
+                    return
+                }
+
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
                 if !(200...299).contains(httpResponse.statusCode) {
                     if let errorData = decodedData as? BaseServerResponse {

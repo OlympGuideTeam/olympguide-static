@@ -7,13 +7,15 @@
 
 import UIKit
 
-final class DiplomasViewController: UIViewController {
+protocol WithPlusButton { }
+
+final class DiplomasViewController: UIViewController, WithPlusButton {
     var interactor: DiplomasBusinessLogic?
     var router: DiplomasRoutingLogic?
     
     var diplomas: [DiplomaViewModel] = []
     
-    private let tableView: UITableView = UITableView()
+    private let tableView: UICustomTbleView = UICustomTbleView()
     private let dataSource: DiplomasDataSource = DiplomasDataSource()
     
     override func viewDidLoad() {
@@ -50,8 +52,16 @@ final class DiplomasViewController: UIViewController {
         tableView.separatorStyle = .none
         tableView.backgroundColor = .white
         
+        let button = LoadDiplomaButton(title: "Подгрузить дипломы")
+        let v = UIView()
+        v.addSubview(button)
+        button.pinLeft(to: v, 20)
+        button.pinTop(to: v)
+        button.pinBottom(to: v)
+        tableView.addHeaderView(v)
         dataSource.register(in: tableView)
         dataSource.viewController = self
+        button.addTarget(self, action: #selector(syncDiplomas), for: .touchUpInside)
         dataSource.deleteDiplomaAt = { [weak self] indexPath in
             guard let self else { return }
             diplomas.remove(at: indexPath.row)
@@ -79,6 +89,10 @@ final class DiplomasViewController: UIViewController {
         emptyLabel.textColor = .black
         emptyLabel.font = FontManager.shared.font(for: .emptyTableLabel)
         return emptyLabel
+    }
+    
+    @objc func syncDiplomas() {
+        interactor?.syncDiplomas(with: Diplomas.Sync.Request())
     }
 }
 

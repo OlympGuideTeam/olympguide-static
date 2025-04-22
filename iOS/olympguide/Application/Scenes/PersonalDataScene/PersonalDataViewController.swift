@@ -15,9 +15,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     // MARK: - Свойства
     private var token: String = ""
     private var hasSecondName: Bool = true
-    
-    private let isGoogleSignUp: Bool
-    
+        
     private var toggleButtonTopConstraint: NSLayoutConstraint?
     private var birthdayTopConstraint: NSLayoutConstraint?
     
@@ -50,18 +48,6 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     var birthday: String = ""
     var region: Int?
     var password: String = ""
-    
-    // MARK: - Инициализация
-    init(token: String, isGoogleSignUp: Bool = false) {
-        self.isGoogleSignUp = isGoogleSignUp
-        super.init(nibName: nil, bundle: nil)
-        self.token = token
-    }
-    
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been реализован")
-    }
     
     
     // MARK: - Жизненный цикл
@@ -114,7 +100,6 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         
     
     // MARK: - Настройка UI
-    
     private func configureUI() {
         // 1. Фамилия
         configureLastNameTextField()
@@ -131,10 +116,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         // 6. Регион
         configureRegionTextField()
         // 7. Пароль
-        configurePasswordTextField()
-        if isGoogleSignUp {
-            configurePasswordExplain()
-        }
+//        configurePasswordTextField()
         
         configureNextButton()
         
@@ -216,10 +198,6 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         passwordTextField.pinLeft(to: view.leadingAnchor, 20)
         
         passwordTextField.setTextFieldType(.default, .newPassword)
-        
-        if isGoogleSignUp {
-            passwordTextField.setTitle(to: "Пароль")
-        }
     }
     
     private func configurePasswordExplain() {
@@ -243,7 +221,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         nextButton.layer.cornerRadius = 13
         nextButton.titleLabel?.tintColor = .black
         nextButton.backgroundColor = UIColor(hex: "#E0E8FE")
-        nextButton.setTitle("Продолжить", for: .normal)
+        nextButton.setTitle("Сохранить", for: .normal)
         
         view.addSubview(nextButton)
         
@@ -348,19 +326,16 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     }
     
     // MARK: - Actions
-    @objc
-    private func didTapNextButton() {
-        let request = PersonalData.SignUp.Request(
-            token: token,
-            password: password,
-            firstName: firstName,
-            lastName: lastName,
-            secondName: hasSecondName ? secondName : nil,
-            birthday: birthday,
-            regionId: region,
-            isGoogleSignUp: isGoogleSignUp
-        )
-        interactor?.signUp(with: request)
+    @objc private func didTapNextButton() {
+//        let request = PersonalData.SignUp.Request(
+//            firstName: firstName,
+//            lastName: lastName,
+//            secondName: hasSecondName ? secondName : nil,
+//            birthday: birthday,
+//            regionId: region,
+//        )
+//        interactor?.signUp(with: request)
+        view.endEditing(false)
     }
 }
 
@@ -401,14 +376,6 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
 
 extension PersonalDataViewController : PersonalDataDisplayLogic {
     func displaySignUp(with viewModel: PersonalData.SignUp.ViewModel) {
-        if let errorMesseges = viewModel.errorMessage {
-            showAlert(with: errorMesseges.joined(separator: "\n"))
-            return
-        }
-        let credential = ASPasswordCredential(user: authManager.userEmail ?? "", password: password)
-        let authController = ASCredentialProviderViewController()
-        authController.extensionContext.completeRequest(withSelectedCredential: credential, completionHandler: nil)
-        
-        router?.routeToRoot(email: authManager.userEmail ?? "", password: password, isGoogleSignUp)
+        router?.routeToRoot()
     }
 }

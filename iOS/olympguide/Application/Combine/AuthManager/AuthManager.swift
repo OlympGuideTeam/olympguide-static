@@ -147,6 +147,7 @@ class AuthManager : AuthManagerProtocol {
                     return
                 }
                 completion(.success(token))
+                self?.isAuthenticated = true
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -165,6 +166,31 @@ class AuthManager : AuthManagerProtocol {
             case .success(let response):
                 self?.isAuthenticated = false
                 completion(.success(response))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func appleSignIn(
+        token: String,
+        completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)
+    ) {
+        let body: [String: String] = [
+            "token": token
+        ]
+        print()
+        print(token)
+        networkService.request(
+            endpoint: Constants.appleEndpoint,
+            method: .post,
+            queryItems: nil,
+            body: body,
+            shouldCache: false
+        ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success:
+                self?.isAuthenticated = true
             case .failure(let error):
                 completion(.failure(error))
             }

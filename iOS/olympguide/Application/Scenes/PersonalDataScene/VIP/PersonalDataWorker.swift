@@ -11,34 +11,52 @@ final class PersonalDataWorker {
     @InjectSingleton
     var networkService: NetworkServiceProtocol
     
-    func signUp(
-        token: String,
-        password: String,
+    func fetchUser(
+        
+    ) {
+        let endpoint = "/user/data"
+        
+        
+    }
+   
+    func updateProfile(
         firstName: String,
         lastName: String,
         secondName: String,
         birthday: String,
         regionId: Int,
-        isGoogleSignUp: Bool,
         completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
     ) {
-        let endpoint = isGoogleSignUp ? "/auth/complete-sign-up" : "/auth/sign-up"
+        let endpoint = "/user/update"
         
         let body: [String: Any] = [
-            "password" : password,
             "first_name" : firstName,
             "last_name" : lastName,
             "second_name": secondName,
-            "birthday" : birthday,
+            "birthdate" : birthday,
             "region_id": regionId
         ]
         
-        networkService.requestWithBearer(
+        networkService.request(
             endpoint: endpoint,
             method: .post,
             queryItems: nil,
             body: body,
-            bearerToken: token,
+            shouldCache: true
+        ) { (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let baseResponse):
+                completion(.success(baseResponse))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+        
+        networkService.request(
+            endpoint: "/user/diplomas/sync",
+            method: .post,
+            queryItems: nil,
+            body: nil,
             shouldCache: true
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {

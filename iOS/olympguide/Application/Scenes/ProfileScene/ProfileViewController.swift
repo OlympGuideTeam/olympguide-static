@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+import AuthenticationServices
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -45,7 +46,7 @@ class ProfileViewController: UIViewController {
     
     var router: ProfileRoutingLogic?
     let authLabels: [String] = [
-        //        "Личные данные",
+        "Личные данные",
         "Мои дипломы",
         "Избранные ВУЗы",
         "Избранные программы",
@@ -210,7 +211,7 @@ extension ProfileViewController: UITableViewDataSource {
                 let cell = AppleSignInButtonTableViewCell()
                 cell.actionButton.addTarget(
                     self,
-                    action: #selector(googleSignInButtonTapped),
+                    action: #selector(appleSignINButtonTapped),
                     for: .touchUpInside
                 )
                 
@@ -262,15 +263,52 @@ extension ProfileViewController: UITableViewDataSource {
             view: self
         ) { [weak self] result in
             switch result {
-            case .success(let token):
-                self?.router?.routeToGoogleSignIn(with: token)
+            case .success(_):
+                return
             case .failure(let error):
                 self?.showAlert(with: error.localizedDescription)
             }
         }
     }
+    
+    @objc func appleSignINButtonTapped() {
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+        
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
 }
 
+extension ProfileViewController: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return self.view.window!
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+            let identityToken = credential.identityToken
+            let tokenString = String(data: identityToken ?? Data(), encoding: .utf8)
+            guard let tokenString = tokenString else { return }
+            
+            authManager.appleSignIn(token: tokenString) { [weak self] result in
+                switch result {
+                case .success:
+                    return
+                case .failure:
+                    self?.showAlert(with: "Не удалось завершить авторизацию")
+                }
+            }
+        }
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+//        showAlert(with: "Не удалось завершить авторизацию")
+    }
+}
 
 // MARK: - UITableViewDelegate
 extension ProfileViewController : UITableViewDelegate {
@@ -291,6 +329,8 @@ extension ProfileViewController : UITableViewDelegate {
             router?.routToFavoritePrograms()
         case "Мои дипломы":
             router?.routeToDiplomas()
+        case "Личные данные":
+            router?.routeToPersonalData()
         default:
             break
         }

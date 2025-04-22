@@ -37,14 +37,21 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
 
     override func textFieldDidBeginEditing(_ textField: UITextField) {
         super.textFieldDidBeginEditing(textField)
-        regionDelegate?.dissmissKeyboard()
-        textField.resignFirstResponder()
         
+        // Сначала скрываем клавиатуру
+        textField.resignFirstResponder()
+        regionDelegate?.dissmissKeyboard()
+        
+        // Затем обрабатываем логику RegionTextField
         if !isActive {
             isActive = true
             updateAppereance()
         }
-        presentOptions()
+        
+        // И только после всего этого показываем options
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.presentOptions()
+        }
     }
 
     private func presentOptions() {

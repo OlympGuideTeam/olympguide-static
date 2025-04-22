@@ -23,8 +23,6 @@ final class FieldViewController: UIViewController {
     var interactor: FieldBusinessLogic?
     var router: FieldRoutingLogic?
     
-    var filterSortView: FilterSortView = FilterSortView()
-    var filterItems: [FilterItem] = []
     var selectedParams: [ParamType: SingleOrMultipleArray<Param>] = [:]
     
     private let field: GroupOfFieldsModel.FieldModel
@@ -50,18 +48,8 @@ final class FieldViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setuoDataSource()
-        setupFilterItems()
-        setupFilterSortView()
         configureUI()
         loadPrograms()
-    }
-    
-    private func setupFilterItems() {
-        filterItems = filtersManager.getData(for: type(of: self))
-        
-        for item in filterItems {
-            selectedParams[item.paramType] = SingleOrMultipleArray<Param>(isMultiple: item.isMultipleChoice)
-        }
     }
     
     func loadPrograms() {
@@ -97,8 +85,7 @@ extension FieldViewController {
     
     private func configureInformationStackView() {
         informationStackView.configure(
-            with: field,
-            filterSortView: filterSortView
+            with: field
         )
         
         informationStackView.searchTapped = { [weak self] in
@@ -196,43 +183,6 @@ extension FieldViewController : FieldDisplayLogic {
             self?.tableView.reloadData()
             self?.refreshControl.endRefreshing()
         }
-    }
-}
-
-// MARK: - OptionsViewControllerDelegate
-extension FieldViewController: OptionsViewControllerDelegate {
-    func didSelectOption(
-        _ indices: Set<Int>,
-        _ options: [OptionViewModel],
-        paramType: ParamType?
-    ) {
-        guard let paramType = paramType else { return }
-        guard let index = filterItems.firstIndex(where: { $0.paramType == paramType }) else { return }
-        
-        filterItems[index].selectedIndices = indices
-        
-        filterItems[index].selectedParams.clear()
-        for option in options {
-            if let param = Param(paramType: paramType, option: option) {
-                filterItems[index].selectedParams.add(param)
-            }
-        }
-        
-        selectedParams[paramType]?.clear()
-        for param in filterItems[index].selectedParams.array {
-            selectedParams[paramType]?.add(param)
-        }
-        
-        loadPrograms()
-    }
-}
-
-// MARK: - Filterble
-extension FieldViewController : Filterble {
-    func deleteFilter(forItemAt index: Int) {
-        let item = filterItems[index]
-        selectedParams[item.paramType]?.clear()
-        loadPrograms()
     }
 }
 

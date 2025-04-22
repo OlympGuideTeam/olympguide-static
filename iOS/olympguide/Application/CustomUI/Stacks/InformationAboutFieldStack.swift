@@ -16,14 +16,12 @@ final class InformationAboutFieldStack : UIStackView {
     var searchTapped: (() -> Void)?
     
     func configure(
-        with field: GroupOfFieldsModel.FieldModel,
-        filterSortView: FilterSortView
+        with field: GroupOfFieldsModel.FieldModel
     ) {
         setupSelf()
         configureNameLabel(field)
         configureDegreeLabel(field)
         configureProgramsTitleLabel()
-        configureFilterSortView(filterSortView)
     }
     
     private func setupSelf() {
@@ -97,12 +95,5 @@ final class InformationAboutFieldStack : UIStackView {
         searchButton.setHeight(Common.Dimensions.searchButtonSize)
         
         return searchButton
-    }
-    
-    private func configureFilterSortView(_ filterSortView: FilterSortView) {
-        pinToPrevious(Dimensions.fswTopMargin)
-        
-        addArrangedSubview(filterSortView)
-        filterSortView.pinLeft(to: leadingAnchor)
     }
 }

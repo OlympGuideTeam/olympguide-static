@@ -8,14 +8,11 @@
 import UIKit
 
 class PersonalDataAssembly {
-    static func build(token: String, isGoogleSignUp: Bool = false) -> UIViewController {
+    static func build() -> UIViewController {
         let presenter = PersonalDataPresenter()
         let interactor = PersonalDataInteractor()
         interactor.presenter = presenter
-        let view = PersonalDataViewController(
-            token: token,
-            isGoogleSignUp: isGoogleSignUp
-        )
+        let view = PersonalDataViewController()
         view.interactor = interactor
         let router = PersonalDataRouter()
         router.viewController = view

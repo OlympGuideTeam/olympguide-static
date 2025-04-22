@@ -13,18 +13,12 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
     
     func signUp(with request: PersonalData.SignUp.Request) {
         guard
-            let token = request.token?.trimmingCharacters(in: .whitespacesAndNewlines), !token.isEmpty,
-            let password = request.password?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty,
             let firstName = request.firstName?.trimmingCharacters(in: .whitespacesAndNewlines), !firstName.isEmpty,
             let lastName = request.lastName?.trimmingCharacters(in: .whitespacesAndNewlines), !lastName.isEmpty,
             let birthday = request.birthday?.trimmingCharacters(in: .whitespacesAndNewlines), !birthday.isEmpty,
             let regionId = request.regionId
         else {
             var validationErrors: [ValidationError] = []
-            
-            if !isPasswordValid(with: request.password) {
-                validationErrors.append(.weakPassword)
-            }
             
             if request.firstName?.isEmpty ?? true {
                 validationErrors.append(.invalidFirstName)
@@ -63,15 +57,12 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             return
         }
         
-        worker.signUp(
-            token: token,
-            password: password,
+        worker.updateProfile(
             firstName: firstName,
             lastName: lastName,
             secondName: secondName,
             birthday: birthday,
-            regionId: regionId,
-            isGoogleSignUp: request.isGoogleSignUp
+            regionId: regionId
         )
         { [weak self] result in
             guard let self = self else { return }

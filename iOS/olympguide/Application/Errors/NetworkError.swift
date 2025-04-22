@@ -17,6 +17,7 @@ enum NetworkError: LocalizedError {
     case userNotFound
     case invalidPassword
     case invalidCode
+    case profileNotComplete
     case unknown(message: String?)
     case previousCodeNotExpired(time: Int)
     
@@ -29,7 +30,8 @@ enum NetworkError: LocalizedError {
         "UniqueViolation": .uniqueViolation,
         "UserNotFound": .userNotFound,
         "InvalidPassword": .invalidPassword,
-        "InvalidCode": .invalidCode
+        "InvalidCode": .invalidCode,
+        "ProfileNotComplete": .profileNotComplete
     ]
     
     init?(serverType: String, time: Int? = nil, message: String? = nil) {
@@ -70,6 +72,8 @@ enum NetworkError: LocalizedError {
             return "Неверный код"
         case .unknown(let message):
             return message ?? "Произошла неизвестная ошибка"
+        case .profileNotComplete:
+            return "Пожалуйста заполните профиль, чтобы мы смогли найти ваши дипломы :)"
         }
     }
 }

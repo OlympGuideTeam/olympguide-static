@@ -14,7 +14,7 @@ protocol ProfileRoutingLogic {
     func routToFavoriteUniversities()
     func routToFavoritePrograms()
     func routeToDiplomas()
-    func routeToGoogleSignIn(with token: String)
+    func routeToPersonalData()
 }
 
 protocol ProfileBusinessLogic {

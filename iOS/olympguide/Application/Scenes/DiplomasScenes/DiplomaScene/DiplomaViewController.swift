@@ -1,14 +1,14 @@
 //
-//  OlympiadViewController.swift
+//  DiplomaViewController.swift
 //  olympguide
 //
-//  Created by Tom Tim on 01.03.2025.
+//  Created by Vladislav Pankratov on 21.04.2025.
 //
 
 import UIKit
 import Combine
 
-final class OlympiadViewController: UIViewController, WithBookMarkButton {
+final class DiplomaViewController: UIViewController {
     @InjectSingleton
     var filtersManager: FiltersManagerProtocol
     
@@ -30,10 +30,10 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
     private var cancellables = Set<AnyCancellable>()
     
     private let olympiad: OlympiadModel
-    private let informationStackView: InformationAboutOlympStack = InformationAboutOlympStack()
+    private let informationStackView: InformationAboutDiplomaStack = InformationAboutDiplomaStack()
     
     private let tableView: UICustomTbleView = UICustomTbleView()
-    private let dataSource: OlympiadDataSource = OlympiadDataSource()
+    private let dataSource: DiplomaDataSource = DiplomaDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     private var isFavorite: Bool = false
@@ -63,25 +63,7 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
         interactor?.loadUniversities(with: request)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        guard let navigationController = navigationController as? NavigationBarViewController else { return }
-        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
-        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
-        navigationController.bookMarkButtonPressed = {[weak self] sender in
-            guard let self = self else { return }
-            self.isFavorite.toggle()
-            let newImageName = self.isFavorite ? "bookmark.fill" :  "bookmark"
-            sender.setImage(UIImage(systemName: newImageName), for: .normal)
-            
-            if self.isFavorite {
-                favoritesManager.addOlympiadToFavorites(model: olympiad)
-            } else {
-                favoritesManager.removeOlympiadFromFavorites(olympiadId: self.olympiad.olympiadID)
-            }
-        }
-    }
-    
+
     private func loadPrograms() {
         for (section, group) in groups.enumerated() {
             if group.isExpanded {
@@ -105,7 +87,7 @@ final class OlympiadViewController: UIViewController, WithBookMarkButton {
 }
 
 // MARK: - UI Configuration
-extension OlympiadViewController {
+extension DiplomaViewController {
     private func configureUI() {
         view.backgroundColor = .white
         
@@ -128,7 +110,7 @@ extension OlympiadViewController {
     
     private func configureNavigationBar() {
         navigationItem.largeTitleDisplayMode = .never
-        let backItem = UIBarButtonItem(title: "Олимпиада", style: .plain, target: nil, action: nil)
+        let backItem = UIBarButtonItem(title: "Диплом", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
     
@@ -165,7 +147,7 @@ extension OlympiadViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension OlympiadViewController {
+extension DiplomaViewController {
     private func setupDataSource() {
         dataSource.viewController = self
         
@@ -180,8 +162,9 @@ extension OlympiadViewController {
     }
     
     private func toggleSection(at index: Int) {
+        groups[index].isExpanded.toggle()
         
-        if !groups[index].isExpanded {
+        if groups[index].isExpanded {
             let request = BenefitsByPrograms.Load.Request(
                 olympiadID: olympiad.olympiadID,
                 universityID: groups[index].university.universityID,
@@ -189,12 +172,14 @@ extension OlympiadViewController {
                 params: selectedParams
             )
             interactor?.loadBenefits(with: request)
+        } else {
+//            reloadSectionWithoutAnimation(index)
         }
     }
 }
 
 // MARK: - OlympiadDisplayLogic
-extension OlympiadViewController : OlympiadDisplayLogic {
+extension DiplomaViewController : OlympiadDisplayLogic {
     func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel) {
         groups = viewModel.universities.map {
             UniWithProgramsWithBenefits(university: $0)
@@ -214,19 +199,15 @@ extension OlympiadViewController : OlympiadDisplayLogic {
 }
 
 // MARK: - BenefitsByProgramsDisplayLogic
-extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
+extension DiplomaViewController : BenefitsByProgramsDisplayLogic {
     func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel) {
         groups[viewModel.section].programs = viewModel.benefits
         let id = groups[viewModel.section].university.universityID
-        if !dataSource.toggle(to: id, in: tableView) {
-            DispatchQueue.main.async { [weak self] in
-                self?.tableView.reloadData()
-            }
-        }
+        dataSource.toggle(to: id, in: tableView)
     }
 }
 
-extension OlympiadViewController : OptionsViewControllerDelegate {
+extension DiplomaViewController : OptionsViewControllerDelegate {
     func didSelectOption(
         _ indices: Set<Int>,
         _ optionsNames: [OptionViewModel],
@@ -253,8 +234,7 @@ extension OlympiadViewController : OptionsViewControllerDelegate {
     }
 }
 
-// MARK: - Filterble
-extension OlympiadViewController : Filterble {
+extension DiplomaViewController : Filterble {
     func deleteFilter(forItemAt index: Int) {
         let item = filterItems[index]
         selectedParams[item.paramType]?.clear()
@@ -262,3 +242,6 @@ extension OlympiadViewController : Filterble {
         loadPrograms()
     }
 }
+
+
+

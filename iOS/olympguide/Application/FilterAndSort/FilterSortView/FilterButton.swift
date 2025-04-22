@@ -186,3 +186,76 @@ extension FilterButton : OptionsViewControllerButtonDelegate {
 }
 
 
+class LoadDiplomaButton: UIButton {
+    typealias Common = AllConstants.Common
+    
+    // MARK: - Variables
+    private var titleLabelCustom: UILabel = UILabel()
+    let plusLabel: UILabel = UILabel()
+    
+    var filterTitle: String {
+        return titleLabelCustom.text ?? ""
+    }
+    
+    
+    var filterInitTitle: String
+    
+    // MARK: - Lifecycle
+    init(
+        title: String
+    ) {
+        self.filterInitTitle = title
+        
+        super.init(frame: .zero)
+        self.titleLabelCustom.text = title
+        isUserInteractionEnabled = true
+        configureUI()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Methods
+    override var isHighlighted: Bool {
+        didSet {
+            self.alpha = isHighlighted ? 0.7 : 1.0
+        }
+    }
+    
+    // MARK: - Private funcs
+    private func configureUI() {
+        addSubview(titleLabelCustom)
+        addSubview(plusLabel)
+        
+        layer.cornerRadius = Constants.Dimensions.cornerRadius
+        clipsToBounds = true
+        
+        self.setHeight(Constants.Dimensions.buttonHeight)
+        
+
+        
+        titleLabelCustom.pinTop(to: self.topAnchor)
+        titleLabelCustom.pinLeft(to: self.leadingAnchor, Constants.Dimensions.titleLeftMargin)
+        titleLabelCustom.pinBottom(to: self.bottomAnchor, Constants.Dimensions.titleBottomMargin)
+        
+        plusLabel.pinTop(to: self.topAnchor)
+        plusLabel.pinLeft(to: titleLabelCustom.trailingAnchor)
+        plusLabel.pinRight(to: self.trailingAnchor, Constants.Dimensions.titleLeftMargin)
+        plusLabel.font = Constants.Fonts.selectedTitleFont
+        plusLabel.pinBottom(to: self.bottomAnchor, Constants.Dimensions.titleBottomMargin)
+        plusLabel.textColor = UIColor(hex: "#999999")
+        
+        configureDefault()
+    }
+    
+    private func configureDefault() {
+        titleLabelCustom.text = filterInitTitle
+        backgroundColor = Constants.Colors.defaultBackgroundColor
+        titleLabelCustom.font = Constants.Fonts.defaultTitleFont
+        titleLabelCustom.textColor = Constants.Colors.defaultTitleTextColor
+    }
+}
+
+

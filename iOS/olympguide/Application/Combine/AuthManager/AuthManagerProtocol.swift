@@ -31,5 +31,10 @@ protocol AuthManagerProtocol {
     func deleteAccount(
         completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)
     )
+    
+    func appleSignIn(
+        token: String,
+        completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)
+    )
 }
 

@@ -97,18 +97,33 @@ final class EnterPasswordViewController: UIViewController, NonTabBarVC {
         configureNextButton()
     }
     
+//    private func configurePasswordTextField() {
+//        view.addSubview(passwordTextField)
+//        
+//        passwordTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.passwordTextFieldTopPadding)
+//        passwordTextField.pinLeft(to: view.leadingAnchor, Constants.Dimensions.horizontalMargin)
+//        passwordTextField.textField.textContentType = .newPassword
+//        passwordTextField.textField.passwordRules = UITextInputPasswordRules(descriptor: "required: upper; required: lower; required: digit; max-consecutive: 2; minlength: 8;")
+//        passwordTextField.textField.autocorrectionType = .no
+//        passwordTextField.textField.autocapitalizationType = .none
+//        passwordTextField.delegate = self
+//        passwordTextField.tag = 1
+//    }
+    
     private func configurePasswordTextField() {
         view.addSubview(passwordTextField)
-        
+
         passwordTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.passwordTextFieldTopPadding)
         passwordTextField.pinLeft(to: view.leadingAnchor, Constants.Dimensions.horizontalMargin)
-        passwordTextField.textField.textContentType = .password
+        passwordTextField.textField.textContentType = .newPassword
         passwordTextField.textField.passwordRules = UITextInputPasswordRules(descriptor: "required: upper; required: lower; required: digit; max-consecutive: 2; minlength: 8;")
+        passwordTextField.textField.keyboardType = .asciiCapable
         passwordTextField.textField.autocorrectionType = .no
         passwordTextField.textField.autocapitalizationType = .none
         passwordTextField.delegate = self
         passwordTextField.tag = 1
     }
+
     
     private func configureEmailTextField() {
         view.addSubview(emailTextField)

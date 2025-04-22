@@ -42,4 +42,17 @@ final class DiplomasInteractor: DiplomasBusinessLogic {
             }
         }
     }
+    
+    func syncDiplomas(with request: Diplomas.Sync.Request) {
+        worker?.syncDiplomas { [weak self] result in
+            switch result {
+            case .success:
+                let response = Diplomas.Sync.Response()
+                self?.presenter?.presentSyncDiplomas(with: response)
+            case .failure(let error):
+                let response = Diplomas.Sync.Response(error: error)
+                self?.presenter?.presentSyncDiplomas(with: response)
+            }
+        }
+    }
 }

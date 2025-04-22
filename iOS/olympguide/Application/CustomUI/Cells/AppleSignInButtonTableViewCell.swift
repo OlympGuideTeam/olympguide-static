@@ -100,4 +100,9 @@ class AppleSignInButtonTableViewCell: UITableViewCell {
             sender.transform = CGAffineTransform(translationX: 0, y: -3)
         }
     }
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let convertedPoint = actionButton.convert(point, from: self)
+        return actionButton.point(inside: convertedPoint, with: event)
+    }
 }

@@ -22,7 +22,7 @@ protocol PersonalDataDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol PersonalDataRoutingLogic {
-    func routeToRoot(email: String, password: String, _: Bool)
+    func routeToRoot()
 }
 
 // MARK: - Data Passing

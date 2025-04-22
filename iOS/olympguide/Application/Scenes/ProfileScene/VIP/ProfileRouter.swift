@@ -46,8 +46,8 @@ final class ProfileRouter: ProfileRoutingLogic {
         viewController?.navigationController?.pushViewController(diplomasVC, animated: true)
     }
     
-    func routeToGoogleSignIn(with token: String) {
-        let personalDataVC = PersonalDataAssembly.build(token: token, isGoogleSignUp: true)
+    func routeToPersonalData() {
+        let personalDataVC = PersonalDataAssembly.build()
         viewController?.navigationController?.pushViewController(personalDataVC, animated: true)
     }
 }

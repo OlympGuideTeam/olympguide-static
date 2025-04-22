@@ -72,6 +72,7 @@ extension AllConstants {
         static let logoutEndpoint: String = "/auth/logout"
         static let checkEndpoint: String = "/auth/check-session"
         static let googleEndpoint: String = "/auth/google"
+        static let appleEndpoint: String = "/auth/apple"
         static let deleteAccountEndpoint: String = "/user"
     }
 }

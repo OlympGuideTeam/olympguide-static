@@ -58,6 +58,16 @@ class NavigationBarViewController : UINavigationController {
         return button
     }()
     
+    let plusButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.tintColor = Constants.Colors.searchButtonTintColor
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
@@ -69,6 +79,7 @@ class NavigationBarViewController : UINavigationController {
     private func configureUI() {
         configureSearchButton()
         configureBookMarkButton()
+        configurePlusButton()
     }
     
     private func configureNavigationBar() {
@@ -125,6 +136,21 @@ class NavigationBarViewController : UINavigationController {
         bookMarkButton.addTarget(self, action: #selector(bookMarkButtonPressed(_:)), for: .touchUpInside)
     }
     
+    private func configurePlusButton() {
+        navigationBar.addSubview(plusButton)
+        
+        plusButton.alpha = 0.0
+        plusButton.isHidden = true
+        
+        plusButton.setWidth(Constants.Dimensions.bookMarkkButtonSize)
+        plusButton.setHeight(Constants.Dimensions.bookMarkkButtonSize)
+        
+        plusButton.pinBottom(to: navigationBar.bottomAnchor, Constants.Dimensions.searchButtonBottomMargin)
+        plusButton.pinRight(to: navigationBar.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
+        
+        plusButton.addTarget(self, action: #selector(bookMarkButtonPressed(_:)), for: .touchUpInside)
+    }
+    
     @objc private func searchButtonPressed(_ sender: UIButton) {
         searchButtonPressed?(sender)
     }
@@ -146,6 +172,8 @@ extension NavigationBarViewController : UINavigationControllerDelegate {
         guard let coordinator = navigationController.transitionCoordinator else {
             self.searchButton.alpha = (viewController is WithSearchButton) ? 1.0 : 0.0
             self.searchButton.isHidden = (viewController is WithSearchButton) ? false : true
+            self.plusButton.alpha = (viewController is WithPlusButton) ? 1.0 : 0.0
+            self.plusButton.isHidden = (viewController is WithPlusButton) ? false : true
             self.bookMarkButton.alpha = shouldShowBookMark ? 1.0 : 0.0
             self.bookMarkButton.isHidden = !shouldShowBookMark
             return
@@ -154,17 +182,21 @@ extension NavigationBarViewController : UINavigationControllerDelegate {
         coordinator.animateAlongsideTransition(in: navigationBar, animation: { _ in
             self.searchButton.isHidden = false
             self.bookMarkButton.isHidden = false
+            self.plusButton.isHidden = false
             self.searchButton.alpha = (viewController is WithSearchButton) ? 1.0 : 0.0
+            self.plusButton.alpha = (viewController is WithPlusButton) ? 1.0 : 0.0
             self.bookMarkButton.alpha = shouldShowBookMark ? 1.0 : 0.0
             if let tabBarVC = self.tabBarController as? TabBarViewController {
                 tabBarVC.customTabBar.alpha = (viewController is NonTabBarVC) ? 0.0 : 1.0
             }
         }, completion: { context in
             self.searchButton.isHidden = (viewController is WithSearchButton) ? false : true
+            self.plusButton.isHidden = (viewController is WithPlusButton) ? false : true
             self.bookMarkButton.isHidden = !shouldShowBookMark
             if context.isCancelled,
                let fromVC = context.viewController(forKey: .from) {
                 self.searchButton.alpha = (fromVC is WithSearchButton) ? 1.0 : 0.0
+                self.plusButton.alpha = (fromVC is WithPlusButton) ? 1.0 : 0.0
                 self.bookMarkButton.alpha = (fromVC is WithBookMarkButton) && isAuthenticated ? 1.0 : 0.0
                 if let tabBarVC = self.tabBarController as? TabBarViewController {
                     tabBarVC.customTabBar.alpha = (fromVC is NonTabBarVC) ? 0.0 : 1.0

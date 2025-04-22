@@ -1,5 +1,5 @@
 //
-//  OlympiadDataSource.swift
+//  DiplomaDataSource.swift
 //  olympguide
 //
 //  Created by Tom Tim on 12.03.2025.
@@ -7,23 +7,23 @@
 
 import UIKit
 
-class UniWithProgramsWithBenefits {
-    let university: UniversityViewModel
-    var programs: [ProgramWithBenefitsViewModel] = []
-    var isExpanded: Bool = false
-    
-    init(university: UniversityViewModel) {
-        self.university = university
-    }
-}
+//class UniWithProgramsWithBenefits {
+//    let university: UniversityViewModel
+//    var programs: [ProgramWithBenefitsViewModel] = []
+//    var isExpanded: Bool = false
+//    
+//    init(university: UniversityViewModel) {
+//        self.university = university
+//    }
+//}
+//
+//enum ProgramWithBenefitItem {
+//    case header(UniWithProgramsWithBenefits, Int)
+//    case cell(ProgramWithBenefitsViewModel, IndexPath)
+//}
 
-enum ProgramWithBenefitItem {
-    case header(UniWithProgramsWithBenefits, Int)
-    case cell(ProgramWithBenefitsViewModel, IndexPath)
-}
-
-final class OlympiadDataSource: NSObject, UITableViewDelegate {
-    weak var viewController: OlympiadViewController?
+final class DiplomaDataSource: NSObject, UITableViewDelegate {
+    weak var viewController: DiplomaViewController?
     
     var onProgramSelect: ((IndexPath) -> Void)?
     var onSectionToggle: ((Int) -> Void)?
@@ -61,7 +61,7 @@ final class OlympiadDataSource: NSObject, UITableViewDelegate {
 }
 
 // MARK: - UITableViewDataSource
-extension OlympiadDataSource: UITableViewDataSource {
+extension DiplomaDataSource: UITableViewDataSource {
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
@@ -182,10 +182,8 @@ extension OlympiadDataSource: UITableViewDataSource {
             group.isExpanded = false
             let programsCount = group.programs.count
             var indexPathsToDelete: [IndexPath] = []
-            if programsCount > 0 {
-                for i in 1...programsCount {
-                    indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
-                }
+            for i in 1...programsCount {
+                indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
             }
             
             tableView.beginUpdates()
@@ -198,24 +196,19 @@ extension OlympiadDataSource: UITableViewDataSource {
         
     }
     
-    func toggle(to id: Int, in tableView: UITableView) -> Bool {
+    func toggle(to id: Int, in tableView: UITableView) {
         for (toggleIndex, item) in programItems.enumerated() {
             switch item {
             case .header(let group, _):
                 guard group.university.universityID == id else { continue }
-                if group.isExpanded == true {
-                    return false
-                }
                 tableView.beginUpdates()
                 group.isExpanded = true
                 let programsCount = group.programs.count
                 
                 var indexPathsToInsert: [IndexPath] = []
                 
-                if programsCount > 0 {
-                    for i in 1...programsCount {
-                        indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
-                    }
+                for i in 1...programsCount {
+                    indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
                 }
                 
                 tableView.insertRows(at: indexPathsToInsert, with: .fade)
@@ -223,11 +216,11 @@ extension OlympiadDataSource: UITableViewDataSource {
                 
                 tableView.reloadRows(at: [indexPath], with: .none)
                 tableView.endUpdates()
-                return true
+                break
+                
             case .cell:
-                return false
+                continue
             }
         }
-        return false
     }
 }

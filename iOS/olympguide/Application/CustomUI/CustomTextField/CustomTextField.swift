@@ -210,7 +210,7 @@ class CustomTextField: UIView {
         super.touchesEnded(touches, with: event)
         let touch = touches.first
         let point = touch?.location(in: self) ?? .zero
-        if !actionButton.frame.contains(point) {
+        if !actionButton.frame.contains(point) && !isActive{
             textField.becomeFirstResponder()
         }
     }
@@ -250,6 +250,10 @@ extension CustomTextField: UITextFieldDelegate {
     
     func isUserInteractionEnabled(_ isUserInteractionEnabled: Bool) {
         textField.isUserInteractionEnabled = isUserInteractionEnabled
+    }
+    
+    func setPlaceHolder(to newTitle: String) {
+        titleLabel.text = newTitle
     }
 }
 

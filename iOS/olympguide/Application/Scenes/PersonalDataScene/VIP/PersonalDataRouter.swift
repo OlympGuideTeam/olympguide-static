@@ -1,22 +1,19 @@
 //
-//  Router.swift
+//  PersonalDataRouter.swift
 //  olympguide
 //
-//  Created by Tom Tim on 04.03.2025.
+//  Created by Tom Tim on 05.02.2025.
 //
 
 import UIKit
 
-final class EnterPasswordRouter: EnterPasswordRoutingLogic {
+final class PersonalDataRouter : PersonalDataRoutingLogic {
     @InjectSingleton
     var authManager: AuthManagerProtocol
     
     weak var viewController: UIViewController?
     
     func routeToRoot() {
-        authManager.isAuthenticated = true
-        
         viewController?.navigationController?.popViewController(animated: true)
     }
 }
-

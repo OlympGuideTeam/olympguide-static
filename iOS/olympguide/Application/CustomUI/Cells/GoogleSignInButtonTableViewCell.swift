@@ -96,4 +96,9 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
             sender.transform = .identity
         }
     }
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let convertedPoint = actionButton.convert(point, from: self)
+        return actionButton.point(inside: convertedPoint, with: event)
+    }
 }

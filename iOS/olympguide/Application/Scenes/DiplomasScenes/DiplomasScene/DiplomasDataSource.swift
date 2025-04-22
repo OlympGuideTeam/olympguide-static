@@ -59,7 +59,14 @@ extension DiplomasDataSource : UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
+        let olymModel = OlympiadModel(
+            olympiadID: 279,
+            name: "Отраслевая физико-математическая олимпиада школьников «Росатом»",
+            level: 2,
+            profile: "Математика",
+            like: false
+        )
+        viewController?.navigationController?.pushViewController(DiplomaAssembly.build(with: olymModel), animated: true)
     }
     
     func tableView(
