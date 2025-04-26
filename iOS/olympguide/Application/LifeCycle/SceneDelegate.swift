@@ -62,18 +62,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 final class TagsContainerView: UIView {
     private var tagViews: [TagView] = []
-    private(set) var currentHeight: CGFloat = 0
-    func configure(requiredSubjects: [String], optionalSubjects: [String]) {
+    var maxWidth: CGFloat = 0
+    func configure(requiredSubjects: [String], optionalSubjects: [String], maxWidth: CGFloat = UIScreen.main.bounds.width - 60) {
         // Удаляем старые
         tagViews.forEach { $0.removeFromSuperview() }
         tagViews = []
-        
+        self.maxWidth = maxWidth
         // Создаём новые
         for subject in requiredSubjects {
             if let subject = Subject(rawValue: subject) {
                 let tagView = TagView(text: subject.abbreviation, isSelected: true)
                 addSubview(tagView)
-                pinBottom(to: tagView.bottomAnchor, 0, .equal)
                 tagViews.append(tagView)
             }
         }
@@ -83,10 +82,15 @@ final class TagsContainerView: UIView {
                 let tagView = TagView(text: subject.abbreviation, isSelected: false)
                 addSubview(tagView)
                 tagViews.append(tagView)
-                pinBottom(to: tagView.bottomAnchor, 0, .lsOE)
             }
         }
+        if let tag = tagViews.last {
+            pinBottom(to: tag.bottomAnchor)
+        }
         
+        if let tag = tagViews.first {
+            pinTop(to: tag.topAnchor)
+        }
         setNeedsLayout()
     }
     
@@ -96,7 +100,6 @@ final class TagsContainerView: UIView {
         let spacing: CGFloat = 6
         var x: CGFloat = 0
         var y: CGFloat = 0
-        let maxWidth = bounds.width
         var rowsCount: CGFloat = 1
         
         for tagView in tagViews {
@@ -113,7 +116,6 @@ final class TagsContainerView: UIView {
             x += size.width + spacing
         }
         
-        currentHeight = rowsCount * 26 + (rowsCount - 1) * spacing
     }
 }
 

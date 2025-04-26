@@ -61,7 +61,7 @@ final class DiplomasViewController: UIViewController, WithPlusButton {
         let v = UIView()
         v.addSubview(button)
         button.pinLeft(to: v, 20)
-        button.pinTop(to: v)
+        button.pinTop(to: v, 13)
         button.pinBottom(to: v)
         tableView.addHeaderView(v)
         dataSource.register(in: tableView)

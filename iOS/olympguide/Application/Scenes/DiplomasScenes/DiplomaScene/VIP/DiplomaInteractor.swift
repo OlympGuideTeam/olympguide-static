@@ -12,7 +12,8 @@ final class DiplomaInteractor : DiplomaBusinessLogic, DiplomaDataStore {
     var diploma: DiplomaModel?
     var programs: [[ProgramWithBenefitsModel]]?
     var universities: [UniversityModel]?
-    
+    var allUniversities: [UniversityModel]?
+
     func loadUniversities(with request: Diploma.LoadUniversities.Request) {
         guard let diploma = diploma else { return }
         
@@ -22,6 +23,9 @@ final class DiplomaInteractor : DiplomaBusinessLogic, DiplomaDataStore {
             switch result {
             case .success(let universities):
                 self?.universities = universities
+                if self?.allUniversities == nil {
+                    self?.allUniversities = universities
+                }
                 self?.programs = [[ProgramWithBenefitsModel]] (repeating: [], count: universities.count)
                 let response = Diploma.LoadUniversities.Response(universities: universities)
                 self?.presenter?.presentLoadUniversities(with: response)

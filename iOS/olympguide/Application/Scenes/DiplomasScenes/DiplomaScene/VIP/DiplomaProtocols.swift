@@ -28,6 +28,7 @@ protocol DiplomaDataStore {
     var diploma: DiplomaModel? { get set }
     var programs: [[ProgramWithBenefitsModel]]? { get }
     var universities: [UniversityModel]? { get }
+    var allUniversities: [UniversityModel]? { get }
 }
 
 protocol DiplomaDataPassing {

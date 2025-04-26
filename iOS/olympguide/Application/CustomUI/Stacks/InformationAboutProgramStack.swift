@@ -18,7 +18,7 @@ final class InformationAboutProgramStack: UIStackView {
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
-    private let subjectsStack: SubjectsStack = SubjectsStack()
+    private let subjectsStack: TagsContainerView = TagsContainerView()
     
     private var program: ProgramShortModel?
     private var university: UniversityModel?
@@ -176,11 +176,11 @@ final class InformationAboutProgramStack: UIStackView {
             let optionalSubjects = program?.optionalSubjects {
             subjectsStack.configure(
                 requiredSubjects: requiredSubjects,
-                optionalSubjects: optionalSubjects
+                optionalSubjects: optionalSubjects,
+                maxWidth: UIScreen.main.bounds.width - 40
             )
             let spacer = UIView()
             spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-            subjectsStack.addArrangedSubview(spacer)
         }
         
         addArrangedSubview(subjectsStack)
@@ -241,11 +241,9 @@ final class InformationAboutProgramStack: UIStackView {
         costLabel.setBoldText(formatNumber(program.cost))
         subjectsStack.configure(
             requiredSubjects: program.requiredSubjects,
-            optionalSubjects: program.optionalSubjects ?? []
+            optionalSubjects: program.optionalSubjects ?? [],
+            maxWidth: UIScreen.main.bounds.width - 40
         )
-        let spacer = UIView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        subjectsStack.addArrangedSubview(spacer)
     }
     
     @objc func openWebPage(sender: UIButton) {

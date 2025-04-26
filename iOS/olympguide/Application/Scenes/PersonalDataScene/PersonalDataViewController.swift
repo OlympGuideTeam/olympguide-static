@@ -455,7 +455,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
             lastName: lastName,
             secondName: hasSecondName ? secondName : nil,
             birthday: birthday,
-            regionId: region,
+            regionId: region
         )
         interactor?.signUp(with: request)
     }

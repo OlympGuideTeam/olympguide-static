@@ -141,7 +141,7 @@ final class InformationAboutDiplomaStack: UIStackView {
         diplomaClassLabel.textColor = Constants.Colors.additionalText
         diplomaClassLabel.numberOfLines = 0
         diplomaClassLabel.lineBreakMode = .byWordWrapping
-        diplomaClassLabel.text = "Степень диплома: " + diploma.diplomaClass.description
+        diplomaClassLabel.text = "Класс диплома: " + diploma.diplomaClass.description
         diplomaClassLabel.calculateHeight()
         return diplomaClassLabel
     }

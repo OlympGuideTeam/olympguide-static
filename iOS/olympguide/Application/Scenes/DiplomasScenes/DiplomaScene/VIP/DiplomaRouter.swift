@@ -13,8 +13,16 @@ final class DiplomaRouter : DiplomaRoutingLogic, DiplomaDataPassing {
     weak var viewController: DiplomaViewController?
     
     func routeToSearch() {
-        guard let diplomaId = dataStore?.diploma?.id else { return }
-        let searchVC = SearchAssembly<BenefitsByDiplomaSearchStrategy>.build(with: "/user/diploma/\(diplomaId)/benefits")
+        guard
+            let diplomaId = dataStore?.diploma?.id,
+            let allUniversities = dataStore?.allUniversities
+        else { return }
+        let strategy = BenefitsByDiplomaSearchStrategy()
+        strategy.allUniversities = allUniversities
+        let searchVC = SearchAssembly<BenefitsByDiplomaSearchStrategy>.build(
+            with: "/user/diploma/\(diplomaId)/benefits",
+            strategy: strategy
+        )
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
     
@@ -33,4 +41,12 @@ final class DiplomaRouter : DiplomaRoutingLogic, DiplomaDataPassing {
         
         viewController?.navigationController?.pushViewController(programVC, animated: true)
     }
+    
+//    let strategy = ProgramWithBenefitsSearchStrategy()
+//    strategy.allUniversities = dataStore?.allUniversities
+//    let searchVC = SearchAssembly<ProgramWithBenefitsSearchStrategy>.build(
+//        with: "/olympiad/\(olympiadId)/benefits",
+//        strategy: strategy
+//    )
+//    viewController?.navigationController?.pushViewController(searchVC, animated: true)
 }

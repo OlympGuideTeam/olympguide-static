@@ -77,6 +77,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
         view.addSubview(emailTextField)
         
         emailTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.emailTextFieldTopPadding)
+        emailTextField.textField.autocapitalizationType = .none
         emailTextField.pinLeft(to: view.leadingAnchor, Constants.Dimensions.horizontalMargin)
         emailTextField.setTextFieldType(.emailAddress, .emailAddress)
         emailTextField.delegate = self

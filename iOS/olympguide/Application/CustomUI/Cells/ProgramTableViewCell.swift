@@ -146,7 +146,8 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         costLabel.setBoldText("\(formatNumber(viewModel.cost)) ₽/год")
         subjectsStack.configure(
             requiredSubjects: viewModel.requiredSubjects,
-            optionalSubjects: viewModel.optionalSubjects ?? []
+            optionalSubjects: viewModel.optionalSubjects ?? [],
+            maxWidth: UIScreen.main.bounds.width - (Common.Dimensions.horizontalMargin + leftConstraint)
         )
         
         let isFavorite = viewModel.like

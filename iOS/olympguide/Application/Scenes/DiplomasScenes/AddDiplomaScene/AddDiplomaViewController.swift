@@ -11,12 +11,14 @@ final class AddDiplomaViewController : UIViewController, NonTabBarVC {
     typealias Common = AllConstants.Common
     private let nextButton: UIButton = UIButton(type: .system)
 
+    var interactor: AddDiplomaBusinessLogic?
+    var router: AddDiplomaRoutingLogic?
     
     private let olympiad: OlympiadModel
     
     private let informationStackView: UIStackView = UIStackView()
     
-    private let classTextField: OptionsTextField = OptionsTextField(
+    var classTextField: OptionsTextField = OptionsTextField(
         with: "Класс диплома",
         filterItem: FilterItem(
             paramType: .minClass,
@@ -29,7 +31,7 @@ final class AddDiplomaViewController : UIViewController, NonTabBarVC {
         )
     )
     
-    private let diplomaLevelTextField: OptionsTextField = OptionsTextField(
+    var diplomaLevelTextField: OptionsTextField = OptionsTextField(
         with: "Степень диплома",
         filterItem: FilterItem(
             paramType: .minDiplomaLevel,
@@ -179,7 +181,15 @@ final class AddDiplomaViewController : UIViewController, NonTabBarVC {
         nextButton.pinRight(to: view.trailingAnchor, 20)
         nextButton.pinBottom(to: view.bottomAnchor, 43)
         
-//        nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
+        nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
+    }
+    
+    @objc private func didTapNextButton() {
+        let request = AddDiploma.Request(
+            diplomaClass: diplomaClass,
+            diplomaLevel: diplomaLevel
+        )
+        interactor?.addDiploma(with: request)
     }
 }
 
@@ -210,5 +220,11 @@ extension AddDiplomaViewController : OptionsTextFieldDelegate {
     
     func dissmissKeyboard() {
         view.endEditing(true)
+    }
+}
+
+extension AddDiplomaViewController : AddDiplomaDisplayLogic {
+    func displayAddDiplomaResult(with viewModel: AddDiploma.ViewModel) {
+        router?.routeToRoot()
     }
 }

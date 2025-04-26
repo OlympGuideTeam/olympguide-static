@@ -19,6 +19,8 @@ enum ValidationError: LocalizedError {
     case invalidBirthay
     case invalidRegion
     case shortPassword
+    case emptyClass
+    case emptyLevel
     
     case emptyField(fieldName: String)
     
@@ -48,6 +50,10 @@ enum ValidationError: LocalizedError {
             return "Выберите регион"
         case .emptyField(let fieldName):
             return "Поле \"\(fieldName)\" не может быть пустым"
+        case .emptyClass:
+            return "Заполните поле класса"
+        case .emptyLevel:
+            return "Заполните поле степени диплома"
         }
     }
 }

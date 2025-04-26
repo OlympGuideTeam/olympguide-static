@@ -59,5 +59,9 @@
     <array>
         <string>webcredentials:olympguide.ru</string>
     </array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>tg</string>
+    </array>
 </dict>
 </plist>

@@ -79,22 +79,22 @@ extension DiplomasDataSource : UITableViewDelegate {
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
-    ) -> UISwipeActionsConfiguration? {
-        let editAction = UIContextualAction(style: .destructive, title: "Изменить") {
-            [weak self] _, _, completionHandler in
-            self?.deleteDiplomaAt?(indexPath)
-            completionHandler(true)
-        }
-        editAction.image = UIImage(systemName: "pencil.and.scribble")?
-            .withTintColor(.white, renderingMode: .alwaysOriginal)
-//        editAction.backgroundColor = AllConstants.Common.Colors.accient
-        editAction.backgroundColor = UIColor(hex: "#74F39F")
-        
-        return UISwipeActionsConfiguration(actions: [editAction])
-    }
+//    func tableView(
+//        _ tableView: UITableView,
+//        leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+//    ) -> UISwipeActionsConfiguration? {
+//        let editAction = UIContextualAction(style: .destructive, title: "Изменить") {
+//            [weak self] _, _, completionHandler in
+//            self?.deleteDiplomaAt?(indexPath)
+//            completionHandler(true)
+//        }
+//        editAction.image = UIImage(systemName: "pencil.and.scribble")?
+//            .withTintColor(.white, renderingMode: .alwaysOriginal)
+////        editAction.backgroundColor = AllConstants.Common.Colors.accient
+//        editAction.backgroundColor = UIColor(hex: "#74F39F")
+//        
+//        return UISwipeActionsConfiguration(actions: [editAction])
+//    }
     
     func tableView(
         _ tableView: UITableView,
@@ -114,14 +114,14 @@ extension DiplomasDataSource : UITableViewDelegate {
                 self?.deleteDiplomaAt?(indexPath)
             }
             
-            let editAction = UIAction(
-                title: "Редактировать",
-                image: UIImage(systemName: "pencil.and.scribble")
-            ) { _ in
-                
-            }
+//            let editAction = UIAction(
+//                title: "Редактировать",
+//                image: UIImage(systemName: "pencil.and.scribble")
+//            ) { _ in
+//                
+//            }
             
-            return UIMenu(title: "", children: [deleteAction, editAction])
+            return UIMenu(title: "", children: [deleteAction])
         }
     }
 
