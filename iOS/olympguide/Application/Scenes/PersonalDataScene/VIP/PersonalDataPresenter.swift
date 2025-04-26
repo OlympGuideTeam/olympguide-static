@@ -5,8 +5,10 @@
 //  Created by Tom Tim on 05.02.2025.
 //
 
+import UIKit
+
 final class PersonalDataPresenter : PersonalDataPresentationLogic {
-    weak var viewController: (PersonalDataDisplayLogic & ValidationErrorDisplayable)?
+    weak var viewController: (PersonalDataDisplayLogic & ValidationErrorDisplayable & UIViewController)?
     
     func presentSignUp(with response: PersonalData.SignUp.Response) {
         if response.error == nil {
@@ -56,5 +58,15 @@ final class PersonalDataPresenter : PersonalDataPresentationLogic {
                 break
             }
         }
+    }
+    
+    func presentSendCode(with response: PersonalData.SendCode.Response) {
+        if let error = response.error {
+            viewController?.showAlert(with: error.localizedDescription)
+            return
+        }
+        
+        let viewModel = PersonalData.SendCode.ViewModel()
+        viewController?.displaySendCodeResult(with: viewModel)
     }
 }

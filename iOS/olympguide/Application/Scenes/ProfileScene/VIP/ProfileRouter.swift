@@ -7,7 +7,9 @@
 
 import UIKit
 
-final class ProfileRouter: ProfileRoutingLogic {
+final class ProfileRouter: ProfileRoutingLogic, ProfileDataPassingLogic {
+    var dataStore: ProfileDataStore?
+    
     weak var viewController: UIViewController?
     
     func routeToSignIn() {
@@ -47,7 +49,10 @@ final class ProfileRouter: ProfileRoutingLogic {
     }
     
     func routeToPersonalData() {
-        let personalDataVC = PersonalDataAssembly.build()
+        guard let user = dataStore?.user else { return }
+        let personalDataVC = PersonalDataAssembly.build(with: user)
+        personalDataVC.hidesBottomBarWhenPushed = true
+
         viewController?.navigationController?.pushViewController(personalDataVC, animated: true)
     }
 }

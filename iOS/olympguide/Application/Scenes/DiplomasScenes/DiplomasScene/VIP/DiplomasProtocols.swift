@@ -14,7 +14,7 @@ protocol DiplomasBusinessLogic {
 
 // MARK: - Data Store
 protocol DiplomasDataStore {
-    
+    var diplomas: [DiplomaModel] { get set }
 }
 
 // MARK: - Presentation Logic
@@ -32,7 +32,8 @@ protocol DiplomasDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol DiplomasRoutingLogic {
-    func routeTo()
+    func routeToAddDiploma()
+    func routeToDiploma(at index: Int)
 }
 
 // MARK: - Data Passing

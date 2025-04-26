@@ -7,7 +7,10 @@
 
 import Foundation
 
-final class PersonalDataInteractor : PersonalDataBusinessLogic {
+final class PersonalDataInteractor : PersonalDataBusinessLogic,  PersonalDataDataStore {
+    var user: UserModel?
+    var time: Int?
+    
     var presenter: PersonalDataPresentationLogic?
     private let worker = PersonalDataWorker()
     
@@ -36,16 +39,23 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
                 validationErrors.append(.invalidRegion)
             }
             
+            let secondName = request.secondName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            if request.secondName != nil || !secondName.isEmpty {
+                validationErrors.append(.invalidSecondName)
+            }
+            
             let response = PersonalData.SignUp.Response(
                 error: AppError.validation(validationErrors) as NSError
             )
             
             self.presenter?.presentSignUp(with: response)
             
+            
+            
             return
         }
         
-        let secondName = request.secondName ?? ""
+        let secondName = request.secondName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         
         guard request.secondName == nil || !secondName.isEmpty else {
             var validationErrors: [ValidationError] = []
@@ -77,6 +87,35 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
                     error: AppError.network(networkError) as NSError
                 )
                 self.presenter?.presentSignUp(with: response)
+            }
+        }
+    }
+    
+    func sendCode(with request: PersonalData.SendCode.Request) {
+        guard let email = user?.email  else { return }
+        
+        worker.sendCode(email: email) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let baseResponse):
+                self.time = baseResponse.time
+                let response = PersonalData.SendCode.Response()
+                self.presenter?.presentSendCode(with: response)
+                
+            case .failure(let networkError):
+                switch networkError {
+                case .previousCodeNotExpired(let time):
+                    self.time = time
+                    let response = PersonalData.SendCode.Response()
+                    self.presenter?.presentSendCode(with: response)
+                    
+                default:
+                    let response = PersonalData.SendCode.Response(
+                        error: networkError as NSError
+                    )
+                    self.presenter?.presentSendCode(with: response)
+                }
             }
         }
     }

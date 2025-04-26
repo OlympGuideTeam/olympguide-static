@@ -43,7 +43,7 @@ fileprivate enum Constants {
 class ProfileViewController: UIViewController {
     @InjectSingleton
     var authManager: AuthManagerProtocol
-    
+    var interactor: ProfileBusinessLogic?
     var router: ProfileRoutingLogic?
     let authLabels: [String] = [
         "Личные данные",
@@ -330,10 +330,16 @@ extension ProfileViewController : UITableViewDelegate {
         case "Мои дипломы":
             router?.routeToDiplomas()
         case "Личные данные":
-            router?.routeToPersonalData()
+            interactor?.loadUser(with: Profile.User.Request())
         default:
             break
         }
         
+    }
+}
+
+extension ProfileViewController: ProfileDisplayLogic {
+    func displayLoadUser(with viewModel: Profile.User.ViewModel) {
+        router?.routeToPersonalData()
     }
 }

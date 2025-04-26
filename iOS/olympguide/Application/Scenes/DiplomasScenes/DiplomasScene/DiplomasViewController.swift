@@ -37,6 +37,11 @@ final class DiplomasViewController: UIViewController, WithPlusButton {
         navigationItem.title = "Мои дипломы"
         let backItem = UIBarButtonItem(title: "Дипломы", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
+        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        navigationController.plusButtonPressed = { [weak self] sender in
+            self?.router?.routeToAddDiploma()
+            print(1)
+        }
     }
     
     private func configureTableView() {

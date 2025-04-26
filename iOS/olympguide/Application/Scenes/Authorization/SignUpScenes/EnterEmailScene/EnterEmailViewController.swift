@@ -139,7 +139,7 @@ final class EnterEmailViewController: UIViewController, NonTabBarVC {
 
 // MARK: - CustomTextFieldDelegate
 extension EnterEmailViewController: CustomTextFieldDelegate {
-    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: UIView, textDidChange text: String) {
         currentEmail = text
     }
 }

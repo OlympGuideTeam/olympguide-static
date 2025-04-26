@@ -8,17 +8,18 @@
 import UIKit
 
 final class DiplomaAssembly {
-    static func build(with olympiad: OlympiadModel) -> UIViewController {
-        let viewController = DiplomaViewController(with: olympiad)
-        let presenter = OlympiadPresenter()
-        let interactor = OlympiadInteractor()
-        let worker = OlympiadWorker()
-        let router = OlympiadRouter()
+    static func build(with diploma: DiplomaModel) -> UIViewController {
+        let viewController = DiplomaViewController(with: diploma)
+        let presenter = DiplomaPresenter()
+        let interactor = DiplomaInteractor()
+        let worker = DiplomaWorker()
+        let router = DiplomaRouter()
         
         viewController.interactor = interactor
         viewController.router = router
         interactor.presenter = presenter
         interactor.worker = worker
+        interactor.diploma = diploma
         presenter.viewController = viewController
         router.dataStore = interactor
         router.viewController = viewController

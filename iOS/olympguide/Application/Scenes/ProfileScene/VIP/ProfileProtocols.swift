@@ -18,6 +18,23 @@ protocol ProfileRoutingLogic {
 }
 
 protocol ProfileBusinessLogic {
-    func googleSignIn()
+    func loadUser(with request: Profile.User.Request)
+}
+
+protocol ProfilePresentationLogic {
+    func presentUser(with response: Profile.User.Response)
+}
+
+protocol ProfileDisplayLogic : AnyObject {
+    func displayLoadUser(with viewModel: Profile.User.ViewModel)
+}
+
+protocol ProfileDataStore {
+    var user: UserModel? { get }
+}
+
+
+protocol ProfileDataPassingLogic {
+    var dataStore: ProfileDataStore? { get }
 }
 

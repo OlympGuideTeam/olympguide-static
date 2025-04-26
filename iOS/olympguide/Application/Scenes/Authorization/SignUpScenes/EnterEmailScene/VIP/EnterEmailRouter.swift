@@ -15,7 +15,7 @@ final class EnterEmailRouter: EnterEmailRoutingLogic, EnterEmailDataPassing {
         let email = dataStore?.email
         let time = dataStore?.time
         
-        let inputCodeVC = VerifyEmailViewController(email: email ?? "", time: time ?? 180)
+        let inputCodeVC = VerifyEmailAssembly.build(email: email ?? "", time: time ?? 180)
         
         viewController?.navigationController?.pushViewController(inputCodeVC, animated: true)
     }

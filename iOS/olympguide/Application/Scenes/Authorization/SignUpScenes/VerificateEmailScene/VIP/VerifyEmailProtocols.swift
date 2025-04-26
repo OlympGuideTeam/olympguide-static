@@ -34,7 +34,7 @@ protocol VerifyEmailDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol VerifyEmailRoutingLogic {
-    func routeToPersonalData()
+    func routeToEnterPassword()
 }
 
 // MARK: - Data Passing

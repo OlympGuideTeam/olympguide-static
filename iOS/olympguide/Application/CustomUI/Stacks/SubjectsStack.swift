@@ -84,17 +84,32 @@ enum Subject {
     
     var abbreviation: String {
         switch self {
-        case .Russian: return "РЯ"
-        case .English: return "ИЯ"
-        case .Math: return "М"
-        case .Physics: return "Ф"
-        case .Chemistry: return "Х"
-        case .History: return "И"
-        case .Biology: return "Б"
-        case .SocialStudies: return "О"
-        case .Informatics: return "ИКТ"
-        case .Geographie: return "Г"
-        case .Literature: return "Л"
+        case .Russian: return "Рус."
+        case .English: return "Ин.Яз."
+        case .Math: return "Мат."
+        case .Physics: return "Физ."
+        case .Chemistry: return "Хим."
+        case .History: return "Ист."
+        case .Biology: return "Биол."
+        case .SocialStudies: return "Общ."
+        case .Informatics: return "Инф."
+        case .Geographie: return "Геог."
+        case .Literature: return "Лит."
         }
     }
+//    var abbreviation: String {
+//        switch self {
+//        case .Russian: return "РЯ"
+//        case .English: return "ИЯ"
+//        case .Math: return "М"
+//        case .Physics: return "Ф"
+//        case .Chemistry: return "Х"
+//        case .History: return "И"
+//        case .Biology: return "Б"
+//        case .SocialStudies: return "О"
+//        case .Informatics: return "ИКТ"
+//        case .Geographie: return "Г"
+//        case .Literature: return "Л"
+//        }
+//    }
 }

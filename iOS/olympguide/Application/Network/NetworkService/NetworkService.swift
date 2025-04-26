@@ -131,6 +131,10 @@ final class NetworkService: NetworkServiceProtocol {
 
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
                 if !(200...299).contains(httpResponse.statusCode) {
+                    if httpResponse.statusCode >= 500 {
+                        completion(.failure(.internalServerError))
+                        return 
+                    }
                     if let errorData = decodedData as? BaseServerResponse {
                         if errorData.type == "PreviousCodeNotExpired",
                            let time = errorData.time {

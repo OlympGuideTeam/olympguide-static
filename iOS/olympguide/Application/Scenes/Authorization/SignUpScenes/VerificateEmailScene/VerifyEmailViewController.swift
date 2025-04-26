@@ -39,7 +39,6 @@ final class VerifyEmailViewController: UIViewController, NonTabBarVC {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "Подтвердите почту"
-        configure()
         configureUI()
         startTimer()
     }
@@ -47,23 +46,6 @@ final class VerifyEmailViewController: UIViewController, NonTabBarVC {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         verifyCodeField.setFocusToFirstField()
-    }
-    
-    private func configure() {
-        let viewController = self
-        let interactor = VerifyEmailInteractor()
-        let presenter = VerifyEmailPresenter()
-        let router = VerifyEmailRouter()
-        
-        viewController.interactor = interactor
-        viewController.router = router
-        
-        interactor.presenter = presenter
-        
-        presenter.viewController = viewController
-        
-        router.viewController = viewController
-        router.dataStore = interactor
     }
     
     private func configureUI() {
@@ -171,7 +153,7 @@ extension VerifyEmailViewController: VerifyEmailDisplayLogic {
         if viewModel.error != nil {
             verifyCodeField.shakeAndChangeColor()
         } else {
-            router?.routeToPersonalData()
+            router?.routeToEnterPassword()
         }
     }
 }

@@ -8,16 +8,18 @@
 import UIKit
 
 class PersonalDataAssembly {
-    static func build() -> UIViewController {
+    static func build(with user: UserModel) -> UIViewController {
         let presenter = PersonalDataPresenter()
         let interactor = PersonalDataInteractor()
         interactor.presenter = presenter
-        let view = PersonalDataViewController()
+        let view = PersonalDataViewController(with: user.toViewModel())
         view.interactor = interactor
         let router = PersonalDataRouter()
+        interactor.user = user
         router.viewController = view
         view.router = router
         presenter.viewController = view
+        router.dataStore = interactor
         return view
     }
 }

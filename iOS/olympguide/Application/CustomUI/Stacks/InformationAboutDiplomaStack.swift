@@ -1,17 +1,17 @@
 //
-//  InformationAboutOlympStack.swift
+//  InformationAboutDiplomaStack.swift
 //  olympguide
 //
-//  Created by Tom Tim on 12.03.2025.
+//  Created by Vladislav Pankratov on 26.04.2025.
 //
 
 import UIKit
 
-final class InformationAboutOlympStack: UIStackView {
+final class InformationAboutDiplomaStack: UIStackView {
     typealias Constants = AllConstants.InformationAboutOlympStack
     typealias Common = AllConstants.Common
 
-    private var olympiad: OlympiadModel?
+    private var diploma: DiplomaModel?
     var searchButtonAction: (() -> Void)?
     
     let searchButton: UIClosureButton = {
@@ -25,17 +25,18 @@ final class InformationAboutOlympStack: UIStackView {
     }()
     
     func configure(
-        _ olympiad: OlympiadModel,
+        _ diploma: DiplomaModel,
         _ filterSortView: FilterSortView
     ) {
-        self.olympiad = olympiad
+        self.diploma = diploma
         
         setupSelf()
-        configureOlympiadNameLabel()
+        configureDiplomaNameLabel()
         configureOlympiadInformation()
         configureProgramsLabel()
         configureFilterSortView(filterSortView)
     }
+    
     
     private func setupSelf() {
         arrangedSubviews.forEach { removeArrangedSubview($0) }
@@ -53,16 +54,16 @@ final class InformationAboutOlympStack: UIStackView {
         )
     }
     
-    private func configureOlympiadNameLabel() {
-        guard let olympiad = self.olympiad else { return }
-        let olympiadNameLabel = UILabel()
-        olympiadNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
-        olympiadNameLabel.numberOfLines = 0
-        olympiadNameLabel.lineBreakMode = .byWordWrapping
-        olympiadNameLabel.text = olympiad.name
+    private func configureDiplomaNameLabel() {
+        guard let diploma = self.diploma else { return }
+        let diplomaNameLabel = UILabel()
+        diplomaNameLabel.font = FontManager.shared.font(weight: .medium, size: 17.0)
+        diplomaNameLabel.numberOfLines = 0
+        diplomaNameLabel.lineBreakMode = .byWordWrapping
+        diplomaNameLabel.text = diploma.olympiad.name
         
-        olympiadNameLabel.calculateHeight()
-        addArrangedSubview(olympiadNameLabel)
+        diplomaNameLabel.calculateHeight()
+        addArrangedSubview(diplomaNameLabel)
     }
     
     private func configureOlympiadInformation() {
@@ -75,22 +76,24 @@ final class InformationAboutOlympStack: UIStackView {
         
         olympiadInformationStack.addArrangedSubview(configureLevelLabel())
         olympiadInformationStack.addArrangedSubview(configureProfileLabel())
+        olympiadInformationStack.addArrangedSubview(configureDiplomaLevel())
+        olympiadInformationStack.addArrangedSubview(configureDiplomaClassLabel())
         
         addArrangedSubview(olympiadInformationStack)
     }
     
     private func configureLevelLabel() -> UILabel {
-        guard let olympiad = self.olympiad else { return UILabel() }
+        guard let diploma = self.diploma else { return UILabel() }
         let levelLabel = UILabel()
         levelLabel.font = FontManager.shared.font(for: .additionalInformation)
         levelLabel.textColor = Constants.Colors.additionalText
-        levelLabel.text = Constants.Strings.levelPrefix + String(repeating: "I", count: olympiad.level)
+        levelLabel.text = Constants.Strings.levelPrefix + String(repeating: "I", count: diploma.olympiad.level)
         
         return levelLabel
     }
     
     private func configureProfileLabel() -> UILabel {
-        guard let olympiad = self.olympiad else { return UILabel() }
+        guard let olympiad = self.diploma?.olympiad else { return UILabel() }
         let profileLabel = UILabel()
         profileLabel.font = FontManager.shared.font(for: .additionalInformation)
         profileLabel.textColor = Constants.Colors.additionalText
@@ -118,6 +121,31 @@ final class InformationAboutOlympStack: UIStackView {
         searchButton.pinCenterY(to: programsLabel)
     }
     
+    private func configureDiplomaLevel() -> UILabel {
+        guard let diploma = self.diploma else { return UILabel() }
+        let diplomaLevelLabel = UILabel()
+        diplomaLevelLabel.font = FontManager.shared.font(for: .additionalInformation)
+        diplomaLevelLabel.textColor = Constants.Colors.additionalText
+        diplomaLevelLabel.numberOfLines = 0
+        diplomaLevelLabel.lineBreakMode = .byWordWrapping
+        let diplomaLevel = diploma.level == 1 ? "победитель" : "призёр"
+        diplomaLevelLabel.text = "Степень диплома: " + diplomaLevel
+        diplomaLevelLabel.calculateHeight()
+        return diplomaLevelLabel
+    }
+    
+    private func configureDiplomaClassLabel() -> UILabel {
+        guard let diploma = self.diploma else { return UILabel() }
+        let diplomaClassLabel = UILabel()
+        diplomaClassLabel.font = FontManager.shared.font(for: .additionalInformation)
+        diplomaClassLabel.textColor = Constants.Colors.additionalText
+        diplomaClassLabel.numberOfLines = 0
+        diplomaClassLabel.lineBreakMode = .byWordWrapping
+        diplomaClassLabel.text = "Степень диплома: " + diploma.diplomaClass.description
+        diplomaClassLabel.calculateHeight()
+        return diplomaClassLabel
+    }
+    
     private func getSearchButton() -> UIClosureButton {
         searchButton.isEnabled = false
         searchButton.setWidth(Constants.Dimensions.searchButtonSize)
@@ -135,5 +163,4 @@ final class InformationAboutOlympStack: UIStackView {
         filterSortView.pinBottom(to: bottomAnchor, Constants.Dimensions.pinBottomOffset)
     }
 }
-
 

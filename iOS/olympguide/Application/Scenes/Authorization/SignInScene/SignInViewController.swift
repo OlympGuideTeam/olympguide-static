@@ -16,8 +16,8 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     var router: SignInRoutingLogic?
     
     // MARK: - UI
-    let emailTextField: HighlightableField = CustomInputDataField(with: Constants.Strings.emailPlaceholder)
-    let passwordTextField: HighlightableField = CustomPasswordField(with: Constants.Strings.passwordPlaceholder)
+    let emailTextField: CustomInputDataField = CustomInputDataField(with: Constants.Strings.emailPlaceholder)
+    let passwordTextField: CustomPasswordField = CustomPasswordField(with: Constants.Strings.passwordPlaceholder)
     
     private let nextButton: UIButton = UIButton(type: .system)
     private var nextButtonBottomConstraint: NSLayoutConstraint?
@@ -105,7 +105,7 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
 }
 
 extension SignInViewController: CustomTextFieldDelegate {
-    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: UIView, textDidChange text: String) {
         switch searchBar.tag {
         case 1:
             email = text

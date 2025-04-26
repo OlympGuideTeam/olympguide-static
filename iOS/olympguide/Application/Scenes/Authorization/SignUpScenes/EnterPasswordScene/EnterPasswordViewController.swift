@@ -17,7 +17,8 @@ final class EnterPasswordViewController: UIViewController, NonTabBarVC {
     var router: EnterPasswordRoutingLogic?
     
     // MARK: - UI
-    var passwordTextField: HighlightableField = CustomPasswordField(with: "Придумайте пароль")
+    var passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
+    var isPasswordChange = false
     private let emailTextField: UITextField = UITextField()
     
     private let nextButton: UIButton = UIButton(type: .system)
@@ -141,7 +142,8 @@ final class EnterPasswordViewController: UIViewController, NonTabBarVC {
         nextButton.layer.cornerRadius = Constants.Dimensions.nextButtonCornerRadius
         nextButton.titleLabel?.tintColor = Constants.Colors.nextButtonText
         nextButton.backgroundColor = Constants.Colors.nextButtonBackground
-        nextButton.setTitle(Constants.Strings.nextButtonTitle, for: .normal)
+        let title = isPasswordChange ? "Изменить пароль" : Constants.Strings.nextButtonTitle
+        nextButton.setTitle(title, for: .normal)
         
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nextButton)
@@ -169,7 +171,7 @@ final class EnterPasswordViewController: UIViewController, NonTabBarVC {
 
 // MARK: - CustomTextFieldDelegate
 extension EnterPasswordViewController: CustomTextFieldDelegate {
-    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: UIView, textDidChange text: String) {
         currentPassword = text
     }
 }

@@ -141,7 +141,7 @@ extension SearchViewController: SearchDisplayLogic {
 // MARK: - CustomTextFieldDelegate
 extension SearchViewController: CustomTextFieldDelegate {
     func action(
-        _ searchBar: CustomTextField,
+        _ searchBar: UIView,
         textDidChange text: String
     ) {
         let request = Search.TextDidChange.Request(query: text)

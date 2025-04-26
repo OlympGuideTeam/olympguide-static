@@ -26,6 +26,6 @@ protocol SignInRoutingLogic {
 }
 
 protocol SignInValidationErrorDisplayable {
-    var emailTextField: HighlightableField { get }
-    var passwordTextField: HighlightableField { get }
+    var emailTextField: CustomInputDataField { get }
+    var passwordTextField: CustomPasswordField { get }
 }

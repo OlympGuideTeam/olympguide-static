@@ -18,7 +18,7 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
-    private let subjectsStack: SubjectsStack = SubjectsStack()
+    private let subjectsStack: TagsContainerView = TagsContainerView()
     private let separatorLine: UIView = UIView()
     
     var leftConstraint: CGFloat = Constants.Dimensions.leadingMargin {
@@ -118,6 +118,7 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         
         subjectsStack.pinTop(to: costLabel.bottomAnchor, Constants.Dimensions.blocksSpacing)
         subjectsStack.pinLeft(to: contentView.leadingAnchor, leftConstraint)
+        subjectsStack.pinRight(to: contentView.trailingAnchor, 20)
     }
     
     private func configureSeparatorLine() {
@@ -160,6 +161,7 @@ final class ProgramTableViewCell: UICellWithFavoriteButton {
         favoriteButton.isHidden = !authManager.isAuthenticated || isFavoriteButtonHidden
         
         separatorLine.isHidden = false
+        layoutIfNeeded()
     }
     
     func formatNumber(_ number: Int) -> String {

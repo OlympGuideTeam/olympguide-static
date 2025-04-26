@@ -8,33 +8,42 @@
 // MARK: - Business Logic
 protocol PersonalDataBusinessLogic {
     func signUp(with request: PersonalData.SignUp.Request)
+    func sendCode(with request: PersonalData.SendCode.Request)
 }
 
 // MARK: - Presentation Logic
 protocol PersonalDataPresentationLogic {
     func presentSignUp(with response: PersonalData.SignUp.Response)
+    func presentSendCode(with response: PersonalData.SendCode.Response)
 }
 
 // MARK: - Display Logic
 protocol PersonalDataDisplayLogic: AnyObject {
     func displaySignUp(with viewModel: PersonalData.SignUp.ViewModel)
+    func displaySendCodeResult(with viewModel: PersonalData.SendCode.ViewModel)
 }
 
 // MARK: - Routing Logic
 protocol PersonalDataRoutingLogic {
     func routeToRoot()
+    func routeToVerifyCode()
 }
 
 // MARK: - Data Passing
 protocol PersonalDataDataPassing {
-    var dataStore: EnterEmailDataStore? { get }
+    var dataStore: PersonalDataDataStore? { get }
+}
+
+protocol PersonalDataDataStore {
+    var user: UserModel? { get set }
+    var time: Int? { get }
 }
 
 protocol ValidationErrorDisplayable: AnyObject {
-    var lastNameTextField: HighlightableField { get }
-    var nameTextField: HighlightableField { get }
-    var secondNameTextField: HighlightableField { get }
-    var birthdayPicker: HighlightableField { get }
-    var regionTextField: (HighlightableField & RegionDelegateOwner) { get }
-    var passwordTextField: HighlightableField { get }
+    var lastNameTextField: CustomInputDataField { get }
+    var nameTextField: CustomInputDataField { get }
+    var secondNameTextField: CustomInputDataField { get }
+    var birthdayPicker: CustomDatePicker { get }
+    var regionTextField: OptionsTextField { get }
+    var passwordTextField: CustomPasswordField { get }
 }

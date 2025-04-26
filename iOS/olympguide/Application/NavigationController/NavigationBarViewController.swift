@@ -36,6 +36,7 @@ class NavigationBarViewController : UINavigationController {
     
     var searchButtonPressed: ((_: UIButton) -> Void)?
     var bookMarkButtonPressed: ((_: UIButton) -> Void)?
+    var plusButtonPressed: ((_: UIButton) -> Void)?
     private var cancellables = Set<AnyCancellable>()
     
     private let searchButton: UIButton = {
@@ -148,7 +149,7 @@ class NavigationBarViewController : UINavigationController {
         plusButton.pinBottom(to: navigationBar.bottomAnchor, Constants.Dimensions.searchButtonBottomMargin)
         plusButton.pinRight(to: navigationBar.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
         
-        plusButton.addTarget(self, action: #selector(bookMarkButtonPressed(_:)), for: .touchUpInside)
+        plusButton.addTarget(self, action: #selector(plusButtonPressed(_:)), for: .touchUpInside)
     }
     
     @objc private func searchButtonPressed(_ sender: UIButton) {
@@ -157,6 +158,10 @@ class NavigationBarViewController : UINavigationController {
     
     @objc private func bookMarkButtonPressed(_ sender: UIButton) {
         bookMarkButtonPressed?(sender)
+    }
+    
+    @objc private func plusButtonPressed(_ sender: UIButton) {
+        plusButtonPressed?(sender)
     }
 }
 

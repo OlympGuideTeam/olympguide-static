@@ -8,12 +8,12 @@
 import UIKit
 
 final class EnterPasswordAssembly {
-    static func build(email: String, token: String) -> UIViewController {
+    static func build(email: String, token: String, isPasswordChange: Bool = false) -> UIViewController {
         let vc = EnterPasswordViewController(email: email)
         let interactor = EnterPasswordInteractor()
         let presenter = EnterPasswordPresenter()
         let router = EnterPasswordRouter()
-        let worker = EnterPasswordWorker(token: token)
+        let worker = EnterPasswordWorker(token: token, isPasswordChange: isPasswordChange)
         
         vc.interactor = interactor
         vc.router = router

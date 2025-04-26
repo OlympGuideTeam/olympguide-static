@@ -7,21 +7,6 @@
 
 import UIKit
 
-//class UniWithProgramsWithBenefits {
-//    let university: UniversityViewModel
-//    var programs: [ProgramWithBenefitsViewModel] = []
-//    var isExpanded: Bool = false
-//    
-//    init(university: UniversityViewModel) {
-//        self.university = university
-//    }
-//}
-//
-//enum ProgramWithBenefitItem {
-//    case header(UniWithProgramsWithBenefits, Int)
-//    case cell(ProgramWithBenefitsViewModel, IndexPath)
-//}
-
 final class DiplomaDataSource: NSObject, UITableViewDelegate {
     weak var viewController: DiplomaViewController?
     
@@ -182,8 +167,10 @@ extension DiplomaDataSource: UITableViewDataSource {
             group.isExpanded = false
             let programsCount = group.programs.count
             var indexPathsToDelete: [IndexPath] = []
-            for i in 1...programsCount {
-                indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
+            if programsCount > 0 {
+                for i in 1...programsCount {
+                    indexPathsToDelete.append(IndexPath(row: toggleIndex + i, section: 0))
+                }
             }
             
             tableView.beginUpdates()
@@ -196,19 +183,24 @@ extension DiplomaDataSource: UITableViewDataSource {
         
     }
     
-    func toggle(to id: Int, in tableView: UITableView) {
+    func toggle(to id: Int, in tableView: UITableView) -> Bool {
         for (toggleIndex, item) in programItems.enumerated() {
             switch item {
             case .header(let group, _):
                 guard group.university.universityID == id else { continue }
+                if group.isExpanded == true {
+                    return false
+                }
                 tableView.beginUpdates()
                 group.isExpanded = true
                 let programsCount = group.programs.count
                 
                 var indexPathsToInsert: [IndexPath] = []
                 
-                for i in 1...programsCount {
-                    indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
+                if programsCount > 0 {
+                    for i in 1...programsCount {
+                        indexPathsToInsert.append(IndexPath(row: toggleIndex + i, section: 0))
+                    }
                 }
                 
                 tableView.insertRows(at: indexPathsToInsert, with: .fade)
@@ -216,11 +208,11 @@ extension DiplomaDataSource: UITableViewDataSource {
                 
                 tableView.reloadRows(at: [indexPath], with: .none)
                 tableView.endUpdates()
-                break
-                
+                return true
             case .cell:
                 continue
             }
         }
+        return false
     }
 }

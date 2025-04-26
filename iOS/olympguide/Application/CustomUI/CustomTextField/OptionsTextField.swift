@@ -7,13 +7,19 @@
 
 import UIKit
 
-// MARK: - Protocol
-protocol CustomTextFieldDelegate: AnyObject {
-    func action(_ searchBar: UIView, textDidChange text: String)
+protocol OptionsTextFieldDelegate: AnyObject {
+    func regionTextFieldDidSelect(option: OptionViewModel)
+    func regionTextFieldWillSelect(with optionsVC: OptionsViewController)
+    func dissmissKeyboard()
+    func textWasDeleted(tag: Int)
+}
+
+protocol RegionDelegateOwner: AnyObject {
+    var regionDelegate: OptionsTextFieldDelegate? { get set }
 }
 
 // MARK: - CustomTextField
-class CustomTextField: UIView {
+class OptionsTextField: UIView, RegionDelegateOwner, HighlightableField {
     typealias Constants = AllConstants.CustomTextField
     typealias Common = AllConstants.Common
     
@@ -25,16 +31,25 @@ class CustomTextField: UIView {
     private let actionButton = UIButton()
     var isActive = false
     
-    // MARK: - Initializers
-    init(with title: String) {
+    var isWrong: Bool = false
+    
+    weak var regionDelegate: OptionsTextFieldDelegate?
+    var selectedIndecies: Set<Int> = []
+    private let filterItem: FilterItem
+    
+    init(with title: String, filterItem: FilterItem) {
+        self.filterItem = filterItem
         super.init(frame: .zero)
         titleLabel.text = title
         configureUI()
+        isUserInteractionEnabled(false)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        fatalError()
     }
+    
     
     // MARK: - UI Configuration
     private func configureUI() {
@@ -83,12 +98,10 @@ class CustomTextField: UIView {
         toolbar.sizeToFit()
         
         let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let closeButton = UIBarButtonItem(
-            title: Constants.Strings.closeButtonTitle,
-            style: .done,
-            target: self,
-            action: #selector(closeInputView)
-        )
+        let closeButton = UIBarButtonItem(title: Constants.Strings.closeButtonTitle,
+                                          style: .done,
+                                          target: self,
+                                          action: #selector(closeInputView))
         toolbar.items = [flexSpace, closeButton]
         textField.inputAccessoryView = toolbar
     }
@@ -159,14 +172,37 @@ class CustomTextField: UIView {
         let hasText = isEmty()
         guard !hasText else { return }
         
+        regionDelegate?.dissmissKeyboard()
         isActive.toggle()
-        if isActive {
-            textField.becomeFirstResponder()
-        } else {
-            textField.resignFirstResponder()
-        }
-        
         updateAppereance()
+        if isActive{
+            presentOptions()
+        }
+    }
+    
+    func presentOptions() {
+        let optionsVC: OptionsViewController
+        
+        switch filterItem.initMethod {
+        case .endpoint(let endpoint):
+            optionsVC = OptionsAssembly.build(
+                title: filterItem.title,
+                isMultipleChoice: false,
+                selectedIndices: filterItem.selectedIndices,
+                endPoint: endpoint,
+                paramType: filterItem.paramType
+            )
+        case .models(let models):
+            optionsVC = OptionsAssembly.build(
+                title: filterItem.title,
+                isMultipleChoice: false,
+                selectedIndices: filterItem.selectedIndices,
+                options: models,
+                paramType: filterItem.paramType
+            )
+        }
+        optionsVC.delegate = self
+        regionDelegate?.regionTextFieldWillSelect(with: optionsVC)
     }
     
     func isEmty() -> Bool {
@@ -200,6 +236,8 @@ class CustomTextField: UIView {
     @objc func didTapDeleteButton() {
         textField.text = ""
         textFieldDidChange(textField)
+        selectedIndecies.removeAll()
+        regionDelegate?.textWasDeleted(tag: tag)
     }
     
     @objc func closeInputView() {
@@ -208,16 +246,30 @@ class CustomTextField: UIView {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        let touch = touches.first
-        let point = touch?.location(in: self) ?? .zero
-        if !actionButton.frame.contains(point) && !isActive{
-            textField.becomeFirstResponder()
+        
+        guard let touch = touches.first else { return }
+        guard !textField.isFirstResponder else { return }
+        
+        let point = touch.location(in: self)
+        
+        let buttonFrame = actionButton.convert(actionButton.bounds, to: self)
+        
+        if !buttonFrame.contains(point) {
+            didTapSearchBar()
         }
+    }
+    
+    func setTitle(to newTitle: String) {
+        titleLabel.text = newTitle
     }
 }
 
 // MARK: - UITextFieldDelegate
-extension CustomTextField: UITextFieldDelegate {
+extension OptionsTextField: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        didTapSearchBar()
+    }
+    
     func setTextFieldType(_ keyboardType: UIKeyboardType = .default, _ textContentType: UITextContentType) {
         textField.keyboardType = keyboardType
         textField.textContentType = textContentType
@@ -251,13 +303,9 @@ extension CustomTextField: UITextFieldDelegate {
     func isUserInteractionEnabled(_ isUserInteractionEnabled: Bool) {
         textField.isUserInteractionEnabled = isUserInteractionEnabled
     }
-    
-    func setPlaceHolder(to newTitle: String) {
-        titleLabel.text = newTitle
-    }
 }
 
-extension CustomTextField {
+extension OptionsTextField {
     func setActionButtonImage(_ image: UIImage?) {
         actionButton.setImage(image, for: .normal)
     }
@@ -280,32 +328,23 @@ extension CustomTextField {
     }
 }
 
-extension CustomTextField {
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        guard !isActive else { return }
-        isActive = true
-        updateAppereance()
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        if textField.text?.isEmpty ?? true {
-            isActive = false
-            updateAppereance()
+extension OptionsTextField : OptionsViewControllerDelegate {
+    func didSelectOption(
+        _ optionsIndicies: Set<Int>,
+        _ optionsNames: [OptionViewModel],
+        paramType: ParamType?
+    ) {
+        selectedIndecies = optionsIndicies
+        if optionsIndicies.isEmpty {
+            setTextFieldText("")
+        } else {
+            setTextFieldText(optionsNames[0].name)
+            regionDelegate?.regionTextFieldDidSelect(option: optionsNames[0])
         }
+        textFieldSendAction(for: .editingChanged)
     }
     
-    func textField(
-        _ textField: UITextField,
-        shouldChangeCharactersIn range: NSRange,
-        replacementString string: String
-    ) -> Bool {
-        // TODO: - Отследить «вставку» пароля
-        return true
-    }
-}
-
-extension CustomTextField {
-    func setTitle(to newTitle: String) {
-        titleLabel.text = newTitle
+    func didCancle() {
+        textFieldSendAction(for: .editingChanged)
     }
 }

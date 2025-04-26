@@ -17,7 +17,7 @@ protocol EnterPasswordPresentationLogic {
 
 // MARK: - Display Logic
 protocol EnterPasswordDisplayLogic: AnyObject {
-    var passwordTextField: HighlightableField { get set}
+    var passwordTextField: CustomPasswordField { get set}
     func displaySignUpResult(with viewModel: EnterPassword.SignUp.ViewModel)
 }
 

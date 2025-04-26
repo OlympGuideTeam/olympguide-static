@@ -20,9 +20,10 @@ class EnterPasswordWorker : EnterPasswordWorkerLogic {
     var networkService: NetworkServiceProtocol
     
     let token: String
-    
-    init(token: String) {
+    let isPasswordChange: Bool
+    init(token: String, isPasswordChange: Bool) {
         self.token = token
+        self.isPasswordChange = isPasswordChange
     }
     
     
@@ -31,13 +32,11 @@ class EnterPasswordWorker : EnterPasswordWorkerLogic {
         password: String,
         completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
     ) {
-        let body: [String: Any] = [
-            "email": email,
-            "password" : password
-        ]
+        let body: [String: Any] = isPasswordChange ? [ "password" : password ] :
+        [ "email": email, "password" : password]
         
         networkService.requestWithBearer(
-            endpoint: "/auth/sign-up",
+            endpoint: isPasswordChange ? "/user/update-password" : "/auth/sign-up",
             method: .post,
             queryItems: nil,
             body: body,

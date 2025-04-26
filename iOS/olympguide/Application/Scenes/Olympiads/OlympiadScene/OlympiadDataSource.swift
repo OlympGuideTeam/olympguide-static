@@ -225,7 +225,7 @@ extension OlympiadDataSource: UITableViewDataSource {
                 tableView.endUpdates()
                 return true
             case .cell:
-                return false
+                continue
             }
         }
         return false

@@ -5,6 +5,13 @@
 //  Created by Vladislav Pankratov on 21.04.2025.
 //
 
+//
+//  DiplomaViewController.swift
+//  olympguide
+//
+//  Created by Tom Tim on 01.03.2025.
+//
+
 import UIKit
 import Combine
 
@@ -18,8 +25,8 @@ final class DiplomaViewController: UIViewController {
     @InjectSingleton
     var authManager: AuthManagerProtocol
     
-    var interactor: (OlympiadBusinessLogic & BenefitsByProgramsBusinessLogic)?
-    var router: OlympiadRoutingLogic?
+    var interactor: (DiplomaBusinessLogic & BenefitsByProgramsBusinessLogic)?
+    var router: DiplomaRoutingLogic?
     
     var filterSortView: FilterSortView = FilterSortView()
     var filterItems: [FilterItem] = []
@@ -29,17 +36,15 @@ final class DiplomaViewController: UIViewController {
     
     private var cancellables = Set<AnyCancellable>()
     
-    private let olympiad: OlympiadModel
+    private let diploma: DiplomaModel
     private let informationStackView: InformationAboutDiplomaStack = InformationAboutDiplomaStack()
     
     private let tableView: UICustomTbleView = UICustomTbleView()
     private let dataSource: DiplomaDataSource = DiplomaDataSource()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
-    
-    private var isFavorite: Bool = false
-    
-    init(with olympiad: OlympiadModel) {
-        self.olympiad = olympiad
+        
+    init(with diploma: DiplomaModel) {
+        self.diploma = diploma
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -51,24 +56,18 @@ final class DiplomaViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.isFavorite = favoritesManager.isOlympiadFavorite(
-            olympiadId: olympiad.olympiadID,
-            serverValue: olympiad.like
-        )
-        interactor?.isFavorite = isFavorite
         setupDataSource()
         setupFilterItems()
         configureUI()
-        let request = Olympiad.LoadUniversities.Request(olympiadID: olympiad.olympiadID)
+        let request = Diploma.LoadUniversities.Request()
         interactor?.loadUniversities(with: request)
     }
     
-
     private func loadPrograms() {
         for (section, group) in groups.enumerated() {
             if group.isExpanded {
                 let request = BenefitsByPrograms.Load.Request(
-                    olympiadID: olympiad.olympiadID,
+                    olympiadID: 0,
                     universityID: groups[section].university.universityID,
                     section: section,
                     params: selectedParams
@@ -101,10 +100,10 @@ extension DiplomaViewController {
     }
     
     private func configureInformatonStack() {
-        informationStackView.configure(olympiad, filterSortView)
+        informationStackView.configure(diploma, filterSortView)
         informationStackView.searchButtonAction = { [weak self] in
             guard let self else { return }
-            router?.routeToSearch(olympiadId: olympiad.olympiadID)
+            router?.routeToSearch()
         }
     }
     
@@ -112,12 +111,6 @@ extension DiplomaViewController {
         navigationItem.largeTitleDisplayMode = .never
         let backItem = UIBarButtonItem(title: "Диплом", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
-    }
-    
-    private func reloadFavoriteButton() {
-        guard let navigationController = navigationController as? NavigationBarViewController else { return }
-        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
-        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
     
     private func configureTableView() {
@@ -162,25 +155,22 @@ extension DiplomaViewController {
     }
     
     private func toggleSection(at index: Int) {
-        groups[index].isExpanded.toggle()
         
-        if groups[index].isExpanded {
+        if !groups[index].isExpanded {
             let request = BenefitsByPrograms.Load.Request(
-                olympiadID: olympiad.olympiadID,
+                olympiadID: 0,
                 universityID: groups[index].university.universityID,
                 section: index,
                 params: selectedParams
             )
             interactor?.loadBenefits(with: request)
-        } else {
-//            reloadSectionWithoutAnimation(index)
         }
     }
 }
 
 // MARK: - OlympiadDisplayLogic
-extension DiplomaViewController : OlympiadDisplayLogic {
-    func displayLoadUniversitiesResult(with viewModel: Olympiad.LoadUniversities.ViewModel) {
+extension DiplomaViewController : DiplomaDisplayLogic {
+    func displayLoadUniversitiesResult(with viewModel: Diploma.LoadUniversities.ViewModel) {
         groups = viewModel.universities.map {
             UniWithProgramsWithBenefits(university: $0)
         }
@@ -191,11 +181,6 @@ extension DiplomaViewController : OlympiadDisplayLogic {
             self?.tableView.reloadData()
         }
     }
-    
-    func displaySetFavorite(to isFavorite: Bool) {
-        self.isFavorite = isFavorite
-        reloadFavoriteButton()
-    }
 }
 
 // MARK: - BenefitsByProgramsDisplayLogic
@@ -203,7 +188,11 @@ extension DiplomaViewController : BenefitsByProgramsDisplayLogic {
     func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel) {
         groups[viewModel.section].programs = viewModel.benefits
         let id = groups[viewModel.section].university.universityID
-        dataSource.toggle(to: id, in: tableView)
+        if !dataSource.toggle(to: id, in: tableView) {
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
+        }
     }
 }
 
@@ -234,6 +223,7 @@ extension DiplomaViewController : OptionsViewControllerDelegate {
     }
 }
 
+// MARK: - Filterble
 extension DiplomaViewController : Filterble {
     func deleteFilter(forItemAt index: Int) {
         let item = filterItems[index]
@@ -242,6 +232,3 @@ extension DiplomaViewController : Filterble {
         loadPrograms()
     }
 }
-
-
-

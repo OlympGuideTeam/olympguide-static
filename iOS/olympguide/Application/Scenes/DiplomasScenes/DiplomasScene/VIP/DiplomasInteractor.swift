@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
-final class DiplomasInteractor: DiplomasBusinessLogic {
+final class DiplomasInteractor: DiplomasBusinessLogic, DiplomasDataStore {
     var presenter: DiplomasPresentationLogic?
     var worker: DiplomasWorkerLogic?
     
