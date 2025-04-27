@@ -24,6 +24,7 @@ final class EnterEmailAssembly {
         router.viewController = viewController
         router.dataStore = interactor
         
+        viewController.hidesBottomBarWhenPushed = true
         return viewController
     }
 }

@@ -13,6 +13,7 @@ final class DiplomasRouter: DiplomasRoutingLogic, DiplomasDataPassing {
     
     func routeToAddDiploma() {
         let searchVC = SearchAssembly<AddDiplomasSearchStrategy>.build(with: "/olympiads")
+        searchVC.hidesBottomBarWhenPushed = true
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
     

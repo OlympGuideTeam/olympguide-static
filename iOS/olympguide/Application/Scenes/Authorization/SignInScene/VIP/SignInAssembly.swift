@@ -19,6 +19,7 @@ final class SignInAssembly {
         viewController.router = router
         presenter.viewController = viewController
         
+        viewController.hidesBottomBarWhenPushed = true
         return viewController
     }
 }
