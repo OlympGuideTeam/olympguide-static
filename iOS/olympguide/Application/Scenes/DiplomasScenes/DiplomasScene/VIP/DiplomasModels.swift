@@ -30,4 +30,12 @@ enum Diplomas {
         
         struct ViewModel { }
     }
+    
+    enum Sync {
+        struct Request { }
+        
+        struct Response {
+            var error: Error?
+        }
+    }
 }

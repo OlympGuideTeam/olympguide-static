@@ -72,6 +72,7 @@ extension AllConstants {
         static let logoutEndpoint: String = "/auth/logout"
         static let checkEndpoint: String = "/auth/check-session"
         static let googleEndpoint: String = "/auth/google"
+        static let appleEndpoint: String = "/auth/apple"
         static let deleteAccountEndpoint: String = "/user"
     }
 }
@@ -143,13 +144,17 @@ extension AllConstants {
         enum Dimensions {
             // actionButton
             static let buttonRadius: CGFloat = 13.0
-            static let buttonBorderWidth: CGFloat = 2.0
+            static let buttonBorderWidth: CGFloat = 1.0
             static let buttonVerticalMargin: CGFloat = 8.0
             static let buttonHeight: CGFloat = 54.0
             
             static let animationDuration: TimeInterval = 0.1
             
             static let buttonScale: CGFloat = 0.95
+        }
+        
+        enum Font {
+            static let button = FontManager.shared.font(weight: .regular, size: 17)
         }
     }
 }
@@ -377,7 +382,7 @@ extension AllConstants {
         
         enum Strings {
             // degreeLabel
-            static let degreeText: String = "Степень: "
+            static let degreeText: String = "Формат обучения: "
             
             // programsTitleLabel
             static let programsText: String = "Программы: "
@@ -488,6 +493,31 @@ extension AllConstants {
         
         enum Dimensions {
             static let emailTextFieldTopPadding: CGFloat = 16.0
+            static let horizontalMargin: CGFloat = 20.0
+            static let nextButtonCornerRadius: CGFloat = 13.0
+            static let nextButtonHeight: CGFloat = 48.0
+            static let nextButtonBottomPadding: CGFloat = 43.0
+            static let keyboardBottomPadding: CGFloat = 10.0
+        }
+        
+        enum Colors {
+            static let nextButtonBackground: UIColor? = UIColor(hex: "#E0E8FE")
+            static let nextButtonText: UIColor = .black
+            static let background: UIColor = .white
+        }
+    }
+}
+
+extension AllConstants {
+    enum EnterPasswordViewController{
+        enum Strings {
+            static let title = "Регистрация"
+            static let nextButtonTitle = "Зарегестрироваться"
+        }
+        
+        enum Dimensions {
+            static let passwordTextFieldTopPadding: CGFloat = 16.0
+            static let repeatPasswordTextFieldTopPadding: CGFloat = 24.0
             static let horizontalMargin: CGFloat = 20.0
             static let nextButtonCornerRadius: CGFloat = 13.0
             static let nextButtonHeight: CGFloat = 48.0

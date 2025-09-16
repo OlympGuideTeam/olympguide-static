@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "icons8-google-logo-96.png",
+      "filename" : "google_logo.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "icons8-google-logo-96 1.png",
+      "filename" : "google_logo@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

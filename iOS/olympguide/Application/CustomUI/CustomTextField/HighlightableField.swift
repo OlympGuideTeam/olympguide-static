@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol HighlightableField: CustomTextField {
+protocol HighlightableField: UIView {
     func highlightError()
     var isWrong: Bool { get set }
 }

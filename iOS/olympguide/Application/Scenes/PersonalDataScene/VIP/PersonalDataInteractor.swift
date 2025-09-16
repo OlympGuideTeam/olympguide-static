@@ -7,24 +7,21 @@
 
 import Foundation
 
-final class PersonalDataInteractor : PersonalDataBusinessLogic {
+final class PersonalDataInteractor : PersonalDataBusinessLogic,  PersonalDataDataStore {
+    var user: UserModel?
+    var time: Int?
+    
     var presenter: PersonalDataPresentationLogic?
     private let worker = PersonalDataWorker()
     
     func signUp(with request: PersonalData.SignUp.Request) {
         guard
-            let token = request.token?.trimmingCharacters(in: .whitespacesAndNewlines), !token.isEmpty,
-            let password = request.password?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty,
             let firstName = request.firstName?.trimmingCharacters(in: .whitespacesAndNewlines), !firstName.isEmpty,
             let lastName = request.lastName?.trimmingCharacters(in: .whitespacesAndNewlines), !lastName.isEmpty,
             let birthday = request.birthday?.trimmingCharacters(in: .whitespacesAndNewlines), !birthday.isEmpty,
             let regionId = request.regionId
         else {
             var validationErrors: [ValidationError] = []
-            
-            if !isPasswordValid(with: request.password) {
-                validationErrors.append(.weakPassword)
-            }
             
             if request.firstName?.isEmpty ?? true {
                 validationErrors.append(.invalidFirstName)
@@ -42,16 +39,23 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
                 validationErrors.append(.invalidRegion)
             }
             
+            let secondName = request.secondName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            if request.secondName != nil || !secondName.isEmpty {
+                validationErrors.append(.invalidSecondName)
+            }
+            
             let response = PersonalData.SignUp.Response(
                 error: AppError.validation(validationErrors) as NSError
             )
             
             self.presenter?.presentSignUp(with: response)
             
+            
+            
             return
         }
         
-        let secondName = request.secondName ?? ""
+        let secondName = request.secondName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         
         guard request.secondName == nil || !secondName.isEmpty else {
             var validationErrors: [ValidationError] = []
@@ -63,15 +67,12 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             return
         }
         
-        worker.signUp(
-            token: token,
-            password: password,
+        worker.updateProfile(
             firstName: firstName,
             lastName: lastName,
             secondName: secondName,
             birthday: birthday,
-            regionId: regionId,
-            isGoogleSignUp: request.isGoogleSignUp
+            regionId: regionId
         )
         { [weak self] result in
             guard let self = self else { return }
@@ -86,6 +87,35 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
                     error: AppError.network(networkError) as NSError
                 )
                 self.presenter?.presentSignUp(with: response)
+            }
+        }
+    }
+    
+    func sendCode(with request: PersonalData.SendCode.Request) {
+        guard let email = user?.email  else { return }
+        
+        worker.sendCode(email: email) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let baseResponse):
+                self.time = baseResponse.time
+                let response = PersonalData.SendCode.Response()
+                self.presenter?.presentSendCode(with: response)
+                
+            case .failure(let networkError):
+                switch networkError {
+                case .previousCodeNotExpired(let time):
+                    self.time = time
+                    let response = PersonalData.SendCode.Response()
+                    self.presenter?.presentSendCode(with: response)
+                    
+                default:
+                    let response = PersonalData.SendCode.Response(
+                        error: networkError as NSError
+                    )
+                    self.presenter?.presentSendCode(with: response)
+                }
             }
         }
     }

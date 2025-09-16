@@ -135,3 +135,5 @@ final class InformationAboutOlympStack: UIStackView {
         filterSortView.pinBottom(to: bottomAnchor, Constants.Dimensions.pinBottomOffset)
     }
 }
+
+

@@ -8,15 +8,20 @@
 import UIKit
 
 final class VerifyEmailRouter: VerifyEmailRoutingLogic, VerifyEmailDataPassing {
+    @InjectSingleton
+    var authManager: AuthManagerProtocol
     weak var viewController: UIViewController?
     var dataStore: VerifyEmailDataStore?
     
-    func routeToPersonalData() {
+    var isPasswordChange = false
+    
+    func routeToEnterPassword() {
         guard
             let token = dataStore?.token
         else { return }
-        let personalDataVC = PersonalDataAssembly.build(token: token)
-        
+        let email  = authManager.userEmail ?? ""
+        let personalDataVC = EnterPasswordAssembly.build(email: email, token: token, isPasswordChange: isPasswordChange)
+    
         viewController?.navigationController?.pushViewController(personalDataVC, animated: true)
     }
 }

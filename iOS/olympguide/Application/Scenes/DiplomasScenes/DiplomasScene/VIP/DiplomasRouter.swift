@@ -11,8 +11,16 @@ final class DiplomasRouter: DiplomasRoutingLogic, DiplomasDataPassing {
     weak var viewController: UIViewController?
     var dataStore: DiplomasDataStore?
     
-    func routeTo() {
-        
+    func routeToAddDiploma() {
+        let searchVC = SearchAssembly<AddDiplomasSearchStrategy>.build(with: "/olympiads")
+        searchVC.hidesBottomBarWhenPushed = true
+        viewController?.navigationController?.pushViewController(searchVC, animated: true)
+    }
+    
+    func routeToDiploma(at index: Int) {
+        guard let diplomaModel = dataStore?.diplomas[index] else { return }
+        let diplomaVC = DiplomaAssembly.build(with: diplomaModel)
+        viewController?.navigationController?.pushViewController(diplomaVC, animated: true)
     }
 }
 

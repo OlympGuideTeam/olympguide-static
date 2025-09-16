@@ -10,7 +10,7 @@ import Combine
 
 protocol AuthManagerProtocol {
     var isAuthenticatedPublisher: AnyPublisher<Bool, Never> { get }
-    var isAuthenticated: Bool { get }
+    var isAuthenticated: Bool { get set }
     var userEmail: String? { get set }
     
     func login(
@@ -29,6 +29,11 @@ protocol AuthManagerProtocol {
     )
     
     func deleteAccount(
+        completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)
+    )
+    
+    func appleSignIn(
+        token: String,
         completion: @escaping ((Result<BaseServerResponse, NetworkError>) -> Void)
     )
 }

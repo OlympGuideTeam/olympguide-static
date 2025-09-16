@@ -130,6 +130,11 @@ class FiltersManager : FiltersManagerProtocol {
         
         setData(data: olympiadFilterItems, for: OlympiadViewController.self)
         
+        let diplomaFilterItems = [
+            benefitFilterItem
+        ]
+        setData(data: diplomaFilterItems, for: DiplomaViewController.self)
+        
         let fieldsFilterItems = [
             degreeFilterItem
         ]

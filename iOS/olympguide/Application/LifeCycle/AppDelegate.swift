@@ -12,21 +12,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var serviceLocator = ServiceLocator.shared
         
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let center = UNUserNotificationCenter.current()
-        center.delegate = self
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error {
-                print("Ошибка запроса разрешения: \(error)")
-                return
-            }
-            if granted {
-                DispatchQueue.main.async {
-                    application.registerForRemoteNotifications()
-                }
-            } else {
-                print("Пользователь отказал в разрешении на уведомления")
-            }
-        }
+//        let center = UNUserNotificationCenter.current()
+//        center.delegate = self
+//        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+//            if let error = error {
+//                print("Ошибка запроса разрешения: \(error)")
+//                return
+//            }
+//            if granted {
+//                DispatchQueue.main.async {
+//                    application.registerForRemoteNotifications()
+//                }
+//            } else {
+//                print("Пользователь отказал в разрешении на уведомления")
+//            }
+//        }
         customizeDependencies()
         
         let deviceIdentifier = getDeviceIdentifier()

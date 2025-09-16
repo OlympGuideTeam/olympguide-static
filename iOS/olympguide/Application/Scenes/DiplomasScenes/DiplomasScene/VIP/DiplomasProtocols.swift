@@ -9,17 +9,19 @@
 protocol DiplomasBusinessLogic {
     func loadDiplomas(with request: Diplomas.Load.Request)
     func deleteDiploma(with request: Diplomas.Delete.Request)
+    func syncDiplomas(with request: Diplomas.Sync.Request)
 }
 
 // MARK: - Data Store
 protocol DiplomasDataStore {
-    
+    var diplomas: [DiplomaModel] { get set }
 }
 
 // MARK: - Presentation Logic
 protocol DiplomasPresentationLogic {
     func presentLoadDiplomas(with response: Diplomas.Load.Response)
     func presentDeleteDiploma(with response: Diplomas.Delete.Response)
+    func presentSyncDiplomas(with response: Diplomas.Sync.Response)
 }
 
 // MARK: - Display Logic
@@ -30,7 +32,8 @@ protocol DiplomasDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol DiplomasRoutingLogic {
-    func routeTo()
+    func routeToAddDiploma()
+    func routeToDiploma(at index: Int)
 }
 
 // MARK: - Data Passing

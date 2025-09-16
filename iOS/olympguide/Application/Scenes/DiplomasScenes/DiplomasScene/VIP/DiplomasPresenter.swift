@@ -27,4 +27,12 @@ final class DiplomasPresenter : DiplomasPresentationLogic {
             viewController?.showAlert(with: error.localizedDescription)
         }
     }
+    
+    func presentSyncDiplomas(with response: Diplomas.Sync.Response) {
+        if let error = response.error {
+            viewController?.showAlert(title: "Профиль не полный", with: error.localizedDescription)
+        } else {
+            viewController?.showAlert(title: "Отлично", with: "Ваши дипломы добавятся в течении минуты")
+        }
+    }
 }

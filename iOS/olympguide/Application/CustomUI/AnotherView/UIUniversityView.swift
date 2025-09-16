@@ -130,10 +130,12 @@ final class UIUniversityView: UIView {
             self.logoImageView.stopShimmer()
             self.logoImageView.image = image
         }
-        nameLabel.calculateHeight(
-            with: UIScreen.main.bounds.width - left - right
-            - Constants.imageSize - Common.Dimensions.favoriteButtonSize - 2 * Constants.itemsSpacing
-        )
+//        nameLabel.calculateHeight(
+//            with: UIScreen.main.bounds.width - left - right
+//            - Constants.imageSize - Common.Dimensions.favoriteButtonSize - 2 * Constants.itemsSpacing
+//        )
+//        print(UIScreen.main.bounds.width - left - right
+//              - Constants.imageSize - Common.Dimensions.favoriteButtonSize - 2 * Constants.itemsSpacing)
         if !arrowIsHidden {
             favoriteButton.isHidden = true
         } else {

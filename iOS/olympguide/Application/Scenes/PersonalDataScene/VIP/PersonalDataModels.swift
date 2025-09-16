@@ -8,14 +8,11 @@
 enum PersonalData {
     enum SignUp {
         struct Request {
-            let token: String?
-            let password: String?
             let firstName: String?
             let lastName: String?
             let secondName: String?
             let birthday: String?
             let regionId: Int?
-            var isGoogleSignUp: Bool = false
         }
         
         struct Response {
@@ -25,5 +22,15 @@ enum PersonalData {
         struct ViewModel {
             let errorMessage: [String]?
         }
+    }
+    
+    enum SendCode {
+        struct Request { }
+        
+        struct Response {
+            var error: Error? = nil
+        }
+        
+        struct ViewModel { }
     }
 }

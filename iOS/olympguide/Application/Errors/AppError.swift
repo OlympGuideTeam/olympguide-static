@@ -16,7 +16,7 @@ enum AppError: LocalizedError {
         case .network(let networkError):
             return [networkError.localizedDescription]
         case .validation(let validationErrors):
-            return validationErrors.map { $0.localizedDescription }
+            return validationErrors.map { $0.localizedDescription + "\n" }
         }
     }
 }

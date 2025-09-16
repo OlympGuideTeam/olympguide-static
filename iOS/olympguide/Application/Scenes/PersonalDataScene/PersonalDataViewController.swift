@@ -15,33 +15,51 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     // MARK: - Свойства
     private var token: String = ""
     private var hasSecondName: Bool = true
-    
-    private let isGoogleSignUp: Bool
-    
+        
     private var toggleButtonTopConstraint: NSLayoutConstraint?
     private var birthdayTopConstraint: NSLayoutConstraint?
+    
+    private let user: UserViewModel
     
     var interactor: PersonalDataInteractor?
     var router: PersonalDataRouter?
     
     // MARK: UI Элементы
-    let lastNameTextField: HighlightableField = CustomInputDataField(with: "Фамилия")
-    let nameTextField: HighlightableField = CustomInputDataField(with: "Имя")
+    let lastNameTextField: CustomInputDataField = CustomInputDataField(with: "Фамилия")
+    let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
     
-    var secondNameTextField: HighlightableField = CustomInputDataField(with: "Отчество")
+    var secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     
     let toggleSecondNameButton: HasSecondNameButton = HasSecondNameButton(frame: .zero)
     
-    let birthdayPicker: HighlightableField = CustomDatePicker(with: "День рождения")
+    let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
     
-    let regionTextField: (HighlightableField & RegionDelegateOwner) = RegionTextField(
+    let regionTextField = OptionsTextField(
         with: "Регион",
-        endPoint: "/meta/regions"
+        filterItem: FilterItem(
+            paramType: .region,
+            title: "Регион",
+            initMethod: .endpoint("/meta/regions"),
+            isMultipleChoice: true
+        )
     )
     
-    let passwordTextField: HighlightableField = CustomPasswordField(with: "Придумайте пароль")
+    let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
     
     private let nextButton: UIButton = UIButton(type: .system)
+    private let changePasswordButton: UIButton = UIButton(type: .system)
+    private let changePasswordText: UITextView = {
+        let tv = UITextView()
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        tv.isEditable = false
+        tv.isScrollEnabled = false
+        tv.backgroundColor = .clear
+        tv.textAlignment = .center
+        tv.dataDetectorTypes = .link
+        tv.textContainerInset = .zero
+        tv.textContainer.lineFragmentPadding = 0
+        return tv
+    }()
     
     // MARK: Свойства данных
     var lastName: String = ""
@@ -51,18 +69,15 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     var region: Int?
     var password: String = ""
     
-    // MARK: - Инициализация
-    init(token: String, isGoogleSignUp: Bool = false) {
-        self.isGoogleSignUp = isGoogleSignUp
+    init(with user: UserViewModel) {
+        self.user = user
         super.init(nibName: nil, bundle: nil)
-        self.token = token
     }
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been реализован")
+        fatalError("init(coder:) has not been implemented")
     }
-    
     
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
@@ -102,6 +117,11 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         navigationController?.navigationBar.backgroundColor = .white
+//        if user.secondName == "" {
+//            UIView.performWithoutAnimation {
+//                toggleSecondNameTapped()
+//            }
+//        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -114,16 +134,13 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         
     
     // MARK: - Настройка UI
-    
     private func configureUI() {
         // 1. Фамилия
         configureLastNameTextField()
         // 2. Имя
         configureNameTextField()
         // 3. Отчество (если включено)
-        if hasSecondName {
-            configureSecondNameTextField()
-        }
+        configureSecondNameTextField()
         // 4. Кнопка для переключения поля «Отчество»
         configureToggleSecondNameButton()
         // 5. День рождения
@@ -131,25 +148,39 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         // 6. Регион
         configureRegionTextField()
         // 7. Пароль
-        configurePasswordTextField()
-        if isGoogleSignUp {
-            configurePasswordExplain()
-        }
-        
         configureNextButton()
+        configureChangePasswordButton()
         
         let hiddenUsernameField = UITextField(frame: .zero)
         hiddenUsernameField.text = token
         hiddenUsernameField.textContentType = .username
         hiddenUsernameField.isHidden = true
         view.addSubview(hiddenUsernameField)
-    }
+        
     
+    }
+        
     private func configureLastNameTextField() {
         view.addSubview(lastNameTextField)
         
         lastNameTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 16)
         lastNameTextField.pinLeft(to: view.leadingAnchor, 20)
+        
+        if let lastName = user.lastName {
+            lastNameTextField.setTextFieldText(lastName)
+            lastNameTextField.isActive = true
+            lastNameTextField.isHidden = false
+            lastNameTextField.textFieldDidChange(lastNameTextField.textField)
+            UIView.performWithoutAnimation {
+                
+                lastNameTextField.updateAppereance()
+            }
+            self.lastName = lastName
+//            lastNameTextField.textField.text = lastName
+////            lastNameTextField.didTapSearchBar()
+//            lastNameTextField.textFieldDidChange(lastNameTextField.textField)
+//            lastNameTextField.setTitle(to: lastName)
+        }
     }
     
     private func configureNameTextField() {
@@ -157,6 +188,19 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         
         nameTextField.pinTop(to: lastNameTextField.bottomAnchor, 24)
         nameTextField.pinLeft(to: view.leadingAnchor, 20)
+        
+        if let firstName = user.firstName {
+            nameTextField.setTextFieldText(firstName)
+            nameTextField.isActive = true
+            nameTextField.isHidden = false
+            nameTextField.textFieldDidChange(nameTextField.textField)
+            UIView.performWithoutAnimation {
+                
+                nameTextField.updateAppereance()
+            }
+            self.firstName = firstName
+//            nameTextField.setTitle(to: firstName)
+        }
     }
     
     private func configureSecondNameTextField() {
@@ -164,6 +208,21 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         
         secondNameTextField.pinTop(to: nameTextField.bottomAnchor, 24)
         secondNameTextField.pinLeft(to: view.leadingAnchor, 20)
+        
+        if let secondName = user.secondName, secondName.count > 0 {
+            secondNameTextField.setTextFieldText(secondName)
+            secondNameTextField.isActive = true
+            secondNameTextField.isHidden = false
+            
+            secondNameTextField.textFieldDidChange(secondNameTextField.textField)
+            UIView.performWithoutAnimation {
+                
+                secondNameTextField.updateAppereance()
+            }
+            self.secondName = secondName
+            
+            //            secondNameTextField.setTitle(to: secondName)
+        }
     }
     
     private func configureToggleSecondNameButton() {
@@ -171,7 +230,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         toggleSecondNameButton.text = "Нет отчества"
         
         toggleSecondNameButton.translatesAutoresizingMaskIntoConstraints = false
-        
+        hasSecondName = user.secondName != ""
         if hasSecondName {
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
                 equalTo: secondNameTextField.bottomAnchor,
@@ -182,6 +241,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
                 equalTo: nameTextField.bottomAnchor,
                 constant: 24
             )
+            secondNameTextField.isHidden = true
         }
         toggleButtonTopConstraint?.isActive = true
         
@@ -197,6 +257,17 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         
         birthdayPicker.pinLeft(to: view.leadingAnchor, 20)
         
+        if let birthday = user.birthday {
+            birthdayPicker.setTextFieldText(birthday)
+            birthdayPicker.isActive = true
+            birthdayPicker.isHidden = false
+            
+            birthdayPicker.textFieldDidChange(birthdayPicker.textField)
+            UIView.performWithoutAnimation {
+                birthdayPicker.updateAppereance()
+            }
+            self.birthday = birthday
+        }
         
     }
     
@@ -207,6 +278,18 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         regionTextField.pinLeft(to: view.leadingAnchor, 20)
         
         regionTextField.regionDelegate = self
+        
+        if let region = user.region {
+            regionTextField.setTextFieldText(region.name)
+            regionTextField.isActive = true
+            regionTextField.isHidden = false
+            
+            regionTextField.textFieldDidChange(regionTextField.textField)
+            UIView.performWithoutAnimation {
+                regionTextField.updateAppereance()
+            }
+            self.region = region.regionId
+        }
     }
     
     private func configurePasswordTextField() {
@@ -216,26 +299,23 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         passwordTextField.pinLeft(to: view.leadingAnchor, 20)
         
         passwordTextField.setTextFieldType(.default, .newPassword)
-        
-        if isGoogleSignUp {
-            passwordTextField.setTitle(to: "Пароль")
-        }
     }
     
-    private func configurePasswordExplain() {
-        let explainLabel: UILabel = UILabel()
-        explainLabel.font = FontManager.shared.font(for: .additionalInformation)
+    private func configureChangePasswordButton() {
+        changePasswordButton.titleLabel?.font = FontManager.shared.font(for: .bigButton)
+        changePasswordButton.layer.cornerRadius = 13
+        changePasswordButton.titleLabel?.tintColor = .black
+        changePasswordButton.backgroundColor = UIColor(hex: "#E0E8FE")
+        changePasswordButton.setTitle("Изменить пароль", for: .normal)
         
-        explainLabel.textColor = .black
-        explainLabel.numberOfLines = 0
-        explainLabel.lineBreakMode = .byWordWrapping
-        explainLabel.text = "Придумайте пароль, чтобы была возможность заходить в свой аккаунт через почту"
+        view.addSubview(changePasswordButton)
         
-        view.addSubview(explainLabel)
-        explainLabel.pinTop(to: passwordTextField.bottomAnchor, 12)
-        explainLabel.pinLeft(to: view.leadingAnchor, 20)
-        explainLabel.pinRight(to: view.trailingAnchor, 20)
-        
+        changePasswordButton.setHeight(48)
+        changePasswordButton.pinTop(to: regionTextField.bottomAnchor, 20, .grOE)
+        changePasswordButton.pinLeft(to: view.leadingAnchor, 20)
+        changePasswordButton.pinRight(to: view.trailingAnchor, 20)
+        changePasswordButton.pinBottom(to: nextButton.topAnchor, 10)
+        changePasswordButton.addTarget(self, action: #selector(didTapChangePasswordButton), for: .touchUpInside)
     }
     
     private func configureNextButton() {
@@ -243,23 +323,48 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         nextButton.layer.cornerRadius = 13
         nextButton.titleLabel?.tintColor = .black
         nextButton.backgroundColor = UIColor(hex: "#E0E8FE")
-        nextButton.setTitle("Продолжить", for: .normal)
+        nextButton.setTitle("Сохранить", for: .normal)
         
         view.addSubview(nextButton)
         
         nextButton.setHeight(48)
         nextButton.pinLeft(to: view.leadingAnchor, 20)
         nextButton.pinRight(to: view.trailingAnchor, 20)
-        nextButton.pinBottom(to: view.bottomAnchor, 43)
+//        nextButton.pinBottom(to: view.bottomAnchor, 10)
+        nextButton.pinBottom(to: view.bottomAnchor, 43, .grOE)
         
         nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
+    }
+    
+    private func configureAgreementTextView() {
+        view.addSubview(changePasswordText)
+        
+//        changePasswordText.delegate = self
+        
+        let fullText = "Изменить пароль"
+        let attributedText = NSMutableAttributedString(string: fullText)
+        
+        if let termsRange = fullText.range(of: "Изменить пароль"){
+            let nsTermsRange = NSRange(termsRange, in: fullText)
+            
+            attributedText.addAttribute(.link, value: "https://olympguide.ru/terms", range: nsTermsRange)
+        }
+        
+        attributedText.addAttribute(.font, value: UIFont.systemFont(ofSize: 12), range: NSMakeRange(0, attributedText.length))
+        attributedText.addAttribute(.foregroundColor, value: UIColor.gray, range: NSMakeRange(0, attributedText.length))
+        
+        changePasswordText.attributedText = attributedText
+        
+        changePasswordText.pinLeft(to: view.leadingAnchor, 20)
+        changePasswordText.pinRight(to: view.trailingAnchor, 20)
+        changePasswordText.pinBottom(to: nextButton.topAnchor, 10)
     }
     
     // MARK: - Переключение поля «Отчество»
     @objc private func toggleSecondNameTapped() {
         if hasSecondName {
             hasSecondName = false
-            secondNameTextField.removeFromSuperview()
+            secondNameTextField.isHidden = true
             
             toggleButtonTopConstraint?.isActive = false
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
@@ -271,11 +376,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         } else {
             hasSecondName = true
             view.addSubview(secondNameTextField)
-            secondNameTextField.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                secondNameTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24),
-                secondNameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
-            ])
+            secondNameTextField.isHidden = false
             
             toggleButtonTopConstraint?.isActive = false
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
@@ -348,25 +449,25 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     }
     
     // MARK: - Actions
-    @objc
-    private func didTapNextButton() {
+    @objc private func didTapNextButton() {
         let request = PersonalData.SignUp.Request(
-            token: token,
-            password: password,
             firstName: firstName,
             lastName: lastName,
             secondName: hasSecondName ? secondName : nil,
             birthday: birthday,
-            regionId: region,
-            isGoogleSignUp: isGoogleSignUp
+            regionId: region
         )
         interactor?.signUp(with: request)
+    }
+    
+    @objc private func didTapChangePasswordButton() {
+        interactor?.sendCode(with: PersonalData.SendCode.Request())
     }
 }
 
 // MARK: - Делегаты для кастомных текстовых полей
 extension PersonalDataViewController: CustomTextFieldDelegate {
-    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: UIView, textDidChange text: String) {
         switch searchBar.tag {
         case 1:
             firstName = text
@@ -384,9 +485,13 @@ extension PersonalDataViewController: CustomTextFieldDelegate {
     }
 }
 
-extension PersonalDataViewController: RegionTextFieldDelegate {
-    func regionTextFieldDidSelect(region: Int) {
-        self.region = region
+extension PersonalDataViewController: OptionsTextFieldDelegate {
+    func regionTextFieldDidSelect(option: OptionViewModel) {
+        self.region = option.id
+    }
+    
+    func textWasDeleted(tag: Int) {
+        self.region = nil
     }
     
     func regionTextFieldWillSelect(with optionsVC: OptionsViewController) {
@@ -400,15 +505,15 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
 }
 
 extension PersonalDataViewController : PersonalDataDisplayLogic {
+    func displaySendCodeResult(with viewModel: PersonalData.SendCode.ViewModel) {
+        router?.routeToVerifyCode()
+    }
+    
     func displaySignUp(with viewModel: PersonalData.SignUp.ViewModel) {
         if let errorMesseges = viewModel.errorMessage {
             showAlert(with: errorMesseges.joined(separator: "\n"))
             return
         }
-        let credential = ASPasswordCredential(user: authManager.userEmail ?? "", password: password)
-        let authController = ASCredentialProviderViewController()
-        authController.extensionContext.completeRequest(withSelectedCredential: credential, completionHandler: nil)
-        
-        router?.routeToRoot(email: authManager.userEmail ?? "", password: password, isGoogleSignUp)
+        router?.routeToRoot()
     }
 }

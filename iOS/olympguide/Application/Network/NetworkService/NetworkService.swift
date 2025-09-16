@@ -117,8 +117,24 @@ final class NetworkService: NetworkServiceProtocol {
             }
             
             do {
+                guard !data.isEmpty else {
+                    if T.self == BaseServerResponse.self,
+                       let emptyResponse = BaseServerResponse(message: nil, type: nil, time: nil, token: nil) as? T
+                    {
+                        completion(.success(emptyResponse))
+                    }
+                    else {
+                        completion(.failure(.decodingError))
+                    }
+                    return
+                }
+
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
                 if !(200...299).contains(httpResponse.statusCode) {
+                    if httpResponse.statusCode >= 500 {
+                        completion(.failure(.internalServerError))
+                        return 
+                    }
                     if let errorData = decodedData as? BaseServerResponse {
                         if errorData.type == "PreviousCodeNotExpired",
                            let time = errorData.time {

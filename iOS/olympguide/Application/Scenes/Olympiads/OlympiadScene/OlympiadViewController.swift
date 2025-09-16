@@ -180,9 +180,8 @@ extension OlympiadViewController {
     }
     
     private func toggleSection(at index: Int) {
-        groups[index].isExpanded.toggle()
         
-        if groups[index].isExpanded {
+        if !groups[index].isExpanded {
             let request = BenefitsByPrograms.Load.Request(
                 olympiadID: olympiad.olympiadID,
                 universityID: groups[index].university.universityID,
@@ -190,8 +189,6 @@ extension OlympiadViewController {
                 params: selectedParams
             )
             interactor?.loadBenefits(with: request)
-        } else {
-//            reloadSectionWithoutAnimation(index)
         }
     }
 }
@@ -221,7 +218,11 @@ extension OlympiadViewController : BenefitsByProgramsDisplayLogic {
     func displayLoadBenefitsResult(with viewModel: BenefitsByPrograms.Load.ViewModel) {
         groups[viewModel.section].programs = viewModel.benefits
         let id = groups[viewModel.section].university.universityID
-        dataSource.toggle(to: id, in: tableView)
+        if !dataSource.toggle(to: id, in: tableView) {
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
+        }
     }
 }
 
@@ -252,6 +253,7 @@ extension OlympiadViewController : OptionsViewControllerDelegate {
     }
 }
 
+// MARK: - Filterble
 extension OlympiadViewController : Filterble {
     func deleteFilter(forItemAt index: Int) {
         let item = filterItems[index]

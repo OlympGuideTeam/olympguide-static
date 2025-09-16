@@ -13,29 +13,36 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
     static let reuseIdentifier = "GoogleSignInButtonTableViewCell"
     
     let actionButton: UIButton = {
-            var configuration = UIButton.Configuration.plain()
-            configuration.title = "Войти через Google"
-            configuration.baseBackgroundColor = .white
-            configuration.baseForegroundColor = .black
-            
-            configuration.imagePadding = 8
-            
-            configuration.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20)
-            
-            if let googleIcon = UIImage(named: "google_logo")?.withRenderingMode(.alwaysOriginal) {
-                configuration.image = googleIcon
-            }
-            
-            let button = UIButton(configuration: configuration, primaryAction: nil)
-            
-            button.layer.cornerRadius = 13
-            button.layer.masksToBounds = true
-            button.layer.borderColor = UIColor.black.cgColor
-            button.layer.borderWidth = Constants.Dimensions.buttonBorderWidth
-            button.translatesAutoresizingMaskIntoConstraints = false
-            
-            return button
-        }()
+        var configuration = UIButton.Configuration.plain()
+        configuration.baseBackgroundColor = .white
+        configuration.baseForegroundColor = .black
+        
+        configuration.imagePadding = 8
+        
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20)
+        
+        let attributedString = AttributedString(
+            "Продолжить с Google",
+            attributes: AttributeContainer([
+                .font: Constants.Font.button,
+                .foregroundColor: UIColor.black
+            ])
+        )
+        configuration.attributedTitle = attributedString
+        
+        if let googleIcon = UIImage(named: "google_logo")?.withRenderingMode(.alwaysOriginal) {
+            configuration.image = googleIcon
+        }
+        
+        let button = UIButton(configuration: configuration, primaryAction: nil)
+        
+        button.layer.cornerRadius = Constants.Dimensions.buttonRadius
+        button.layer.masksToBounds = true
+        button.layer.borderColor = UIColor.black.cgColor
+        button.layer.borderWidth = Constants.Dimensions.buttonBorderWidth
+        
+        return button
+    }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -89,5 +96,9 @@ class GoogleSignInButtonTableViewCell: UITableViewCell {
             sender.transform = .identity
         }
     }
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let convertedPoint = actionButton.convert(point, from: self)
+        return actionButton.point(inside: convertedPoint, with: event)
+    }
 }
-

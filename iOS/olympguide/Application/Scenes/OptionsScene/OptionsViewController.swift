@@ -416,7 +416,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
 
 // MARK: - CustomTextFieldDelegate
 extension OptionsViewController: CustomTextFieldDelegate {
-    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: UIView, textDidChange text: String) {
         let request = Options.TextDidChange.Request(query: text)
         interactor?.textDidChange(with: request)
     }

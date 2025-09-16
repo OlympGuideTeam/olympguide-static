@@ -21,6 +21,7 @@ final class DiplomasAssembly {
         interactor.worker = worker
         presenter.viewController = viewController
         router.viewController = viewController
+        router.dataStore = interactor
         return viewController
     }
 }

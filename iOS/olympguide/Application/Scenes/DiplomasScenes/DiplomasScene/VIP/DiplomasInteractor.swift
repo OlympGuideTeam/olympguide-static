@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 04.03.2025.
 //
 
-final class DiplomasInteractor: DiplomasBusinessLogic {
+final class DiplomasInteractor: DiplomasBusinessLogic, DiplomasDataStore {
     var presenter: DiplomasPresentationLogic?
     var worker: DiplomasWorkerLogic?
     
@@ -39,6 +39,19 @@ final class DiplomasInteractor: DiplomasBusinessLogic {
                 }
                 let response = Diplomas.Delete.Response(error: error)
                 self?.presenter?.presentDeleteDiploma(with: response)
+            }
+        }
+    }
+    
+    func syncDiplomas(with request: Diplomas.Sync.Request) {
+        worker?.syncDiplomas { [weak self] result in
+            switch result {
+            case .success:
+                let response = Diplomas.Sync.Response()
+                self?.presenter?.presentSyncDiplomas(with: response)
+            case .failure(let error):
+                let response = Diplomas.Sync.Response(error: error)
+                self?.presenter?.presentSyncDiplomas(with: response)
             }
         }
     }

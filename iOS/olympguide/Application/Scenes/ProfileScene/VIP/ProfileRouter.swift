@@ -7,7 +7,9 @@
 
 import UIKit
 
-final class ProfileRouter: ProfileRoutingLogic {
+final class ProfileRouter: ProfileRoutingLogic, ProfileDataPassingLogic {
+    var dataStore: ProfileDataStore?
+    
     weak var viewController: UIViewController?
     
     func routeToSignIn() {
@@ -46,8 +48,11 @@ final class ProfileRouter: ProfileRoutingLogic {
         viewController?.navigationController?.pushViewController(diplomasVC, animated: true)
     }
     
-    func routeToGoogleSignIn(with token: String) {
-        let personalDataVC = PersonalDataAssembly.build(token: token, isGoogleSignUp: true)
+    func routeToPersonalData() {
+        guard let user = dataStore?.user else { return }
+        let personalDataVC = PersonalDataAssembly.build(with: user)
+        personalDataVC.hidesBottomBarWhenPushed = true
+
         viewController?.navigationController?.pushViewController(personalDataVC, animated: true)
     }
 }

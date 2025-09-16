@@ -28,7 +28,8 @@ class ProfileButtonTableViewCell: UITableViewCell {
     private func configureUI() {
         backgroundColor = .white
         
-        actionButton.titleLabel?.font = FontManager.shared.font(for: .commonInformation)
+//        actionButton.titleLabel?.font = FontManager.shared.font(for: .commonInformation)
+        actionButton.titleLabel?.font = Constants.Font.button
         actionButton.layer.cornerRadius = Constants.Dimensions.buttonRadius
         actionButton.layer.borderWidth = Constants.Dimensions.buttonBorderWidth
         actionButton.titleLabel?.tintColor = Common.Colors.text
